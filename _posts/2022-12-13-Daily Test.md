@@ -3,7 +3,7 @@ title: Daily Test
 tags: java
 ---
 
-1. [22.12.13]
+#1. [22.12.13]
 
 ```java
 package day.test;
@@ -115,8 +115,8 @@ public class test_221213_1_2 {
 
 
 
-
-2. [22.12.14]
+<br><br>
+#2. [22.12.14]
 
 ```java
 package day.test;
