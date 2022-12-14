@@ -210,7 +210,133 @@ public class test_221214_1_1 {																		// 코드는 단계별로 주석
 }
 
 
+```
 
+<br><br>
+#3. 오목게임 수정[22.12.14]
+
+```java
+package ex1.test;
+
+import java.util.Scanner;
+
+public class OmokTest3 {
+
+	public static void main(String[] args) {
+		
+		// 오목에서 배열 10x10 100개 문자를 담을 수 있는 배열 이름: board
+		char[] board = new char[100];
+		char[][] board2 = new char[10][10];
+
+		//----------- board1 -------------------
+
+		for(int i=0; i<100; i++)
+			board[i] = '┼'; 
+		
+//		board[15] ='○';							// 배열은 기존의 정수값과는 다르다.
+//		//board[44] ='○';	
+//		board[(5-1)*10+(6-1)] ='○';	
+		
+
+		
+//		for(int i=0; i<100; i++) {
+//			
+//			System.out.print(board[i]);
+//			
+//			if(i % 10 ==9) 	
+//				System.out.print("\n");
+//			
+//		}
+		
+		
+		
+	//----------- board2 -------------------
+		
+		for(int y=1; y<=10; y++) {
+			for(int x =1; x<=10; x++) {
+				board2[y-1][x-1] = '┼';		
+			}
+		}
+		
+		for(int y=1; y<=10; y++) {
+			for(int x =1; x<=10; x++) {
+				board2[0][x-1] = '┬';
+				board2[9][x-1] = '┴';
+			}
+			board2[y-1][0] = '├';
+			board2[y-1][9] = '┤';
+			
+			board2[0][0] = '┌';
+			board2[0][9] = '┐';
+			board2[9][0] = '└';
+			board2[9][9] = '┘';
+		}
+	
+		for(int y=1; y<=10; y++) {
+			for(int x =1; x<=10; x++) {
+				System.out.printf("%c", board2[y-1][x-1]);
+			}
+			System.out.print("\n");
+		}
+		
+		
+		//----------- omok game -------------------
+		
+		Scanner scan = new Scanner(System.in);										// while문의 조건 처리는 변수화하여 최대한 적게 해야한다.
+		int ox, oy;
+		
+		for(int count =100; count>0; count--) {												// 중첩이 최대한 적게 만들어야 한다.
+			
+			System.out.println("(x, y) > ");
+		
+			ox = scan.nextInt();
+			oy = scan.nextInt();
+				
+			if(ox<1 || ox>10 || oy<1 || oy>10)	{											// 예외 처리 추가 (같은 위치에 오목돌 겹치지 않게 하기)
+				System.out.println("x는 1~10의 수만 입력할 수 있습니다. x: ");
+				System.out.println("y는 1~10의 수만 입력할 수 있습니다. y: ");
+				continue;
+			}
+		
+			if(count % 2 == 0) 
+				board2[ox-1][oy-1] = '○';
+			else 
+				board2[ox-1][oy-1] = '●';
+			
+			if(count<100) {
+				if(board2[ox-1][oy-1] == '○'  || board2[ox-1][oy-1] == '●') {
+					System.out.println("돌이 있습니다. ");
+					continue;
+				}
+			}
+			
+			for(int y=1; y<=10; y++) {
+				for(int x =1; x<=10; x++) {
+					System.out.printf("%c", board2[y-1][x-1]);
+				}
+				System.out.print("\n");
+			}
+			
+		}
+			
+			
+			
+//			//-------------------------------------	---------------	---------------	---------------	
+//			 <원래>
+			
+//			if(count % 2 == 0) 
+//				board2[ox-1][oy-1] = '○';
+//			else
+//				board2[ox-1][oy-1] = '●';
+//			
+//			
+			
+			
+		}
+	}
+								// 자리 배치하기
+								// 랜덤하게 섞어서 추가 조건 처리 :  누구랑 누구랑 묶여서?
+								// UI 이쁘게
 
 
 ```
