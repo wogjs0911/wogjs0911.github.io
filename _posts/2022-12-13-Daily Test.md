@@ -3,7 +3,7 @@ title: Daily Test
 tags: java
 ---
 
-#1. [22.12.13]
+#1. [22.12.13]: 문제 1. 개수를 구하는 코드, 문제 2. 가장 큰 값, 문제 3. 그 위치를 출력
 
 ```java
 package day.test;
@@ -116,7 +116,7 @@ public class test_221213_1_2 {
 
 
 <br><br>
-#2. [22.12.14]
+#2. [22.12.14] : 문제 4. 숫자의 자리 변경 방법
 
 ```java
 package day.test;
@@ -339,7 +339,7 @@ public class OmokTest3 {
 ```
 
 <br><br>
-#4-1. [22.12.15] : 문제 5
+#4-1. [22.12.15] : 문제 5. 문자의 자리 변경 방법
 
 ```java
 package day.test;
@@ -449,7 +449,7 @@ public class test_221215_1_1 {																		// 코드는 단계별로 주석
 
 
 <br><br>
-#4-2. [22.12.15] : 문제 6
+#4-2. [22.12.15] : 문제 6. 제어구조 중첩 + 다차원 배열
 
 ```java
 package day.test;
