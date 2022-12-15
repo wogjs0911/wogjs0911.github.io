@@ -455,7 +455,9 @@ public class test_221215_1_1 {																		// 코드는 단계별로 주석
 package day.test;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Scanner;
 
 /*—--------------------------------------------------------------------------------------------------------------
@@ -530,20 +532,20 @@ public class test_221215_1_2 {																		// 코드는 단계별로 주석
 			while(scan.hasNext()) {
 				
 				for(int i=0; i<10; i++) {
-					nums[i] = scan.nextLine();							// 문자열로 받기
+					nums[i] = scan.nextLine();					// 1. 문자열로 받기
 					System.out.printf("%s\n", nums[i]);
 				}
 				System.out.println("문자열로 받기");
 				System.out.println();
 				
 				for(int j = 0; j<10; j++) 	{
-					for(int i=0; i<20; i++) {							// 문자열을 문자로 변환
-																						
-						num[i] = nums[j].charAt(i);				//1차원배열은 1차원배열로 받아야한다.
+					for(int i=0; i<20; i++) {					
+																// 2. 문자열을 문자로 변환.				
+						num[i] = nums[j].charAt(i);				// 1차원배열은 1차원배열로 받아야한다. 그리고 배열의 자리수 생각
 						
-						System.out.printf("%c", num[i]);		// 그리고 배열의 자리수 생각
+						System.out.printf("%c", num[i]);		
 					
-						bitmap[i][j] = num[i]*1;					// 문자를 숫자로 변환하여 역순으로 대입
+						bitmap[i][j] = num[i]*1;				// 3. 문자열을 숫자로 변환
 					}						
 					System.out.println();
 				}
@@ -559,7 +561,7 @@ public class test_221215_1_2 {																		// 코드는 단계별로 주석
 					System.out.printf("%c", bitmap[i][k]);
 			
 					}
-					System.out.println();
+				System.out.println();
 				}
 			System.out.println("숫자로 변환한 것 출력");
 		}
@@ -571,11 +573,11 @@ public class test_221215_1_2 {																		// 코드는 단계별로 주석
 			int temp;			
 			for(int k = 0; k<10; k++){
 				
-				for(int j=0; j<20-1; j++) {									// 1. 선언 부분 : 배열 교차,
-					  															// 2. 문자열 바꿔주는 방법 : fis.read는 문자열을 int로 반환, toCharArray라는 메서드 사용
+				for(int j=0; j<20-1; j++) {							// 4. 문자를 숫자로 변환하여 역순으로 대입
+					  															
 					for(int i=0; i<20-1-j; i++) {
 						if(bitmap[i+1][k]<bitmap[i][k]) {			// "-1"은 배열이 i와 i+1이라서 이렇게 설계했다. 생각해보기(숫자 대입)
-							temp = bitmap[i][k];							// "-j"는 비교되는 값을  한곳으로 몰아 넣고 나머지를 다시 정렬한다.
+							temp = bitmap[i][k];					// "-j"는 비교되는 값을  한곳으로 몰아 넣고 나머지를 다시 정렬한다.
 							bitmap[i][k] =  bitmap[i+1][k];
 							bitmap[i+1][k] = temp;
 						}
@@ -593,11 +595,27 @@ public class test_221215_1_2 {																		// 코드는 단계별로 주석
 			
 			System.out.println("자리변경 완료"); 
 		}
+			
+		
+			// 5. 파일 저장하기 
+		{
+			FileOutputStream fos = new FileOutputStream("res/bitmap-out.txt");
+			PrintStream out = new PrintStream(fos);
+			
+			for(int j = 0; j<10; j++) {
+				for(int i=0; i<20; i++) {
+					out.printf("%c", bitmap[i][j]);
+			
+					}
+				out.print("\n");
+			}
+			
+			fos.close();
+		}
 		
 		
 	}
 
 }
-
 ```
 
