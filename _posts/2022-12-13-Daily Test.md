@@ -315,12 +315,9 @@ public class OmokTest3 {
 					System.out.printf("%c", board2[y-1][x-1]);
 				}
 				System.out.print("\n");
-			}
-			
+			}	
 		}
-			
-			
-			
+		
 //			//-------------------------------------	---------------	---------------	---------------	
 //			 <원래>
 			
@@ -339,5 +336,206 @@ public class OmokTest3 {
 								// UI 이쁘게
 
 
+```
+
+#3. [22.12.15] : 문제 5
+
+```java
+package day.test;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Scanner;
+
+	
+public class test_221215_1_1 {																		// 코드는 단계별로 주석처리로 진행했다.
+
+	public static void main(String[] args) throws IOException  {
+		
+		/*
+		 * //문제 5 : 다음 각 절차를 따라 작성하시오.
+		 * 
+		 * 
+		 * // 1. res/alphabet.txt 파일을 생성하고 다음 데이터를 복사/붙여넣으시오. // abcdefghijklmn
+		 * 
+		 * // 2. alphabet이라는 이름으로 문자 15개를 저장할 수 있는 배열 객체를 생성한다. [ ] alphabet = [ ];
+		 * 
+		 * // 3. res/alphabet.txt 파일에 저장된 구분자가 없는 영문자 값들을 alphabet 배열에 로드한다. { // 코드를
+		 * 작성하는 공간
+		 * 
+		 * 
+		 * System.out.println(“로드 완료”); }
+		 * 
+		 * // 3. 배열의 값이 다음과 같은 상태가 되도록 자리를 바꾼다. // nmlkjihgfedcba
+		 * 
+		 * { // 코드를 작성하는 공간
+		 * 
+		 * 
+		 * 
+		 * System.out.println(“자리변경 완료”); }
+		 * 
+		 * // 4. res/alphabet-out.txt 파일로 배열의 값들을 저장 { // 코드를 작성하는 공간
+		 * 
+		 * 
+		 * 
+		 * System.out.println(“저장 완료”); }
+		 */
+		
+		
+		// 1. res/alphabet.txt 파일을 생성하고 다음 데이터를 복사/붙여넣으시오. // abcdefghijklmn
+		char[] alphabet = new char[15];
+		
+		
+		 // 2. alphabet이라는 이름으로 문자 15개를 저장할 수 있는 배열 객체를 생성한다. [ ] alphabet = [ ];
+		{
+			FileInputStream fis = new FileInputStream("res/alphabet.txt");
+			Scanner scan = new Scanner(fis);
+			String line = scan.nextLine();
+			System.out.printf("%s\n",line); 
+			
+			for(int i = 0; i<14; i++) {													// for-each 구문도 생각!!
+				alphabet[i] = line.charAt(i);
+				System.out.printf("%c",alphabet[i]); 
+			}
+			System.out.println(); 
+			System.out.println("로드 완료"); 
+		}
+		
+		
+		 // 3. 배열의 값이 다음과 같은 상태가 되도록 자리를 바꾼다. // nmlkjihgfedcba
+		{
+			char temp;																	// 다른 방식 :
+			for(int j=0; j<15-1; j++) {												// 1.  : 배열 교차,
+																							// 2. 문자열 바꿔주는 방법 : fis.read는 문자열을 int로 반환, toCharArray라는 메서드 사용
+			for(int i=0; i<15-1-j; i++) {
+				if(alphabet[i+1]>alphabet[i]) {									// "-1"은 배열이 i와 i+1이라서 이렇게 설계했다. 생각해보기(숫자 대입)
+					temp = alphabet[i];												// "-j"는 비교되는 값을  한곳으로 몰아 넣고 나머지를 다시 정렬한다.
+					alphabet[i] =  alphabet[i+1];
+					alphabet[i+1] = temp;
+				}
+			}
+			
+			}
+			for(int i=0; i<15-1; i++) {
+				System.out.printf("%c",alphabet[i]); 
+			}
+			System.out.println("\n자리변경 완료"); 
+			
+		}
+			
+		 // 4. res/alphabet-out.txt 파일로 배열의 값들을 저장 { // 코드를 작성하는 공간
+		
+		{
+			FileOutputStream fos = new FileOutputStream("res/alphabet.txt");
+			PrintStream out = new PrintStream(fos);
+			
+			for(int i=0; i<15; i++) {
+				out.printf("%c", alphabet[i]);
+			}
+				
+			fos.close();
+			//fos.wr
+			System.out.println("\n저장 완료");
+		}
+		
+		}
+}
+
+``` 
+
+
+
+#3-1. [22.12.15] : 문제 6
+
+```java
+package day.test;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Scanner;
+
+	
+public class test_221215_1_2 {																		// 코드는 단계별로 주석처리로 진행했다.
+
+	public static void main(String[] args) throws IOException  {
+		
+		int[][] bitmap = new int[20][10];
+		String[] nums = new String[10];
+		char[] num = new char[20];
+		
+	
+		{
+			FileInputStream fis = new FileInputStream("res/bitmap.txt");
+			Scanner scan = new Scanner(fis);
+			
+			
+			while(scan.hasNext()) {
+				for(int i=0; i<10; i++) {
+					nums[i] = scan.nextLine();							// 문자열로 받기
+					System.out.printf("%s\n", nums[i]);
+				}
+				System.out.println("문자열로 받기");
+				System.out.println();
+				
+				for(int j = 0; j<10; j++) 	{
+					for(int i=0; i<20; i++) {							// 문자열을 문자로 변환
+																						
+						num[i] = nums[j].charAt(i);				//1차원배열은 1차원배열로 받아야한다.
+						System.out.printf("%c", num[i]);		// 그리고 배열의 자리수 생각
+						
+						bitmap[i][j] = num[i]*1;					// 문자를 숫자로 변환
+					}						
+					System.out.println();
+				}
+				System.out.println("문자로 변환");
+				
+			}
+			System.out.println();
+			
+			//System.out.println(bitmap[0][0]);
+			
+			for(int k = 0; k<10; k++) {
+				for(int i=0; i<20; i++) {
+					System.out.printf("%c", bitmap[i][k]);
+			
+					}
+					System.out.println();
+				}
+			System.out.println("숫자로 변환");
+		}
+			
+		System.out.println();
+		
+		{
+			int temp;			
+			for(int k = 0; k<10-1; k++){
+				for(int j=0; j<20-1; j++) {									// 1. 선언 부분 : 배열 교차,
+																				// 2. 문자열 바꿔주는 방법 : fis.read는 문자열을 int로 반환, toCharArray라는 메서드 사용
+					for(int i=0; i<20-1-j; i++) {
+						if(bitmap[i+1][k+1]>bitmap[i][k]) {			// "-1"은 배열이 i와 i+1이라서 이렇게 설계했다. 생각해보기(숫자 대입)
+							temp = bitmap[i+1][k+1];					// "-j"는 비교되는 값을  한곳으로 몰아 넣고 나머지를 다시 정렬한다.
+							bitmap[i+1][k+1] =  bitmap[i][k];
+							bitmap[i][k] = temp;
+						}
+					}
+				}
+			}
+			
+			for(int j = 0; j<10; j++) {
+			for(int i=0; i<20; i++) {
+				System.out.printf("%c", bitmap[i][j]);
+		
+				}
+				System.out.println();
+			}
+			
+			System.out.println("자리변경 완료"); 
+	}
+}
+
+}
 ```
 
