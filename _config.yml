@@ -55,7 +55,7 @@ author:
 
 ## => GitHub Repository (if the site is hosted by GitHub)
 ##############################
-repository: https://wogjs0911.github.io
+repository: wogjs0911/wogjs0911.github.io
 repository_tree: master
 
 
@@ -91,7 +91,7 @@ mathjax_autoNumber: # false (default), true
 mermaid: # false (default), true
 
 ## Chart
-chart: # false (default), true
+chart: true # false (default), true
 
 
 ## => Paginate
