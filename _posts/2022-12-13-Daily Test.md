@@ -449,7 +449,7 @@ public class test_221215_1_1 {																		// 코드는 단계별로 주석
 
 
 <br><br>
-#4-2. [22.12.15] : 문제 6
+#4-2. [22.12.15] : 문제 6. 제어구조 중첩 + 다차원 배열(+자리 바꾸기)
 
 ```java
 package day.test;
@@ -618,4 +618,170 @@ public class test_221215_1_2 {							// 코드는 단계별로 주석처리로 �
 
 }
 ```
+
+<br><br>
+#5. [22.12.16] : 문제 7. 제어구조 중첩 + 다차원 배열 + 배열 문제(+자리 바꾸기)
+
+```java
+package day.test;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Scanner;
+
+/*—--------------------------------------------------------------------------------------------------------------
+:  제어구조 중첩 + 다차원 배열 + 배열  문제
+—--------------------------------------------------------------------------------------------------------------
+
+문제 7 : 다음 각 절차를 따라 작성하시오.
+// 1. res/map.txt 파일을 생성하고 다음 데이터를 복사/붙여넣으시오.
+
+00010
+01010
+00000
+
+// 2. map이라는 이름으로 5x3 크기의 정수를 담을 수 있는 이차원 배열과 board라는 이름의 10X6크기의 문자를 담을 수 있는 이차원 배열을 생성하시오.
+
+[           ]  map = [                                      ];
+[           ]  board = [                                      ];
+
+// 3. res/map.txt에서 읽은 데이터로 map 배열을 채우시오.
+
+{
+    // 코드를 작성하는 공간
+
+    System.out.println(“map 데이터 로드 완료”);
+}
+
+// 4. map 데이터 하나는 board 배열의 4칸과 대응되며 다음과 같은 모양으로 대응된다.
+// map에서 0은 다음 모양과 같다.
+// ┌ ┐
+// └ ┘
+// map에서 1은 다음 모양과 같다.
+// ▩▩
+// ▩▩
+// map에서 읽은 데이터를 이용해서 board 배열을 채우시오.  다음은 board 배열에 채워진 
+// 모습니다.
+// ┌ ┐┌ ┐┌ ┐▩▩┌ ┐
+// └ ┘└ ┘└ ┘▩▩└ ┘
+// ┌ ┐▩▩┌ ┐▩▩┌ ┐
+// └ ┘▩▩└ ┘▩▩└ ┘
+// ┌ ┐┌ ┐┌ ┐┌ ┐┌ ┐
+// └ ┘└ ┘└ ┘└ ┘└ ┘
+
+{
+     // 코드를 작성하는 공간
+
+
+
+    System.out.println(“board 그리기 완료”);
+}
+
+// 5. board 배열을 화면에 출력하는 코드를 작성하시오.
+
+{
+     // 코드를 작성하는 공간
+
+
+
+    System.out.println(“board 출력 완료”);
+}
+*/
+
+	
+public class test_221216_1_1 {							// 코드는 단계별로 주석처리로 진행했다.
+
+	public static void main(String[] args) throws IOException  {
+		
+		// 2. map이라는 이름으로 5x3 크기의 정수를 담을 수 있는 이차원 배열과 board라는 이름의 10X6크기의 문자를 담을 수 있는 이차원 배열을 생성하시오.
+
+		int[][] map = new int[3][5];
+		char[][] board = new char[6][10];
+		String[] nums = new String[5];
+		char[] num = new char[5];
+		
+		
+		// 3. res/map.txt에서 읽은 데이터로 map 배열을 채우시오.
+		{
+			FileInputStream fis = new FileInputStream("res/map.txt");
+			Scanner scan = new Scanner(fis);
+			
+			
+			while(scan.hasNext()) {
+				
+				for(int i=0; i<3; i++) {
+					nums[i] = scan.nextLine();					// 1. 문자열로 받기
+					System.out.printf("%s\n", nums[i]);
+				}
+				System.out.println("문자열로 받기\n");
+				
+				for(int j = 0; j<3; j++) 	{
+					for(int i=0; i<5; i++) {					
+																		// 2. 문자열을 문자로 변환.				
+						num[i] = nums[j].charAt(i);				// 1차원배열은 1차원배열로 받아야한다. 그리고 배열의 자리수 생각
+						
+						System.out.printf("%c", num[i]);		
+					
+						map[j][i] = num[i]*1;				// 3. 문자열을 숫자로 변환
+					}						
+					System.out.println();
+				}
+				System.out.println("문자로 변환한 것 출력\n");
+				
+			}
+					
+				for(int k = 0; k<3; k++) {
+					for(int i=0; i<5; i++) {
+						System.out.printf("%c", map[k][i]);
+				
+						}
+					System.out.println();
+					}
+				System.out.println("map 데이터 로드 완료\n");
+			}
+			
+				// 4. map 데이터 하나는 board 배열의 4칸과 대응되며 다음과 같은 모양으로 대응된다.
+			{
+				// 1칸이 크기가 4배로 불려짐.(배수 이용)
+				
+				
+				for(int j = 0; j<3; j++) {
+					for(int i=0; i<5; i++) {
+						
+						int x=2*i;
+						int y=2*j;
+						
+						if(map[j][i] == '0') {
+								board[y][x] = '┌';
+								board[y][x+1] = '┐';
+								board[y+1][x] = '└';
+								board[y+1][x+1] = '┘';
+						}
+						else if(map[j][i] == '1') {
+							
+							board[y][x] = '▩';
+							board[y][x+1] = '▩';
+							board[y+1][x] = '▩';
+							board[y+1][x+1] = '▩';
+						}
+						}
+					}
+				System.out.println("board 그리기 완료\n");
+				
+				for(int n = 0; n<6; n++) {
+					for(int m=0; m<10; m++) {
+						System.out.printf("%c", board[n][m]);
+				
+						}
+					System.out.println();
+					}
+				System.out.println("board 출력 완료\n");
+			}
+		
+		}
+}
+
+
+```
+
 
