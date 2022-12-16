@@ -451,6 +451,18 @@ public class test_221215_1_1 {																		// 코드는 단계별로 주석
 <br><br>
 #4-2. [22.12.15] : 문제 6. 제어구조 중첩 + 다차원 배열(+자리 바꾸기)
 
+- 1차원 배열을 2차원으로 확장할 때 선언 방법을 보시면 차원이 증가할 때마다 배열의 선언 뒤쪽에 붙이는 것이 아니라 앞으로 붙이는 형식으로 되어 있습니다. (메모리에 저장되는 구조를 볼 때)
+
+char a[4]; // 4바이트 1차원 배열
+char b[2][4]; // 위의 1차원 배열을 2개 붙여 2차원 배열 생성
+char c[3][2][4]; // 위의 2차원 배열을 3개 붙여 3차원 배열 생성
+
+즉, b[2][4]는 메모리에 저장되는 구조가 아래와 같이 나타납니다.
+
+b[0][0] b[0][1] b[0][2] b[0][3] b[1][0] b[1][1] b[1][2] b[1][3]
+
+1차원 배열로 변환했을 때 쉽게 알아볼 수 있으려면 위의 구조를 이해하고 있는 편이 나중에 배열 계산을 할 때 실수를 막는 방법이 될 겁니다.
+
 ```java
 package day.test;
 
@@ -738,50 +750,50 @@ public class test_221216_1_1 {							// 코드는 단계별로 주석처리로 �
 					System.out.println();
 					}
 				System.out.println("map 데이터 로드 완료\n");
-			}
+		}
 			
 				// 4. map 데이터 하나는 board 배열의 4칸과 대응되며 다음과 같은 모양으로 대응된다.
-			{
+		{
 				// 1칸이 크기가 4배로 불려짐.(배수 이용)
 				
 				
-				for(int j = 0; j<3; j++) {
-					for(int i=0; i<5; i++) {
-						
-						int x=2*i;
-						int y=2*j;
-						
-						if(map[j][i] == '0') {
-								board[y][x] = '┌';
-								board[y][x+1] = '┐';
-								board[y+1][x] = '└';
-								board[y+1][x+1] = '┘';
-						}
-						else if(map[j][i] == '1') {
-							
-							board[y][x] = '▩';
-							board[y][x+1] = '▩';
-							board[y+1][x] = '▩';
-							board[y+1][x+1] = '▩';
-						}
-						}
+			for(int j = 0; j<3; j++) {
+				for(int i=0; i<5; i++) {
+					
+					int x=2*i;
+					int y=2*j;
+					
+					if(map[j][i] == '0') {
+							board[y][x] = '┌';
+							board[y][x+1] = '┐';
+							board[y+1][x] = '└';
+							board[y+1][x+1] = '┘';
 					}
-				System.out.println("board 그리기 완료\n");
-				
-				for(int n = 0; n<6; n++) {
-					for(int m=0; m<10; m++) {
-						System.out.printf("%c", board[n][m]);
-				
-						}
-					System.out.println();
+					else if(map[j][i] == '1') {
+						
+						board[y][x] = '▩';
+						board[y][x+1] = '▩';
+						board[y+1][x] = '▩';
+						board[y+1][x+1] = '▩';
 					}
-				System.out.println("board 출력 완료\n");
-			}
-		
+					}
+				}
+			System.out.println("board 그리기 완료\n");
 		}
+			
+		{
+			for(int n = 0; n<6; n++) {
+				for(int m=0; m<10; m++) {
+					System.out.printf("%c", board[n][m]);
+			
+					}
+				System.out.println();
+				}
+			System.out.println("board 출력 완료\n");
+		}
+		
+	}
 }
-
-
 ```
 
 
