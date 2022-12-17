@@ -131,7 +131,8 @@ comments:
     clientSecret: a514aabb09d91fc366a4b9ab69f253730325c169 # GitHub Application Client Secret
     repository  : wogjs0911.github.io # GitHub repo
     owner       : wogjs0911 # GitHub repo owner
-    admin: wogjs0911 # GitHub repo owner and collaborators, only these guys can initialize GitHub issues, IT IS A LIST.
+    admin: 
+    - wogjs0911 # GitHub repo owner and collaborators, only these guys can initialize GitHub issues, IT IS A LIST.
       # - your GitHub Id
 
   ## Valine
