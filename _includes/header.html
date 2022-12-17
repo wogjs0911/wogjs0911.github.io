@@ -19,7 +19,25 @@
           <button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button>
         {%- endif -%}
       </div>
+      
       {%- if site.data.navigation.header -%}
+      
+      <header class="site-category">
+		  <ul>
+		    
+		    {% assign pages_list = site.pages %}
+		    {% for node in pages_list %}
+		      {% if node.title != null %}
+		        {% if node.layout == "category" %}
+		          <li><a class="category-link {% if page.url == node.url %} active{% endif %}"
+		          href="{{ site.baseurl }}{{ node.url }}">{{ node.title }}</a></li>
+		        {% endif %}
+		      {% endif %}
+		    {% endfor %}
+		    
+		</ul>
+	  </header>
+	  
       <nav class="navigation">
         <ul>
           {%- for _item in site.data.navigation.header -%}
