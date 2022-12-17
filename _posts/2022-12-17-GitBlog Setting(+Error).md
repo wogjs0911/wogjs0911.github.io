@@ -38,6 +38,14 @@ tags: TeXt
 ---
 
 
+### 3) gitalk 기본 설정하고 나서  블로그 포스팅시, 댓글을 적용 시키려면  post할  md 파일에 key: jekyll-text-theme 항상 설정 추가하기
+
+- 댓글을 적용 시키려면  post할  md 파일에 key: jekyll-text-theme 항상 설정 추가.
+- _posts의 .md 파일은 항상 영어로 만들어야 한다.(한글은 깨짐)
+- 블로그를 직접 포스팅할 때, title은 영어나 한글 상관없다.
+- https://github.com/wogjs0911/gitalktest 에서 Issues 탭에서 포스팅한 글 목록 하나당 label(gitalk, url) 붙여줘서 댓글이랑 연동시켜주기  
+
+
 # 2. gitblog의 방문자 수 확인하는 방법
 
 
