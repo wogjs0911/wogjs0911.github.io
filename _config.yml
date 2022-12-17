@@ -127,6 +127,7 @@ comments:
   ## Gitalk
   # please refer to https://github.com/gitalk/gitalk for more info.
   gitalk:
+    enable : true
     clientID    : 0021f6e927aa071319c0 # GitHub Application Client ID
     clientSecret: a514aabb09d91fc366a4b9ab69f253730325c169 # GitHub Application Client Secret
     repository  : gitalktest # GitHub repo
