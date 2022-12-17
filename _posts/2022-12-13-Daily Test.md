@@ -1,4 +1,5 @@
 ---
+key: jekyll-text-theme
 title: Daily Test
 tags: java
 ---
