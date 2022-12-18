@@ -11,7 +11,7 @@ tags: TeXt
 
 - 먼저, [GitHub OAuth App](https://github.com/settings/applications/new)에서  gitblog를 등록해야 한다.
 - [참고 블로그: 6mini.github.io](https://6mini.github.io/github%20blog/2021/08/29/blog/)
-- GitHub OAuth App에서 gitblog를 등록할 때, Authorization callback URL은 댓글이 저장될 임의의 포스팅된 블로그 게시글의 URL이다.(제일 중요!!!! 여기서 에러 많이 발생한다.) ***
+- GitHub OAuth App에서 gitblog를 등록할 때, Authorization callback URL은 댓글이 저장될 임의의 포스팅된 블로그 게시글의 URL이다.(제일 중요!!!! 여기서 에러 많이 발생한다.) 
 
 ```
  gitalk:
@@ -57,6 +57,9 @@ tags: TeXt
 
 
 
+---
+
+
 # 2. gitblog의 방문자 수 확인하는 방법
 
 
@@ -65,6 +68,8 @@ tags: TeXt
 - [블로그 참고 1 : 파인데이터랩 GA4 초기 세팅 사항 참고](https://finedata.tistory.com/50?category=1052408)
 - [블로그 참고 1 : 파인데이터랩 GA4 설치 방법 참고](https://finedata.tistory.com/52?category=913224)
 
+
+---
 
 
 # 3. gitblog의 카테고리 추가하는 방법
