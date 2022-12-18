@@ -130,7 +130,7 @@ comments:
     enable : true
     clientID    : 614f6cea2a44b3f28cff # GitHub Application Client ID
     clientSecret: 12cfb860a6d206ad18b1b6a901014567910c539b # GitHub Application Client Secret
-    repository  : gitalktest # GitHub repo
+    repository  : gitalk # GitHub repo
     owner       : wogjs0911 # GitHub repo owner
     admin: 
     - wogjs0911 # GitHub repo owner and collaborators, only these guys can initialize GitHub issues, IT IS A LIST.
