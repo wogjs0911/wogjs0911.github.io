@@ -1,8 +1,7 @@
 ---
 key: /2022/12/14/Data-Structure.html
 title: 자료구조 정리
-categories: [ algorithm ]
-tags: [ TeXt, algorithm ]
+tags: TeXt algorithm
 
 ---
 (https://st-lab.tistory.com/) 참고!!

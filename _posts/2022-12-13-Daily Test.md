@@ -1,8 +1,7 @@
 ---
 key: /2022/12/13/Daily-Test.html
 title: Daily Test
-categories: [ ictlecture ]
-tags: [ java, TeXt, ictlecture ]
+tags: java TeXt
 ---
 
 ## 1. [22.12.13]: 문제 1) 개수를 구하는 코드, 문제 2) 가장 큰 값, 문제 3) 그 위치를 출력
