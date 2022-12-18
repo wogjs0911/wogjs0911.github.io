@@ -61,7 +61,7 @@ tags: TeXt
 
 ```
 ---
-key: jekyll-text-theme
+key: /2022/12/17/GitBlog-Setting(+Error).html
 title: gitblog 설정시, error 해결
 tags: TeXt
 ---
