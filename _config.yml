@@ -186,7 +186,7 @@ analytics:
 ##############################
 markdown    : kramdown
 highlighter : rouge
-permalink   : /:year/:categories/:title
+permalink   : date
 
 exclude:
   - CHANGELOG.md
