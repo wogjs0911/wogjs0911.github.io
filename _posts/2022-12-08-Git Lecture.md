@@ -1,7 +1,9 @@
 ---
 key: /2022/12/08/Git-Lecture.html
 title: Git 강의
-tags: git TeXt
+categories: [ git ]
+tags: [ git ]
+
 ---
 
 # 1. 버전 관리란?

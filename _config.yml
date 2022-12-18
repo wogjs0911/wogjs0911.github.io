@@ -100,7 +100,7 @@ paginate: 8
 paginate_path: /page:num # don't change this unless for special need
 
 ## => Category
-category_list: [ text, ictlecture, java, javascript, sql, mysql, jsp, servlet, spring, springboot, jekyll, tip, error ]
+category_list: [ text, ictlecture, java, javascript, sql, mysql, jsp, servlet, spring, springboot, git, gitblog, jekyll, tip, error ]
 
 
 ## => Sources
