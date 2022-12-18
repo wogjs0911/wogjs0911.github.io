@@ -102,5 +102,5 @@ header:
       fr-LU   : *FR
       tr      : &TR       Hakkında
       # @end locale config
-    url: /list.html
+    url: /_layouts/list.html
     
