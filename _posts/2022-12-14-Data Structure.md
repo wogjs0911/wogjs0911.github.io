@@ -1,5 +1,5 @@
 ---
-key: jekyll-text-theme
+key: /2022/12/14/Data-Structure.html
 title: 자료구조 정리
 tags: TeXt
 

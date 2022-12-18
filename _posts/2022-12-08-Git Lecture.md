@@ -1,5 +1,5 @@
 ---
-key: jekyll-text-theme
+key: /2022/12/08/Git-Lecture.html
 title: Git 강의_버전 관리란? 
 tags: git TeXt
 ---

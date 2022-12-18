@@ -1,5 +1,5 @@
 ---
-key: jekyll-text-theme
+key: /2022/12/17/GitBlog-Setting(+Error).html
 title: GitBlog 설정(에러 해결)
 tags: TeXt
 ---
@@ -56,6 +56,16 @@ tags: TeXt
 <br><br>
 ### 5) 하지만, gitalk를 사용하면 댓글이 중복되는 문제가 있다.(추가로 해결하기)
 
+- post할  .md 파일에서 key 설정은 댓글을 모아두는 repository에 labels별로 나뉘어지므로 각각 다르게 설정해주어야 한다.
+- 보통 각 페이지 url의 뒷부분을 넣음. ex) /2022/12/17/GitBlog-Setting(+Error).html
+
+```
+---
+key: jekyll-text-theme
+title: gitblog 설정시, error 해결
+tags: TeXt
+---
+```
 
 <br><br>
 ---
