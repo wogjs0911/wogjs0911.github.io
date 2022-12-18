@@ -12,6 +12,7 @@ tags: TeXt
 - 먼저, [GitHub OAuth App](https://github.com/settings/applications/new)에서  gitblog를 등록해야 한다.
 - [참고 블로그: 6mini.github.io](https://6mini.github.io/github%20blog/2021/08/29/blog/)
 - GitHub OAuth App에서 gitblog를 등록할 때, Authorization callback URL은 댓글이 저장될 임의의 포스팅된 블로그 게시글의 URL이다.(제일 중요!!!! 여기서 에러 많이 발생한다.) 
+<br><br>
 
 ```
  gitalk:
@@ -56,7 +57,7 @@ tags: TeXt
 ### 5) 하지만, gitalk를 사용하면 댓글이 중복되는 문제가 있다.(추가로 해결하기)
 
 
-
+<br><br>
 ---
 
 
@@ -70,6 +71,7 @@ tags: TeXt
 - [블로그 참고 1 : 파인데이터랩 GA4 설치 방법 참고](https://finedata.tistory.com/52?category=913224)
 
 
+<br><br>
 ---
 
 
