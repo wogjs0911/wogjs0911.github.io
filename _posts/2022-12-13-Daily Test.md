@@ -480,7 +480,7 @@ b[0][0] b[0][1] b[0][2] b[0][3] b[1][0] b[1][1] b[1][2] b[1][3]
 <br>
 
 ```java
-package day.test;
+package com.newlecture;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -543,11 +543,11 @@ import java.util.Scanner;
 }
 */
 	
-public class test_221215_1_2 {							// 코드는 단계별로 주석처리로 진행했다.
+public class test_221215_1_2 {																		// 코드는 단계별로 주석처리로 진행했다.
 
 	public static void main(String[] args) throws IOException  {
 		
-		int[][] bitmap = new int[20][10];
+		int[][] bitmap = new int[10][20];
 		String[] nums = new String[10];
 		char[] num = new char[20];
 		
@@ -568,16 +568,12 @@ public class test_221215_1_2 {							// 코드는 단계별로 주석처리로 �
 				
 				for(int j = 0; j<10; j++) 	{
 					for(int i=0; i<20; i++) {					
-
-																		// 2. 문자열을 문자로 변환.				
-
 																// 2. 문자열을 문자로 변환.				
-
 						num[i] = nums[j].charAt(i);				// 1차원배열은 1차원배열로 받아야한다. 그리고 배열의 자리수 생각
 						
 						System.out.printf("%c", num[i]);		
 					
-						bitmap[i][j] = num[i]*1;				// 3. 문자열을 숫자로 변환
+						bitmap[j][i] = num[i]*1;				// 3. 문자열을 숫자로 변환
 					}						
 					System.out.println();
 				}
@@ -590,7 +586,7 @@ public class test_221215_1_2 {							// 코드는 단계별로 주석처리로 �
 			
 			for(int k = 0; k<10; k++) {
 				for(int i=0; i<20; i++) {
-					System.out.printf("%c", bitmap[i][k]);
+					System.out.printf("%c", bitmap[k][i]);
 			
 					}
 				System.out.println();
@@ -608,10 +604,10 @@ public class test_221215_1_2 {							// 코드는 단계별로 주석처리로 �
 				for(int j=0; j<20-1; j++) {							// 4. 문자를 숫자로 변환하여 역순으로 대입
 					  															
 					for(int i=0; i<20-1-j; i++) {
-						if(bitmap[i+1][k]<bitmap[i][k]) {			// "-1"은 배열이 i와 i+1이라서 이렇게 설계했다. 생각해보기(숫자 대입)
-							temp = bitmap[i][k];					// "-j"는 비교되는 값을  한곳으로 몰아 넣고 나머지를 다시 정렬한다.
-							bitmap[i][k] =  bitmap[i+1][k];
-							bitmap[i+1][k] = temp;
+						if(bitmap[k][i+1]<bitmap[k][i]) {			// "-1"은 배열이 i와 i+1이라서 이렇게 설계했다. 생각해보기(숫자 대입)
+							temp = bitmap[k][i];					// "-j"는 비교되는 값을  한곳으로 몰아 넣고 나머지를 다시 정렬한다.
+							bitmap[k][i] =  bitmap[k][i+1];
+							bitmap[k][i+1] = temp;
 						}
 					}
 				}
@@ -619,7 +615,7 @@ public class test_221215_1_2 {							// 코드는 단계별로 주석처리로 �
 			
 			for(int j = 0; j<10; j++) {
 			for(int i=0; i<20; i++) {
-				System.out.printf("%c", bitmap[i][j]);
+				System.out.printf("%c", bitmap[j][i]);
 		
 				}
 				System.out.println();
@@ -635,11 +631,10 @@ public class test_221215_1_2 {							// 코드는 단계별로 주석처리로 �
 			PrintStream out = new PrintStream(fos);
 			
 			for(int j = 0; j<10; j++) {
-				for(int i=0; i<20; i++) {
-					out.printf("%c", bitmap[i][j]);
-			
-					}
-				out.print("\n");
+				for(int i=0; i<20; i++) 
+					out.printf("%c", bitmap[j][i]);
+				if(j!=9)
+					out.print("\n");
 			}
 			
 			fos.close();
