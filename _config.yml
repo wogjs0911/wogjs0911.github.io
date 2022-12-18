@@ -128,8 +128,8 @@ comments:
   # please refer to https://github.com/gitalk/gitalk for more info.
   gitalk:
     enable : true
-    clientID    : 332c37e879810504601b # GitHub Application Client ID
-    clientSecret: 8142a2c1cdb53002e11f0498a37007de6ad8f9d4 # GitHub Application Client Secret
+    clientID    : 614f6cea2a44b3f28cff # GitHub Application Client ID
+    clientSecret: 12cfb860a6d206ad18b1b6a901014567910c539b # GitHub Application Client Secret
     repository  : wogjs0911.github.io # GitHub repo
     owner       : wogjs0911 # GitHub repo owner
     admin: 
