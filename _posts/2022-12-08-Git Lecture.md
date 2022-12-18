@@ -1,8 +1,7 @@
 ---
-key: /git/2022/12/08/Git-Lecture.html
+key: /2022/12/08/Git-Lecture.html
 title: Git 강의
-categories: [ git ]
-tags: [ git ]
+tags: git TeXt
 
 ---
 
