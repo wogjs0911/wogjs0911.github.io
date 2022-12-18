@@ -1,5 +1,5 @@
 ---
-key: /ictlecture/2022/12/13/Daily-Test.html
+key: /2022/12/13/Daily-Test.html
 title: Daily Test
 categories: [ ictlecture ]
 tags: [ java, TeXt, ictlecture ]
