@@ -49,7 +49,7 @@ header:
         fr-LU   : *FR
         tr      : &TR       Hakkında
         # @end locale config
-      url: /categories
+      url: /categories/
       
   - titles:
       # @start locale config

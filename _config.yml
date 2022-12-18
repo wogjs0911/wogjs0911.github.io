@@ -183,7 +183,7 @@ analytics:
 ##############################
 markdown    : kramdown
 highlighter : rouge
-permalink   : date
+permalink   : /:categories/:title/
 
 exclude:
   - CHANGELOG.md
@@ -219,7 +219,13 @@ defaults:
   - scope:
       path: "assets/images"
       image: true
-
+  - scope:                  # _pages
+      path: "_pages"
+      type: pages
+    values:
+      layout: single
+      author_profile: true
+      
       
 ## => Plugins
 ##############################
