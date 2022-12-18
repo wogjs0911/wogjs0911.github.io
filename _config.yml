@@ -67,6 +67,8 @@ paths:
   archive : # "/archive.html" (default)
   rss     : # "/feed.xml" (default)
 
+## => Category
+category_list: [ nodejs, javascript, tip, diary, linux, chatbot, php ,publishing, jekyll, sql, error ]
 
 ## => Post
 ##############################
