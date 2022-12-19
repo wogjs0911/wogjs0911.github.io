@@ -136,6 +136,11 @@ tags: TeXt algorithm
 - 첫 번째는 객체에 Comparable이 구현되어 있어 따로 파라미터로 Comparator를 넘겨주지 않는 경우고
 - 다른 하나는 Comparator을 넘겨주어 정의 된 정렬 방식을 사용하는 경우다.
 
+
+
+<br> [Singly LinkedList 정리]
+- Singly LinkedList는 왠만해선 head만 고려해서 생각한다.
+
 - 단일 연결리스트의 경우 삽입, 삭제 과정에서 '링크'만 끊어주면 되기 때문에 매우 효율적이라는 것을 볼 수가 있을 것이다.
 
 - 반대로 모든 자료를 인덱스가 아닌 head부터 연결되어 관리하기 때문에 색인(access)능력은 떨어진다. 결과적으로 이전에 구현했던 ArrayList와 이번에 구현한 LinkedList의 쓰이는 용도가 다르다는 것을 알 수가 있다.
@@ -144,11 +149,29 @@ tags: TeXt algorithm
 
 - 양방향의 경우 고려해야 할 것이 워낙 많고, 기본적인 구조 이해 없이는 어렵기 때문이다.
 
+
 ---
 
 <br><br>
 # 6. Doubly LinkedList (이중 연결리스트)
 
+<br> [Doubly LinkedList 정리]
+
+- Doubly LinkedList는 Singly LinkedList와 다르게 head뿐만 아니라 tail까지 고려해주어야 한다. 즉, 2가지를 고려야해야 한다.
+
+- add(int index, E value) 메서드 : 
+	- 이전노드(prev_Node)의 next 변수는 새 노드(newNode)를 가리키도록 하고, 새 노드는 prev와 next를 앞 뒤 노드를 가리키도록 한 뒤, 마지막으로 next_Node의 prev 변수는 새 노드를 가리키도록 해야한다. 또한 index 변수가 잘못된 위치를 참조할 수 있으니 이에 대한 예외처리로 IndexOutOfBoundsException을 한다.
+	
+	
+	- 정리하면, 이전노드의 입장, 새노드의 입장, 다음 노드의 입장에서 총 3번의 위치에서 입장 고려해야 한다.
+
+- remove(int index) 메소드 :
+	- '삭제하려는 노드의 이전 노드'의 next 변수를 '삭제하려는 노드의 다음 노드'를 가리키도록 해주면 된다.
+	
+	
+	- 즉, 여기도 이전노드의 입장, 새노드의 입장, 다음 노드의 입장에서 총 3번의 위치에서 입장 고려해야 한다.
+	
+	
 ---
 
 
