@@ -10,6 +10,21 @@ tags: TeXt algorithm
 <br>
 # 0. Java Collections
 
+- 선형 자료구조(Linear Data Structure)과 비선형 자료구조(Nonlinear Data Structure)
+
+	- 선형 자료구조(Linear Data Structure) : 데이터가 일렬로 연결된 형태. int[] 배열같은 것이다. 선형 자료구조는 리스트(List)와 큐(Queue), 덱(Deque)가 있다.
+
+	- 비선형 자료구조(Nonlinear Data Structure) : 일렬로 나열된 것이 아닌, 각 요소가 여러 개의 요소와 연결 된 형태이다. 비선형 자료구조는 그래프(Graph)와 트리(Tree)가 있다.
+
+- List Interface를 구현하는 클래스
+
+	- ArrayList
+
+	- LinkedList
+
+	- Vector (+ Vector를 상속받은 Stack)
+
+
 ---
 <br><br> 
 # 1. List Interface
