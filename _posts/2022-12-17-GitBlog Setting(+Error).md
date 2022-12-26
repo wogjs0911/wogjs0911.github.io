@@ -1,6 +1,6 @@
 ---
 key: /2022/12/17/GitBlog-Setting(+Error).html
-title: GitBlog 설정(에러 해결)
+title: [GitBlog] GitBlog 설정(에러 해결)
 tags: TeXt, gitblog
 
 ---
