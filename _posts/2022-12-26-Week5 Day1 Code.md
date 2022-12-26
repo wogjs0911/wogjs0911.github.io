@@ -34,45 +34,45 @@ tags: java web servlet
 	
 - Web Container는 service() 메서드를 호출하기 전에 Servlet 객체를 메모리에 올린다.
 
-
-#### 추가 정리*** :
-
 <br>
-1. Web Server는 HTTP request를 Web Container(Servlet Container == 톰캣)에게 위임한다.
+#### 2-1) 서블릿 동작 과정 추가 정리** (참고 - https://coooding.tistory.com/14) :
+
+
+- Web Server는 HTTP request를 Web Container(Servlet Container == 톰캣)에게 위임한다.
   
- 1) web.xml 설정에서 어떤 URL과 매핑되어 있는지 확인(없으면 기본 설정으로 돌아간다.)
- 2) 클라이언트(browser)의 요청 URL을 보고 적절한 Servlet을 실행
+	- web.xml 설정에서 어떤 URL과 매핑되어 있는지 확인(없으면 기본 설정으로 돌아간다.)
+	- 클라이언트(browser)의 요청 URL을 보고 적절한 Servlet을 실행
   
  
 <br>
-2. Web Container는 service() 메서드를 호출하기 전에 Servlet 객체를 메모리에 올린다.
-  
- 1) Web Container는 적절한 Servlet 파일을 컴파일(.class 파일 생성)한다.
- 2) .class 파일을 메모리에 올려 Servlet 객체를 만든다.
- 3) 메모리에 로드될 때 Servlet 객체를 초기화하는 init() 메서드가 실행된다.
+- Web Container는 service() 메서드를 호출하기 전에 Servlet 객체를 메모리에 올린다.
+	- Web Container는 적절한 Servlet 파일을 컴파일(.class 파일 생성)한다.
+	- .class 파일을 메모리에 올려 Servlet 객체를 만든다.
+	- 메모리에 로드될 때 Servlet 객체를 초기화하는 init() 메서드가 실행된다.
 
  
 <br>
-3. Web Container는 Request가 올 때마다 thread를 생성하여 처리한다.
- 1) 각 thread는 Servlet의 단일 객체에 대한 service() 메서드를 실행한다.
+- Web Container는 Request가 올 때마다 thread를 생성하여 처리한다.
+	- 각 thread는 Servlet의 단일 객체에 대한 service() 메서드를 실행한다.
  
 
-
-1. 클라이언트의 요청이 들어오면 WAS는 해당 요청에 맞는 Servlet이 메모리에 있는지 확인한다. 
+<br>
+- 클라이언트의 요청이 들어오면 WAS는 해당 요청에 맞는 Servlet이 메모리에 있는지 확인한다. 
   
   
-2-1. 만약 메모리에 없다면,
-1) 해당 Servlet Class를 메모리에 올린 후(Servlet 객체 생성) init() 메서드 실행 
-2) 이후 service() 메서드를 실행
+- 만약 메모리에 없다면,
+	- 해당 Servlet Class를 메모리에 올린 후(Servlet 객체 생성) init() 메서드 실행 
+	- 이후 service() 메서드를 실행
   
-2-2. 메모리에 있다면 
-1) 바로 service() 메서드 실행
+- 메모리에 있다면 
+	- 바로 service() 메서드 실행
 	 
 
 <br>	
 ### 3) [web.xml 파일에서 서블랫 매핑 설정]****
 
 ```java
+
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:web="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd http://xmlns.jcp.org/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="5.0">
   <display-name>webprj</display-name>
@@ -142,7 +142,7 @@ public class HelloServlet extends HttpServlet {
 
 <br>
 
- ```html
+```html
  <!DOCTYPE html>
 <html>
 <head>
@@ -161,11 +161,11 @@ public class HelloServlet extends HttpServlet {
 	<a href="/hello">hello</a>
 </body>
 </html>
- ```
+```
  
- <br>
+<br>
  
- ```java
+```java
  package com.newlecture.web;
 
 import java.io.IOException;
@@ -211,6 +211,19 @@ public class HelloServlet extends HttpServlet {
 			out.println("hello Servlet");
 	}
 }
- 
- ```
+
+```
+
+
+<br>
+### 8) Canvas(프론트)와 Servlet(백엔드)을 이용해서 만들기 + 자바 스크립트 공부 
+
+
+
+
+
+
+
+
+
  
