@@ -86,12 +86,17 @@ tags: TeXt
 ---
 
 
+
+
+
 <br><br>
-# 3. gitblog의 카테고리 추가하는 방법
+# 3. 이메일 설정과 github 아이디 잘못된 설정으로 gitblog를 통한 github 잔디 심기
+
+- 참고1 : [잔디 에러 해결1](https://wellbell.tistory.com/43)
+- 참고2 : [잔디 에러 해결2](https://12716.tistory.com/entry/Github-%EC%9E%94%EB%94%94-%EC%95%88%EC%8B%AC%EC%96%B4%EC%A7%80%EB%8A%94-%ED%98%84%EC%83%81-%ED%95%B4%EA%B2%B0)
 
 
-
-
-
+<br><br>
+# 4. gitblog의 카테고리 추가하는 방법
 
 
