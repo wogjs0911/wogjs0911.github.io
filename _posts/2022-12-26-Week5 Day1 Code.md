@@ -4,7 +4,7 @@ title: TIL-5주차 코드 - Day1
 tags: java web servlet 
 ---
 
-# 1. [servlet 이용]
+# 1. Servlet 이용
 
 <br>
 ### 1) [이전 강의 복습 : 오늘의 질문]
