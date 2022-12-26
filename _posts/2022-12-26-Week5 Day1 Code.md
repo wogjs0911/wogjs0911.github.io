@@ -35,7 +35,7 @@ tags: java web servlet
 - Web Container는 service() 메서드를 호출하기 전에 Servlet 객체를 메모리에 올린다.
 
 <br>
-#### 2-1) 서블릿 동작 과정 추가 정리** (참고 - https://coooding.tistory.com/14) :
+#### 2-1) [서블릿 동작 과정 추가 정리]** (참고 - https://coooding.tistory.com/14) :
 
 
 - Web Server는 HTTP request를 Web Container(Servlet Container == 톰캣)에게 위임한다.
@@ -118,22 +118,24 @@ public class HelloServlet extends HttpServlet {
 }
 ```
 
+---
 
 <br>
-### 5) 에러 발견
+### 5) [에러 발견]
 
 - 이전 상태의 코드가 계속 실행되는 경우 : Project 탭 - Clean 클릭해서 프로젝트가 실행되었던 문제가 발생.
 
 - 배포가 안되는 경우 : 브라우저가 열린 상태에서는 배포가 되지 않는다.  
 
 <br>
-### 6) 서블릿에 html 파일 적용
+### 6) [서블릿에 html 파일 적용]
 
  - 프로젝트명을 만들 때, 충돌날까봐 context명(/webprj)을 만들어 줬는데 충돌이 나지 않아서 root(/)로 바꾸기
  
+---
 
 <br>
-### 7) GET 요청
+### 7) [GET 요청]
 
  - Get 요청 : html에게 데이터를 달라고 하는 요청이지만 값을 전달할 수 있다. 옵션 느낌이다.
  
@@ -214,16 +216,73 @@ public class HelloServlet extends HttpServlet {
 
 ```
 
+---
+
+<br><br>
+# 2. Canvas(프론트)와 Servlet(백엔드)을 이용해서 게임 만들기 (+ 자바 스크립트 공부)
 
 <br>
-### 8) Canvas(프론트)와 Servlet(백엔드)을 이용해서 만들기 + 자바 스크립트 공부 
+### 1) [자바 스크립트]
+
+- ES5 vs ES6 : ES5부터 먼저 공부하고 ES6를 공부하기
+	- ES5는 예전 버전이라서 에러가 많이 발생한다.(모듈화(= 객체지향)를 제공하지 않아서)
+	- ES6만 공부하면, ES5와의 기준을 몰라서 기준이 사라진다.
+
+<br>	
+	![이미지](/assets/images/jsStudy.jpg)
+	- 언어와 플랫폼을 공부하고나서 하나의 제품을 만들고 나중에는 가운데 부분에 있는 것을 관심있는 것 공부하기!
+<br>
+
+	- 웹 프론트 API : 
+		- 윈도우 UI : DOM
+		- Ajax : XHR, Fetch
+		- 2D/3D 그래픽 : SVG, Canvas
+	<br>	
+	- 백엔드 API : 
+		- 실행 환경 : NodeJS
+		- 웹 서버 겸 WAS : Express
 
 
+<br>
+	- 통계학의 필요성 
+		- 서비스를 운영하면서, 통계학이 필요하다.(하지만, 먼저 R을 공부하지마라.)
+		- 데이터 분석 : 빈도수, 시간대별 빈도수 등등
+		- 확률 공부 : 모집합, 표본 집합
+		- 이런 것들로 예측한다.
+	
+	
+	
+### 2) [Wrapper 클래스]
 
+```javascript
+var x = 3; 
+```
+	- 여기선, 3을 자동으로 박스화해준다. 그리고 x가 이것을 참조한다. 이렇게 박스처럼 만들어서 값을 참조하는 모습을 Wrapper Class에서 참조하는 모습과 같다.
 
+- Java에서는 부모를 갖지 않아도 Object 클래스에서 상속 받아서 이용한다.
+ 
+- Object 클래스는 모든 객체를 한 번에 묶을 수 있는 역할을 한다.  배열을 Object 형식으로 만들면, 참조 못할 것이 없다. 객체를 서로 연결 지을 수 있다.
+ 
+- 하지만, 이렇게 어떠한 공간이여서 Wrapper 클래스는 모든 것을 엮고 담을 수 있지만, primitive 타입만 모든 것을 담을 수 없다.
+ 
+```java
+package ex8.wrapper;
 
+public class WrapperTest {
 
+	public static void main(String[] args) {
+		// Object obj = 3;				// 값을 담는 것은 불가능하고 참조하는 것이 가능하다.								
+		Object obj = new Integer(3);	// wrapper 클래스 적용!!
 
+		int x = 3;						// primitive 타입 설정!!
 
+		System.out.println(obj);
+		System.out.println(x);
 
+	}
+}
+ ```
+ 
+ 
+ 
  
