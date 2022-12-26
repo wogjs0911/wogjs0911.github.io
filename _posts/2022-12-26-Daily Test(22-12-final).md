@@ -1,6 +1,6 @@
 ---
 key: /2022/12/26/Daily-Test(22-12-final).html
-title: [Test] Daily Test(22-12-마지막주)
+title: Test-Daily Test(22-12-마지막주)
 tags: java
 ---
 

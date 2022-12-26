@@ -1,6 +1,6 @@
 ---
 key: /2022/12/26/Week5-Day1-Code.html
-title: [TIL] 5주차 코드 - Day1
+title: TIL-5주차 코드 - Day1
 tags: java web servlet 
 ---
 

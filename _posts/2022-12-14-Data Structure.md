@@ -1,6 +1,6 @@
 ---
 key: /2022/12/14/Data-Structure.html
-title: [자료구조] 자료구조 정리
+title: 자료구조-자료구조 정리
 tags: TeXt algorithm
 
 ---
