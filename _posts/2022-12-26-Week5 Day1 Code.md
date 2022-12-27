@@ -1,10 +1,10 @@
 ---
 key: /2022/12/26/Week5-Day1-Code.html
 title: TIL-5주차 코드 - Day1
-tags: java web servlet 
+tags: java web servlet javascript
 ---
 
-# 1. Servlet 이용
+# 1. Servlet 이용 : 22.12.26
 
 <br>
 ### 1) 이전 강의 복습 : 오늘의 질문
@@ -286,5 +286,351 @@ public class WrapperTest {
  
 
 
+<br><br>
+# 3. Javascript 이용 : 22.12.27  
+
+
+### 1) Wrapper 클래스 정리
+
+```java 
+package ex8.wrapper;
+
+import ex7.is_a.Exam;
+
+public class WrapperTest {
+
+	public static void main(String[] args) {
+		// Object obj = 3;				// 값을 담는 것은 불가능하고 참조하는 것이 가능하다.								
+		Object obj = new Integer(3);	// wrapper 클래스 적용!!
+
+		int x = 3;						// primitive 타입 설정!!
+
+		System.out.println(obj);
+		System.out.println(x);
+
+		
+  //------------------------------------------------------------------------
+		Exam exam = new Exam();
+		String str = new String("Hello~");
+		
+		Exam[] list1 = new Exam();		// 불가능(타입이 다르다.)
+		String[] list2 = new String[2];	// 가능
+		Object[] list3 = new Object[5];	// 가능 Obj
+		
+		list3[0] = exam;
+		list3[1] = exam;
+
+	// ** 중요!!	
+		Object d = 3;				// 자바 예전 버전에서는 원래, 값을 참조해서는 안 된다.
+		Object d2 = new Integer(3);	// 이렇게 박스에 담에서 사용하면 가능하다.
+		
+		// 원래 값으로 담으면 공간이다. 따라서, 참조와 달라서 에러가 발생
+		int x = (Integer) d2;	// 에러 발생(정확히 형변환 까지 해주면,)
+
+		
+		
+    //------------------------------------------------------------------------
+	
+		}
+
+}
+```
  
+- 이것과 마찬가지로, 자바스크립트는 값 변수가 없어서 모든 것이 객체화 되어 있다.
+
+
+<br>
+
+```java
+var x = 3;	// undefined로 설정이 되어 있는데 값이 입력되면, Wrapper 클래스가 기본형이 되어 불러온다.
+```		
+
+- 컴파일 타임에 의한 에러가 나지 않는다.
+		
+- undefined를 판단하기 위해서, "undefined" 이렇게 쓰지 않는다.	 undefined 이렇게 사용한다.
+		
+- 자바 스크립트 작성법 : html 코드에 script 태그의 내부에 작성한다.
+		
+- 자바 스크립트의 구분자는 줄바꾸기와 ";"로 2가지 형태로 구분된다.
+
+- 자바스크립트는 문서 안에서 사용하기 때문에 Single인데도 문서 안에서는 Double을 사용한다. 따라서, 기준이 없다.
+
+
+<br>
+### 2) [Array 객체]
+
+- Index 기반의 저장소, Stack 저장소, queue 저장소, Deque 저장소
+
+- Array 객체는 알아서 index를 늘려준다.
+
+```java
+var nums = new Array();
+nums[0] = 5;
+nums[1] = 5;
+nums[2] = 5;
+
+```
+
+- 콜렉션은 자리가 모자라면. 자리를 알아서 늘려간다.
+
+
+<br>
+### 3) [javascript #1]
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<script>
+	var x;
+	alert(x==undefined);
+	
+/* 	var nums = new Array();	자바에서는 바로 안 만들고 공간을 설정해줬어야 했다. 
+	
+	nums[0] = 3;
+	nums[1] = 10;
+	nums[2] = 21;
+	
+	console.log(nums[0]);
+	console.log(nums[1]);
+	console.log(nums); */
+	
+	var nums = new Array();
+	nums[3] = 5;
+	
+	console.log(nums);
+	console.log(nums.length);
+	
+	
+</script>
+
+</head>
+<body>						<!-- html 공부하기 -->
+	<section>
+		<h1>인사말을 몇 번 듣고 싶으세요?</h1>
+		<ul>
+			<li><a href="/hello?c=5">5번</a></li>
+			<li><a href="/hello?c=10">10번</a></li>
+			<li><a href="/hello?c=100">100번</a></li>
+		</ul>
+	</section>
+	
+	<form action = "/hello">
+		<label>기타</label>
+		<input placeholder="원하는 횟수를 입력하세요." name = "c"/>
+		<input type = "submit" value = "전송"/>
+	</form>
+
+	<a href="/hello">hello</a>
+	
+
+	
+</body>
+</html>
+```
+
+
+### 4) [javascript #2]
+
+- 자바스크립트에서 배열이 1개만 받으면 크기이고 1개를 넘어서는 순간, 초기값을 설정한다.
+
+
+```html
+ 	var nums = new Array();			 typeof : 배열의 타입을 반환 해준다.
+	var nums = new Array(5);
+	var nums = new Array(5,10,21);
+	var nums = new Array(5,10,21,'Hello');
+	console.log(typeof nums[3]); 
+```	
+
+- 자바 스크립트 2차원 배열
+
+```html
+	var nums = new Array(5,10,21,'Hello');
+```
+
+  
+### 5)  [Stack] : 뒤로가기에서 쓰임
+
+- LiFO(Last In First Out) : 데이터를 쌓았다가 지운다.
+
+- push : 하나씩 데이터를 쌓을 때, 이용(index를 안 쓰므로 좋다.)
+
+- pop : 데이터를 꺼내서 없앨 때, 이용(마지막에 쌓은거부터 사라짐)
+
+```html
  
+/* Stack */ 
+var nums = new Array()
+nums.push(4);
+console.log(nums);
+
+var n1 = nums.pop();
+console.log(nums); 
+
+```
+
+<br>
+### 6)  [Queue] 
+
+- FiFO(First In First Out) : 데이터를 쌓았다가 지운다.
+
+- push : 하나씩 데이터를 쌓을 때, 이용(index를 안 쓰므로 좋다.)
+
+- shift : 데이터를 꺼내서 없앨 때, 하나씩 밀면서 이용해서 shift 이다.(데이터를 다 쌓고 그다음에 밀면서 없애버림.)
+
+
+```html
+/* Queue */ 
+var nums = new Array(1,2,3,4,5);
+
+nums.push(6);
+var num = nums.shift();
+console.log(num);
+ 
+```
+
+<br>
+### 7)  [DeQue(Double-Ended Queue)] : 공부하기
+
+- 데이터를 양쪽에서 push하고 shift하여 밀고 pop하여 없애버린다. 한다.(여러개로 섞임)
+
+
+
+
+### 8) Split : 배열과 배열을 끝에 잇거나 중간에 들어갈 수도 있다. 또는 중간에 들어가기 위해 배열을 자르고 안 들어갈수도 있다.
+
+- nums.splice(2) : 0번째 인덱스부터 마지막 인덱스를 버리고 출력. 
+	- 1,2 출력
+
+- nums.splice(2,1) : 1개를 지우고 거기에 배열을 넣으려고 이렇게 사용.
+	- 1,2,4,5 출력
+	- nums.splice(2,1)
+	
+- nums.splice(1,0,23,100,124) : 2번째 인덱스에 0이 들어가면, 그 인덱스부터 삽입
+	- 1,23,100,124,2,3,4,5 출력
+	- nums.splice(2,1)
+
+- nums.splice(1,2,23) : 1,23,4,5 출력(중요!! : 1번째 인덱스부터 2개 지우고 그자리에 23을 삽입)
+	
+- 따라서, 이것은 배열을 조작하기 위해서 사용된다.**
+
+- 추가 도구 : 배열을 이용하는 메서드 Loop over, Find, Filter, Map, Concat, Join 이용
+
+
+### 9) Object
+
+- 하지만, 객체에 속성이 늘어나면 문제가 많다.
+- 자바와 달리 자바스크립트는 계획되지 않는 속성이므로... 에러 발생한다.(ex) exam.Kor과 같은 경우)
+
+```html
+<script>
+var exam = new Object();		
+exam.kor = 30;					
+exam.eng = 70;
+exam.math = 90;
+
+alert(exam.kor + exam.eng);
+</script>
+```
+
+### 10) 자바스크립트 사용법
+
+- exam["kor"]은 exam.kor과 같은 의미이다. : 즉, 변수명을 속성으로 사용할 수 없는 경우에 이렇게 쓴다.(ex) 변수명에 빈공백을 넣어주는 경우)
+
+- 객체의 속성 제거 : delete exam.kor;(데이터 손실 때문에 키와 값을 빈 배열에 각각 담아줄수도 있다. 이런 것을 map 같은 콜렉션에 넣어줄 수 있다.)
+
+```html
+<script>
+
+var exam = new Object();
+exam.kor = 30;
+console.log(exam);
+delete exam.kor;
+console.log(exam);
+
+</script>
+```
+
+<br>
+### 11) JSON (중요!!)
+
+![이미지](/assets/images/json.jpg)
+
+- 데이터를 표기하는데 가장 기본적인 모습 : JSON이며 그외는 XML, CSV가 있다.
+
+<br>
+![이미지](/assets/images/json1.jpg)
+
+<br>
+![이미지](/assets/images/json2.jpg)
+
+<br>
+- Json 이용법
+
+```html
+<script>
+	var exam ="[3,5,3,2]";
+	alert(exam[2]);			// 외부에서 데이터를 받으면 이런식으로, 문자열로 받아오므로 "["부터 index 2번째인 ","가 출력된다.
+
+	
+	// 자바 스트립트에서 코드를 value로 인식하여 실행해주는 경우
+ 	eval("var x = 3+5");
+	alert(x);	
+</script>
+```
+- 보안에서 주의해야 한다.(외부에서 Injection 문제 : sql injection 문제 같은 경우)
+
+- 원격으로 데이터가 오는 경우 객체화하는 경우 용이하다.
+
+<br>
+### 12) JSON
+
+```java	
+	var exam1 = eval("([3,5,3,2])");	// eval에는 원래 완전한 문장이 들어가야하는데 문장으로 쓰기 위해서는 "" 안에도 ()를 써준다.
+	alert(exam1[2]);
+	
+	// 중요!!!****
+	// eval()은 객체화를 해주지만 어떠한 것도 만들어주므로 문제가 많다.(모든 형태만 변환해줘서)
+	// 새롭게 Json 파싱해주는 도구: reference 찾기
+	// 따라서, Json.parse()를 이용한다. (올바른 방법)
+	var data = JSON.parse("[3,5,3,2]");
+	alert(data[3]);
+	
+	// 객체를 만들다음에 스트링 형태로 바꿔주는 도구 : JSON.stringify() (올바른 방법)
+	var data1 = JSON.stringify("[3,5,3,2]");
+	alert(data1[2]);
+```
+	
+<br>	
+### 13) 연산자
+
+- 기본 연산자
+
+```html
+	var str1 = "hello";
+	var str2 = "hello";
+		
+	console.log(str1 == str2);			// true
+	
+	var str3 = "hello";
+	var str4 = new String("hello");		// 자바스크립트에서는 ==가 값을 비교해준다.
+										
+	console.log(str3 == str4);			// true
+	
+	var str5 = "hello";
+	var str6 = new String("hello");		// ===가 객체까지 비교한다.
+										
+	console.log(str5 === str6);		// false
+
+```
+	
+- 논리 연산자 및 값 비교
+
+```html
+
+```
+	
