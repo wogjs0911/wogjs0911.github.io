@@ -251,7 +251,7 @@ public class HelloServlet extends HttpServlet {
 		- 이런 것들로 예측한다.
 	
 	
-	
+<br><br>	
 ### 2) [Wrapper 클래스]
 
 ```javascript
@@ -284,12 +284,12 @@ public class WrapperTest {
  ```
  
  
-
+---
 
 <br><br>
 # 3. Javascript 이용 : 22.12.27  
 
-
+<br>
 ### 1) Wrapper 클래스 정리
 
 ```java 
@@ -374,7 +374,7 @@ nums[2] = 5;
 - 콜렉션은 자리가 모자라면. 자리를 알아서 늘려간다.
 
 
-<br>
+<br><br>
 ### 3) [javascript #1]
 
 ```html
@@ -432,7 +432,7 @@ nums[2] = 5;
 </html>
 ```
 
-
+<br><br>
 ### 4) [javascript #2]
 
 - 자바스크립트에서 배열이 1개만 받으면 크기이고 1개를 넘어서는 순간, 초기값을 설정한다.
@@ -452,7 +452,7 @@ nums[2] = 5;
 	var nums = new Array(5,10,21,'Hello');
 ```
 
-  
+<br><br>
 ### 5)  [Stack] : 뒤로가기에서 쓰임
 
 - LiFO(Last In First Out) : 데이터를 쌓았다가 지운다.
@@ -473,7 +473,7 @@ console.log(nums);
 
 ```
 
-<br>
+<br><br>
 ### 6)  [Queue] 
 
 - FiFO(First In First Out) : 데이터를 쌓았다가 지운다.
@@ -493,14 +493,14 @@ console.log(num);
  
 ```
 
-<br>
+<br><br>
 ### 7)  [DeQue(Double-Ended Queue)] : 공부하기
 
 - 데이터를 양쪽에서 push하고 shift하여 밀고 pop하여 없애버린다. 한다.(여러개로 섞임)
 
 
 
-
+<br><br>
 ### 8) Split : 배열과 배열을 끝에 잇거나 중간에 들어갈 수도 있다. 또는 중간에 들어가기 위해 배열을 자르고 안 들어갈수도 있다.
 
 - nums.splice(2) : 0번째 인덱스부터 마지막 인덱스를 버리고 출력. 
@@ -520,7 +520,7 @@ console.log(num);
 
 - 추가 도구 : 배열을 이용하는 메서드 Loop over, Find, Filter, Map, Concat, Join 이용
 
-
+<br><br>
 ### 9) Object
 
 - 하지만, 객체에 속성이 늘어나면 문제가 많다.
@@ -537,7 +537,13 @@ alert(exam.kor + exam.eng);
 </script>
 ```
 
-### 10) 자바스크립트 사용법
+---
+
+<br><br>
+# 4. 자바스크립트 사용법 :
+
+<br>
+### 1) 자바스크립트 객체의 속성 설정
 
 - exam["kor"]은 exam.kor과 같은 의미이다. : 즉, 변수명을 속성으로 사용할 수 없는 경우에 이렇게 쓴다.(ex) 변수명에 빈공백을 넣어주는 경우)
 
@@ -555,8 +561,8 @@ console.log(exam);
 </script>
 ```
 
-<br>
-### 11) JSON (중요!!)
+<br><br>
+### 2) JSON (중요!!)
 
 ![이미지](/assets/images/json.jpg)
 
@@ -582,12 +588,12 @@ console.log(exam);
 	alert(x);	
 </script>
 ```
-- 보안에서 주의해야 한다.(외부에서 Injection 문제 : sql injection 문제 같은 경우)
+- 보안에서 주의해야 한다.(외부에서 Injection 문제 : SQL Injection과 같이 보안 문제(해킹) 같은 경우)
 
 - 원격으로 데이터가 오는 경우 객체화하는 경우 용이하다.
 
-<br>
-### 12) JSON
+<br><br>
+### 3) JSON 데이터형으로 파싱하는 방법
 
 ```java	
 	var exam1 = eval("([3,5,3,2])");	// eval에는 원래 완전한 문장이 들어가야하는데 문장으로 쓰기 위해서는 "" 안에도 ()를 써준다.
@@ -605,8 +611,8 @@ console.log(exam);
 	alert(data1[2]);
 ```
 	
-<br>	
-### 13) 연산자
+<br>	<br>
+### 4) 연산자
 
 - 기본 연산자
 
@@ -617,20 +623,134 @@ console.log(exam);
 	console.log(str1 == str2);			// true
 	
 	var str3 = "hello";
-	var str4 = new String("hello");		// 자바스크립트에서는 ==가 값을 비교해준다.
-										
+	var str4 = new String("hello");		
+									// 자바스크립트에서는 ==가 값을 비교해준다.	
 	console.log(str3 == str4);			// true
 	
 	var str5 = "hello";
-	var str6 = new String("hello");		// ===가 객체까지 비교한다.
-										
+	var str6 = new String("hello");		
+									// ===가 객체까지 비교한다.
 	console.log(str5 === str6);		// false
 
 ```
-	
+
+<br>	
 - 논리 연산자 및 값 비교
+	- if문이 유연하다. 0이 아니면 전부 true이다.(자바에서는 불가능)
+	
+	- Truthy : if([]), if({})
+	- Falsy : if(""), if(NaN)
+	
+	- Or 연산자 : 가장 앞에 것을 반환
+	
+```html
+<script>
+								// 가장앞에것을 반환
+console.log('Cat' || 'Dog');		// true : 빈문자가 아니면 true일 듯?
+console.log('null' || '' || ' ' || 0);	// 
+</script>
+```
+
+<br>
+- null이 들어오면, 기본값으로 설정된 값이 입력된다.
+
+```html
+<script>	
+	var name = x || "newlec";	
+</script>
+```	
+
+<br>
+- And 연산자(&&) : 보통 true가 없으면 뒤에 것을 반환, 처음으로 거짓이 되는 경우를 찾으시오.
+
+```html
+<script>	
+	var name = x && "newlec";	
+</script>
+```	
+	
+<br>		
+- Nullish : null이 아니다라는 것을 알려준다.(Truthy, Falsy 같은 느낌)
+
+```html
+<script>
+	var foo = null ?? 42;
+	console.log(foo); 		// 42가 출력
+	
+	var baz = 0 ?? 42;
+	console.log(baz); 		// 0이 출력
+</script>
+```		
+
+<br>
+- NaN : Not a Number
 
 ```html
 
-```
+	var x = 3;
+	var y = '3';
+	console.log(x*y);		// 문자가 숫자로 바뀐다.
 	
+	var x = 3;
+	var y = 'a';
+	console.log(x*y);		// NaN : Not a Number - 'a'가 숫자가 아니라서 NaN이 출력
+
+	// NaN은 연산자로 비교할 수 없다. 그래서 isNaN(), isFinite()으로 비교한다.
+	var x = 3*'a';
+	
+	if(isNaN(x))
+		console.log("오류 발생");
+
+```
+
+<br>	<br>
+### 5) 제어구조
+- for in, for of : index를 꺼내거나 value를 꺼내서 반환
+
+	- for in은 index를 어떤 것을 쓰겠다고 알려주면, 인덱스가 알아서 증가한다.
+
+	```html
+		var ar = ["철수","영희","맹구","동천"];
+		
+		for(i in ar)
+			console.log(ar[i]);
+	```
+
+<br>
+	- for of는 ES6에 존재하고 index를 꺼내는 방법이다. (배열 요소의 위치 반환)
+
+	```html
+		var ar2 = ["철수","영희","맹구","동천"];
+		
+		for(v of ar2)
+			console.log(v);
+	```
+
+<br>
+	- for in, for of에는 Object 형태도 넣어서 값을 꺼낼 수 있다.(map 형태 : key, value)
+		- for in은 key값을 이용해서 출력해준다.
+		```html
+			var record = {kor:30, eng:40, math:50};		
+			
+			for(var k in record)
+				console.log(record[k]);
+		```
+
+<br>
+		- for of은 value값을 이용해서 출력해준다.	
+		```html
+			var record = {kor:30, eng:40, math:50};
+			
+			for(var v of record)		// ES6에서 사용된다, 
+				console.log(v);				// map 콜렉션에서 사용할 것이고 
+		```
+
+<br>	
+### 15) 앞으로의 프로젝트 목적
+- 재밌게 구현하는 시각적인 도구 만들기. 시각 도구화?된 공부하려고 만드는 것을 만들기
+
+- ex) 웹 페이지용 와이어 프레임 만드는 것?(기존의 문제점: 유료화라 프로젝트가 1개만 만들어지고, 데이터 저장 기간이 존재하고, 아이폰만 기종이 있다.)
+
+
+
+
