@@ -496,6 +496,27 @@ console.log(num);
 <br><br>
 ### 7)  [DeQue(Double-Ended Queue)] : 공부하기
 
+```html
+<script>
+	var nums = new Array(1,2,3,4,5);	
+	console.log(nums);				//[1, 2, 3, 4, 5]
+	nums.push(6);						// 마지막부터 새로운 데이터를 채운다.
+	console.log(nums);				// [1, 2, 3, 4, 5, 6]
+	
+	var pos = nums.pop();				// 뒤에서부터 데이터를 없앤다.
+	console.log(pos);					// 6
+	console.log(nums);				// [1, 2, 3, 4, 5]
+	
+	var num = nums.shift();			// [2, 3, 4, 5] : 뒤에서부터 데이터를 밀어서 버린다.
+	console.log(num);
+	console.log(nums);				
+									
+	var num = nums.unshift(3);			// [3, 2, 3, 4, 5] : unshift는 앞에서부터 데이터를 채워준다.	
+	console.log(num);					// 새로운 길이를 출력한다. 배열 전체 길이 : 5
+	console.log(nums); 				// [3, 2, 3, 4, 5]
+</script>
+```
+
 - 데이터를 양쪽에서 push하고 shift하여 밀고 pop하여 없애버린다. 한다.(여러개로 섞임)
 
 
