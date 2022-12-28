@@ -862,5 +862,443 @@ console.log(exam);
 ```
 
 
+----------------------------------------------
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script>
+        // var add = new Function("x,y","return x+y");
+        // console.log(add(3,4));
+
+        // var add = function(x,y) {       // 가장 올바른 방법
+        //     return x + y;
+        // }
+
+        // function add (x,y) {            // 다른 방법 사용하자
+        //     return x + y;
+        // }
+
+        // console.log(add(3,4,5,6));      // 에러가 발생하지 않아서 문제가 많다.
+
+        
+        // function add () {           
+        //     return arguments[0] + arguments[1];
+        // }
+        // // 자바스크립트는 arguments랑 값을 모두 컬렉션이 받는다. 따라서, 입력값의 개수는 의미가 없다.
+        // console.log(add(4,5));      
+
+        // alert(a);           // 선언한 적이 있어서 undefined가 나오는 것이다.
+        //                     // 내가 실행하여 사용하기 전에 코드가 stack에 저장된다.
+        // var a= 1;
+
+        // ------- 전역 객체 --------------
+        // a = 1;              // var로 선언되지 않는데 1로 출력된다. 아직 stack에 쌓이지 않았다.
+        //                     // 아무개에 저장이되는 것인데 아무개가 전역 객체(window)이며 전역 객체에 속성으로 들어간다.
+        // alert(a);
 
 
+        //------- 심볼의 의미 --------------
+        // alert(a);           // Uncaught ReferenceError: a is not defined
+        // a = 1;              // a라는 심볼이 아예 없다는 뜻이다.(undefined와 다른 의미이다.)
+
+        //------- 전역 객체(기본적으로 window)의 의미 --------------          
+        // a = 1;              // 아무개인 window가 전역객체라서 this와 같은 역할이다.
+        // alert(window.a);    // 여기서 a가 window 그자체이고 window.a는 a와 같다. 그래서, window를 생략할 수 있다.
+
+
+        //------- 전역 객체(기본적으로 window)의 범위? --------------       
+        // 내가 정리 : 전역객체가 새로운 함수로 범위를 묶어버려도 전역객체의 범위를 없애진 않는다.
+        // ** 최종 정리 : 다른 함수가 사용되어도 전역객체를 사용할 수 있다.
+        // var f1 = function() {
+        //     a = 1;
+        //     console.log(window.a);
+        // }
+
+        // f1();
+
+        // *** 이렇게 자바스크립트는 자유도가 높다.
+
+        // -----------------------------
+        // var f2 = function(){
+        //     a=1;
+        //     var a;
+            
+        //     console.log(window.a);      // 1이 출력된다. 공간이 다르게 선언된다.(전역 객체 vs 스택에 변수)
+            
+        // }
+        
+        // f2();
+
+        // ------------------------------
+        var f3 = function(){
+            a=1;
+            
+            console.log(window.a);
+            
+            var a;                // 변수 선언이 밑에 있지만 코드를 저장하면서 먼저 stack에 쌓여 있어서 
+        }                         // window.a는 다른 공간이다. 
+        f3();
+
+
+
+        // ------------------------------
+        // var a1 = 1;
+        
+        
+        
+        
+        
+        
+        // var a1 = 2;                 // 코드가 길어져도 아래에서 다시 재선언해도 에러가 안난다.(자바에서는 에러가 난다.)
+        //                             // ES6에서는 이러한 문제점이 해결되었지만, TypeScript가 컴파일러 과정을 만들어줘서 에러나게 해준다.
+
+
+        // alert(a1);
+
+
+        // ----------- 중괄호가 사용하는 경우(지역화 X) ---------
+        
+        
+        // {
+        //     var a = 1;
+        // }
+
+        // alert(a);           // 지역 변수를 지정할 수 없다.
+                            // 즉, 스크립트 파일을 100개로 만들어도 된다. 하나의 공간을 바라보기 때문이다.
+                            // *** 따라서, 이러한 문제점을 해결하기 위해서 ES6가 만들어졌다.
+
+
+
+        // ----------------- 지역화 O ----------------
+        // 자바 스크립트에서는 지역화를 함수 내부에서만 가능
+        // function f4() {
+        //     var a = 1;
+        // }
+        // alert(a);
+
+
+        // function f5() {
+        //     a = 1;
+        // }
+        // alert(a);
+
+
+        // ----------------- 함수 중복 선언 가능(JS 특징) ----------------
+        // function f6() {
+        //     a = 1;
+        //     f2();
+        //     function f7() {
+        //         a = 2;
+        //         f3();
+        //         function f8() {
+        //         a = 3;
+        //         }
+        //     }
+        //     console.log(a);     // f1 함수 내부에서 출력.
+        // }
+
+        // --------- outer 변수 개념 ------------------
+        function func1() {
+            var b = 10;
+
+            func2();
+
+            console.log(b);     // f1 함수 내부에서 출력가능   // 20 출력
+            
+            function func2() {
+                b = 20;
+            }
+            
+        }
+
+        function func1() {
+            var b = 10;
+
+            func2();
+
+            console.log(b);     // 불가능   // 10이 출력
+            
+            var func2 = function func2() {
+                var b = 20;
+            }
+            
+        }
+
+        // --------- outer 변수 적용 ------------------
+        function func1() {
+            var b = 10;
+
+            var func2 = function func2() {
+                b = 20;
+            }
+
+            func2();
+            console.log(b);     // 가능
+                                // outer 변수 : func1이 전체 범위라고 했을 때, func2에서 b가 var func2에 담겨져서 밖으로 나갈 수 있는데 이것을 outer 변수라고 부른다.
+                                // 원래는 변수 범위가 끝나야 하는데 선언 안 한 b이기 때문에 밖의 var b도 있어서 그것을 덮어씌워주는 역할을 해준다.    
+        }                       // 그래서 결과가 20이 나온다.
+
+                                // **** 변수를 선언하지 않았으면(var), 남의 함수를 쓰는 것이다.
+        function func1() {
+            var b = 10;
+
+            var func2 = function func2() {
+                var b = 20;                      // 얘는 여기서 만들어지고 사라지므로 20이 사라진다.
+            }
+
+            func2();
+            console.log(b);                     // 그래서 결과가 10이 나온다.
+                               
+            
+        }
+
+
+        var funca;
+        function funa(){
+            var a = 10;
+
+            var funb = function(){
+                a++;
+            }
+            f2();
+
+            
+            console.log(a);
+        }
+
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script>
+    
+    // var f3 = function(){
+    //     a=1;
+
+    //     console.log(a);          // 1이 출력(window가 아니라 var a로 인식한다.)
+
+    //     console.log(window.a);   // undefined 출력(window로부터 값을 가져와야하는데 a를 var a로 인식해서 undefined)
+        
+    //     var a;                 // 변수 선언이 밑에 있지만 코드를 저장하면서 먼저 stack에 쌓여 있어서 a(여기선, a가 var a를 의미)와 window.a는 다른 공간에 있다.
+    // };                         // window.a는 다른 공간이다. 
+    // f3();
+
+
+    // var func3;
+    // function func1(){
+    //     var a = 10;
+
+    //     var func2 = function(){
+    //         a++;
+    //     };
+    //     func2();
+
+    //     console.log(a);     // 11이 출력
+    // }
+
+
+    // ** 추가 질문 : f1 함수가 변수에 의해서 참조되고 있어서 자원 반납을 하지 못 하는 상황이라고 말씀하셨는데 그 말은 곧 f1함수가 return을 하였음에도 스택 메모리에서 사라지지 않고 있는 상황이라고 이해를 해도 될까요?
+    // ** 추가 정답 : f1 변수는 스택에 있고 그 변수가 클로저를 참조하고 있는 한 클로저가 사용하는 outer 변수들은 사라지지 못합니다.
+
+    // ---------------- outer 변수의 메모리 누수 문제(함수의 return이 없어서) -------------
+    var func6;
+
+    function func4(){
+        var a = 10;
+
+        var func5 = function(){
+            a++;
+        };
+        func5();                // func4가 메모리에서 사리지지 않는다. func6 때문에 사라지지 않는다.
+                               
+        func6 = func5;
+
+        console.log(a);         // 11이 출력 
+                                // 차이가 없어 보이지만, 전역이라서 변수가 사라지지 않아서 메모리 누수가 생겨서 stack에서 f1, f2가 사라지지 않는다.
+    }
+
+    func4();
+
+
+
+    // 중간 코드가 길면.
+
+                                 // *** 최종 정리 : 
+    func4();                     // func4 재호출 시, func4는 여전히 구형으로 살아있고(살아 있는 이유 : 함수에 return이 없어서!!)
+                                 // func5, func6는 신형으로 다시 만들어져서 살아 있다. 결국 메모리 누수!!
+
+
+    // ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+
+    // ----- [Closure] --------- (함수가 선언할 때 환경이 구성되면서 closure와 결합되면서 다양한 결합 가능)
+
+    // 여전히 outer 함수를 물고 있어서 closure라고 부른다. 
+    // 안쪽에 있는 함수가 사라지기 전까지 생명선이 존재한다.
+
+    // ----- [Closure]를 이해하는 과정 ---------
+    var funcs = [];
+
+    for(var i =0; i<3; i++){
+        funcs[i] = function(){
+            console.log(i);
+        };
+    }
+
+    // funcs[0]();
+
+
+    for(var i =0; i<3; i++){        // 아까 죽지 못한 변수가 살아남아서 대체 되었고
+        funcs[i]();                 // 새로 대체되어서 1, 2, 3 출력!!
+    }
+
+    for(var a =0; a<3; a++){        // 앞에 있는 변수가 죽지 못하고 다르게 바뀐 배열 인덱스가 대체되어지지 않고 
+                                    // 그대로 이전 함수의 마지막 값과 연결되어서 3,3,3 출력
+        funcs[a]();
+    }
+
+    // 함수가 죽지 못해 살아 남는 과정
+       
+
+
+    </script>
+
+</head>
+<body>
+    
+</body>
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script>
+        // ------- 1. 객체를 삭제하는 방법
+        // exam = null;
+
+        // ------- 2. 객체 속성 제거하는 방법(JS의 모든 객체는 속성을 갖고 있고 삭제할 수 있다.)
+        // delete exam.kor;
+        // delete exam.kor;
+        
+        // ------- 3. JS 기본 객체 사용법
+        // var ar = [];
+        // ar.papa = function(){
+        //     console.log(ar);
+        // }
+        // ar.papa();
+    
+        // ------- 4. JS 클래스의 Expand 기능 지원 X 
+        // var name = new String("newlec");
+        // name.kor = 20;
+        // console.log(name.kor);     //에러가 발생한다.
+
+        // 확장을 가능하게 할 것인지 말건지 할 수 있다.
+        // 자바스크립트에서는 Wrapper 클래스가 기본형이라서, Primitive 클래스(자바스크립트에서는 Wrraper클래스가 Primitive 클래스이다.)는 Expand가 지원하지 않는다.
+
+
+
+        // ------- 5-1. 객체 사용법(new의 의미)   
+        // function Exam(){
+        //     kor = 30;
+        // }
+
+        // var exam1 = Exam(); // 이것은 함수를 호출하기만 하는 것이고 return이 없어서 받을 수는 없다.
+        
+        // console.log(exam1);
+        // console.log(exam1.kor);
+
+        // ------- 5-2. 객체 사용법(new의 의미)   
+
+        // function Exam(){
+        //     kor = 30;
+        // }
+
+        // var exam1 = new Exam(); // new로 함수를 호출하는 것이 아니라 객체를 만들줘서 값을 참조해주면, 값을 출력할 수 있다?
+        //                         // 앞에 new를 쓰면, 객체를 만드는게 이것을 함수가 먹어서 함수 내에서 사용할 수 있고 속성을 추가할 수 있다.(사용자가 임의로 바꿀수 있고 생성자를 의미한다.)
+        //                         // 즉, 데이터 초기화하려고 대문자 로 사용한다.
+        // console.log(exam1);
+        // console.log(exam1.kor); 
+        
+        // ----------- 6. this의 의미 -------------
+        // function Exam(){
+        //     this.kor = 30;      // this라는 것은 자기가 사용할 수 있는 기본객체
+        //     console.log(kor);   // 에러가 발생한다. why? 자바스크립트에서는 this를 이용해서 변수를 만들면 출력시에도 this를 써주어야 한다.
+        // }
+        // new Exam();             // 새로운 객체 생성!(자기만의 객체이며 this이용)
+
+        // Exam();                 // 앞에 this가 생략 되어있다.
+        //                         // 앞에 new를 하면, 자기만의 객체이고 new를 빼면, 전역객체이다.                     
+
+
+        // ----- 7. 자바스크립도 자기만의 객체 생성 가능(this + new 이용) : 약갼의 객체지향스러운 모습이 있지만 은닉성을 보장 못한다. -------
+        // function Exam(){
+        //     this.kor = 30;
+        //     this.eng = 20;
+        //     this.math = 40;
+
+        //     this.total = function(){
+        //         return this.kor+this.eng+this.math; // this를 넣으면 값이 나온다. this를 빼면 에러 발생!!
+        //     }
+        // }
+
+        // var exam = new Exam();                      // 자기만의 객체 이용가능.
+        // console.log(exam.total());
+         
+        // 나중에 ES6에서 사용하지 않는 이유를 알기 위해서 이렇게 배운다
+        // 나중에는 람다 함수 사용하지 말기, 익명 함수?
+
+
+
+        // ----- 8. 객체 생성을 위한 new의 의미 -------
+        function Exam(){
+            this.kor = 30;
+            this.eng = 20;
+            this.math = 40;
+
+            this.total = function(){
+                return this.kor+this.eng+this.math; // this를 넣으면 값이 나온다. this를 빼면 에러 발생!!
+                                                    // 하지만, 이렇게 쓴 코드도 에러가 있다! ES6와 차이가 있을 것이며 자바코드와도 차이가 있을 것이다.
+            }
+        }
+
+        var exam = new Exam();              // 자기만의 객체 이용가능.
+        console.log(exam.total());
+ 
+        var exam1 = new Exam();             // new로 객체가 새로 만들어지기 때문에 또 새로 만들어진다.
+        console.log(exam1.total()); 
+
+</script>
+
+</head>
+<body>
+    
+</body>
+</html>
+```
