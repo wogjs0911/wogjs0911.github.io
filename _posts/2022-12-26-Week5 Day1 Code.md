@@ -663,33 +663,36 @@ console.log(exam);
 	- Truthy : if([]), if({})
 	- Falsy : if(""), if(NaN)
 	
-	- Or 연산자 : 가장 앞에 것을 반환
+	- [Or 연산자(||)] : 가장 앞에 것이 참이면 바로 앞에 것을 반환, 만약 앞에 것이 거짓이면, 뒤에 것이 결과가 된다.(이경우에는 뒤에 값은 무엇이든 결과에 상관이 없다.)
 	
-```html
-<script>
+	```html
+		<script>
 								// 가장앞에것을 반환
-console.log('Cat' || 'Dog');		// true : 빈문자가 아니면 true일 듯?
-console.log('null' || '' || ' ' || 0);	// 
-</script>
-```
+		console.log('Cat' || 'Dog');			// true : 빈문자가 아니면 true일 듯?
+		console.log('null' || '' || ' ' || 0);	// true 반환한다.(' '가 빈공백이라서 0보다는 크다.)
+		</script>
+	```
 
-<br>
-- null이 들어오면, 기본값으로 설정된 값이 입력된다.
+	<br>
+	- null이 들어오면, 기본값으로 설정된 값이 입력된다.
+	
+	```html
+		<script>	
+			var x = null;
+			var name = x || "newlec";		// name은 newlec 출력	
+		</script>
+	```	
 
-```html
-<script>	
-	var name = x || "newlec";	
-</script>
-```	
-
-<br>
-- And 연산자(&&) : 보통 true가 없으면 뒤에 것을 반환, 처음으로 거짓이 되는 경우를 찾으시오.
-
-```html
-<script>	
-	var name = x && "newlec";	
-</script>
-```	
+	<br>
+	- [And 연산자(&&)] : 보통 앞에 true가 없으면(false) 뒤에 것을 반환
+	- 또한, 첫번째 항이 참인 경우에는 두번째 항이 참이냐 거짓이냐는 결과에 영향을 미치지 않습니다. 따라서 'aaa' && 'bbb' 처럼 두번째 항이 참인 경우도, 'aaa' && 0 처럼 두번째 항이 거짓인 경우도 첫번째 항인 'aaa'가 모두 참이므로 모두 결과는 두번째 항이 됩니다.
+	
+	```html
+	<script>			var x = null;
+		var name = x && "newlec";		// name은 newlec 반환
+	</script
+	```	
+- 정리*** : ||는 처음으로 참이 되는 경우에, &&는 처음으로 거짓이 되는 경우를 찾을 때 이용한다.
 	
 <br>		
 - Nullish : null이 아니다라는 것을 알려준다.(Truthy, Falsy 같은 느낌)
