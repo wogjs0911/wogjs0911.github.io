@@ -341,3 +341,329 @@ public class SubwayService {
 }
 ```
 
+---
+
+<br><br>
+# 2. 22.12.27 : 엘리베이터 설계 문제
+
+
+```java
+package com.elevator.service;
+
+public class ElevatorController {
+
+	public static void main(String[] args) {
+		
+		ElevatorService es = new ElevatorService();
+		
+		System.out.println("---- Welcome Elevator ----");
+		
+		es.run();
+
+	}
+
+}
+
+```
+
+```java
+package com.elevator.service;
+
+import java.util.Scanner;
+
+public class ElevatorService {
+	
+	int[][] spaces = new int[3][4];
+	int currentLayer = 1;
+	int nextLayer = 1;
+	
+	boolean moveCheck = false;
+	
+	
+	int count = 0;
+	int rideoffcount = 0;
+
+	int temp = 0;
+	
+	public void run() {
+		
+		Scanner scan = new Scanner(System.in);
+		
+		
+		Tag:
+		while(true) {
+			System.out.println("\n\n======= 메뉴 선택 =======");
+		
+			System.out.println("1.탑승  2.이동  3.탑승현황  4.종료 > ");
+			
+			switch(scan.nextLine()) {
+				case "1":
+					join();
+					break;
+				case "2":
+					move();
+					break;
+				case "3":
+					detail();
+					break;
+				case "4":
+					System.out.println("종료합니다.");
+					break Tag;	
+				default:
+					System.out.println("잘못 입력하셨습니다.");
+			}	
+		}
+			
+	}
+	
+	private void join() {
+		Scanner scan = new Scanner(System.in);
+		System.out.println("가고싶은 층수를 선택해주세요.");
+		System.out.println("1.1층 2.2층 3.3층 >");
+		
+		
+		nextLayer = scan.nextInt();
+			
+		System.out.printf("입력하신 층은 %d층 입니다.\n", nextLayer);
+		
+		for(int j=0; j<3; j++) {
+			for(int i=0; i<4; i++) {
+				if(j == nextLayer-1 && i == 0) {
+					spaces[j][i]++;
+					count++;
+					
+					if(spaces[j][i] == 4) {
+						System.out.printf("====== 더이상 탑승할 공간이 없습니다. ======");
+						return;
+					}
+				}
+ 			}
+		}
+		
+			
+	}
+	
+	private void detail() {
+		System.out.println("======= 탑승 현황 =======");
+		
+		if((count-rideoffcount) != 0)
+			System.out.printf("현재 탑승 인원은 %d명 입니다.\n", count-rideoffcount);
+		else if(count-rideoffcount == 0)
+			System.out.print("현재 탑승 인원은 0명 입니다.\n");
+		
+		System.out.printf("현재 층수는 %d층 입니다.\n", currentLayer);
+			
+	}
+
+	private void move() {
+		
+
+		if(moveCheck == false) { 
+			currentLayer++;
+			
+			if(currentLayer == 4) 
+				moveCheck = true;
+				//return;
+		}
+		
+
+		if(moveCheck == true) { 
+			currentLayer--;
+			
+			if(currentLayer == 1) 
+				moveCheck = false;
+				//return;
+		}
+		
+		for(int j=0; j<3; j++) 
+			for(int i=0; i<4; i++) 
+				if(j == currentLayer-1 && i == 0) { 
+					spaces[j][i]--;
+					rideoffcount++;
+				}
+		
+		if((count-rideoffcount) != 0)
+			System.out.printf("%d명이 하차했습니다.\n", rideoffcount);
+		else if(count-rideoffcount == 0)
+			System.out.print("0명이 하차했습니다.\n");
+	
+	}
+
+}
+
+
+
+
+```
+
+
+
+---
+
+
+<br><br>
+# 3. 22.12.28
+
+### 1) javascript 복습 문제
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script>
+        // 5이하 alert로 출력
+        // for(var i = 0; i<5; i++){
+        //     alert(i+1);
+        // }
+
+        // JS에서 if문 사용법
+        // for(var i = 0; i<10; i++){
+        //     if(i<=5)
+        //         alert("Good");
+        //     else if(i>=6 && i<=8)
+        //         alert("Nice");
+        //     else 
+        //         alert("yes");
+        // }
+        
+        // JS에서 while문 사용법
+        while(i<=5){
+            console.log(i+1);
+            i++
+        }
+
+        // 1부터 10까지 배열로 표현
+        var arr = [1,2,3,4,5,6,7,8,9,10];
+        console.log(arr);
+
+
+        // 1부터 10까지 객체로 표현하기
+        // 자바스크립트에서 Object는 JSON, eval인데 eval은 위험해서 데이터 타입을 쓸때는 JSON 쓰자.
+        var obj = JSON.parse("[1,2,3,4,5,6,7,8,9,10]");
+
+        for(var i = 0; i<10; i++){
+            console.log(obj[i]);
+        }
+
+        // a,b,c 오름차순 만들기 (temp 이용해서)
+        var a = 5;
+        var b = 8;
+        var c = 3;
+
+        var temp = 0;
+
+        for(var i=0; i<3; i++) {
+
+            if(a>b){
+                temp = a;
+                a = b;
+                b = temp;
+            }
+            else if(b>c){
+                temp = b;
+                b = c;
+                c = temp;
+            }
+            else if(a>c){
+                temp = c;
+                c = a;
+                a = temp;
+            }
+        }
+
+        console.log(a);
+        console.log(b);
+        console.log(c);
+
+        // 내림차순
+        var arr =[5,7,3]
+        var temp1;
+
+        for(var i= 0; i<arr.length; i++){
+            if(arr[i+1]>arr[i]){
+                temp1 = arr[i];
+                arr[i] = arr[i+1];
+                arr[i+1] = temp1;
+            }
+            console.log(arr[i]);
+
+        }
+        
+        // prompt가 입력값 받게해주는 역할을 해준다.
+        var age = prompt("나이를 입력해주세요.");
+        
+        switch(age){
+            case '18':
+                alert("낭랑 18세이네...");
+                break;
+
+            case '19':
+                alert("성인이네...");
+                break;
+
+            default :
+                alert("잘못 입력");
+        }
+
+
+        // 객체 만들고 반환(나는 JSON으로 만듬)
+        // *** 웹의 데이터를 가져올때, 이런식으로 가져오거나 가져다 준다!!
+
+        var user = {"name": "json", "age": 30, "addr": "bro"};
+        console.log(user.addr);
+
+
+
+        // 공공 데이터 이용하는 JSON 데이터 타입 //  for in, for of 이용하기(키의 값인지 키 값인지 비교)
+
+        var stations = [{"sgg_cd":"1114000000","emd_nm":"봉래동2가","node_code":"1","emd_cd":"1114012000","node_wkt":"POINT(126.97279432094167 37.5550080901334)","sgg_nm":"중구","type":"NODE","sw_nm":null,"sw_cd":null,"node_id":177923},
+{"sgg_cd":"1114000000","emd_nm":"봉래동2가","node_code":"1","emd_cd":"1114012000","node_wkt":"POINT(126.97206655819348 37.55632725997717)","sgg_nm":"중구","type":"NODE","sw_nm":"서울역","sw_cd":"284","node_id":15251},
+{"sgg_cd":"1114000000","emd_nm":"을지로4가","node_code":"1","emd_cd":"1114015000","node_wkt":"POINT(126.99753408814574 37.566489380284985)","sgg_nm":"중구","type":"NODE","sw_nm":"을지로4가","sw_cd":"285","node_id":7015}];
+
+        for (var k in stations) 
+            console.log(stations[k].node_id);
+    
+        
+        for (var v of stations) 
+            console.log(v);
+        
+        // JS의 parseInt는 + 형태로 문자열을 구성하여도 각각을 숫자로 바꿔서 계산해주지만,
+        // 자바에서의 Integer.parseInt()는 + 형태로 문자열을 구성하면, 각각을 숫자로 바꿔주지 않는다. +가 있으면 동작하지 않음.
+        // int j = 1;
+		// System.out.println();
+		// System.out.println(Integer.parseInt(j+"1"));
+
+        // ***결론 : JS가 더 유연하다.
+
+
+
+
+        // 현재시간 및 날짜 입력하기 (Date 객체를 만들어서 Data 객체의 함수이용하기)
+
+        var date1 = new Date();
+        var date2 = new Date(2007,11,24,3,48);
+        var date3 = new Date('2022-05-03');             // .getMonth()는 0부터 11까지 출력된다.
+        var date4 = new Date('2022-05-04 10:20:30');
+
+        console.log(date4);
+
+        var y = date4.getFullYear();
+        var m = date4.getMonth();
+
+        console.log(y);             //2022
+        console.log(m);             //4가 출력(원래는 5월인데) .getMonth()는 0부터 11까지 출력된다.
+
+    </script>
+
+
+</head>
+<body>
+    
+</body>
+</html>
+```
