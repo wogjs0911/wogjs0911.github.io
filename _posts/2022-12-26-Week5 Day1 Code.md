@@ -803,6 +803,48 @@ console.log(exam);
 - ex) 웹 페이지용 와이어 프레임 만드는 것?(기존의 문제점: 유료화라 프로젝트가 1개만 만들어지고, 데이터 저장 기간이 존재하고, 아이폰만 기종이 있다.)
 
 
+---
+
+<br><br>
+# 4. javascript day3 : 22.12.28
+
+
+### 1) 자바스크립트의 함수 정의
+
+- 자바 스크립트에서 함수를 정의하는 경우가 없다.(익명 함수?) : 내가 쓰면서 정의한다.
+
+```html
+<script>
+	var add = new Function("x,y","return x+y;");
+	console.log(add(3,4));
+</script>
+```
+	- 인자와 반환값을 나눠서 함수 객체를 만든다.
+
+
+- 자바 스크립트에서 함수를 정의하는 방법 : 정의한 것이 아니라 함수 이름을 붙여 준것이라서 참조가 가능하다.
+
+```html
+<script>
+	var add = function(x, y) {		// 가장 올바른 방법
+		return x+y;
+	}
+</script>
+```	
+
+```html
+<script>
+	function add(x, y) {			// 입문자의 입장에서 쓰는 방법
+		return x+y;
+	}
+<script>
+```	
+
+
+
+
+
+
 
 
 
