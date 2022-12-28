@@ -825,26 +825,41 @@ console.log(exam);
 - 자바 스크립트에서 함수를 정의하는 방법 : 정의한 것이 아니라 함수 이름을 붙여 준것이라서 참조가 가능하다.
 
 ```html
+
 <script>
 	var add = function(x, y) {		// 가장 올바른 방법
 		return x+y;
 	}
 </script>
+
 ```	
 
 ```html
+
 <script>
 	function add(x, y) {			// 입문자의 입장에서 쓰는 방법
 		return x+y;
 	}
 <script>
+
 ```	
 
 
 
+- 특이한 자바스크립트 함수 특징 : 
 
+	- 자바스크립트는 argument랑 값을 모두 컬렉션이 받는다. 따라서, 입력값의 개수는 의미가 없다.
 
+```html
+    <script>
+        function add (x,y) {            // 다른 방법 사용하자
+            return x + y;
+        }
 
+        console.log(add(3,4,5,6));      // 에러가 발생하지 않아서 문제가 많다.
+
+    </script>
+```
 
 
 
