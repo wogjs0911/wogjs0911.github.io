@@ -439,17 +439,21 @@ nums[2] = 5;
 
 
 ```html
+<script>
  	var nums = new Array();			 typeof : 배열의 타입을 반환 해준다.
 	var nums = new Array(5);
 	var nums = new Array(5,10,21);
 	var nums = new Array(5,10,21,'Hello');
 	console.log(typeof nums[3]); 
+</script>
 ```	
 
 - 자바 스크립트 2차원 배열
 
 ```html
-	var nums = new Array(5,10,21,'Hello');
+<script>
+	var nums = new Array(5,10,21,'Hello', Array(5,10,21,'Hello'));
+</script>
 ```
 
 <br><br>
@@ -462,7 +466,7 @@ nums[2] = 5;
 - pop : 데이터를 꺼내서 없앨 때, 이용(마지막에 쌓은거부터 사라짐)
 
 ```html
- 
+<script>
 /* Stack */ 
 var nums = new Array()
 nums.push(4);
@@ -470,7 +474,7 @@ console.log(nums);
 
 var n1 = nums.pop();
 console.log(nums); 
-
+</script>
 ```
 
 <br><br>
@@ -485,12 +489,13 @@ console.log(nums);
 
 ```html
 /* Queue */ 
+<script>
 var nums = new Array(1,2,3,4,5);
 
 nums.push(6);
 var num = nums.shift();
 console.log(num);
- 
+</script>
 ```
 
 <br><br>
@@ -597,6 +602,15 @@ console.log(exam);
 ![이미지](/assets/images/json2.jpg)
 
 <br>
+
+```html
+<script>
+	var notice = [{"id":1, "title":"hello json"},
+				 {"id":2, "title":"hi json"},
+				 {"id":3, "title":"json is ~"}];
+</script>
+```
+
 - Json 이용법
 
 ```html
@@ -610,9 +624,9 @@ console.log(exam);
 	alert(x);	
 </script>
 ```
-- 보안에서 주의해야 한다.(외부에서 Injection 문제 : SQL Injection과 같이 보안 문제(해킹) 같은 경우)
+- eval()의 문제점 eval()은 보안에서 주의해야 한다.(외부에서 Injection 문제 : SQL Injection과 같이 보안 문제(해킹) 같은 경우)
 
-- 원격으로 데이터가 오는 경우 객체화하는 경우 용이하다.
+- eval()은 원격으로 데이터가 오는 경우 객체화하는 경우 용이하다. 하지만 보안때문에 JSON을 이용한다. 
 
 <br><br>
 ### 3) JSON 데이터형으로 파싱하는 방법
@@ -688,10 +702,12 @@ console.log(exam);
 	- 또한, 첫번째 항이 참인 경우에는 두번째 항이 참이냐 거짓이냐는 결과에 영향을 미치지 않습니다. 따라서 'aaa' && 'bbb' 처럼 두번째 항이 참인 경우도, 'aaa' && 0 처럼 두번째 항이 거짓인 경우도 첫번째 항인 'aaa'가 모두 참이므로 모두 결과는 두번째 항이 됩니다.
 	
 	```html
-	<script>			var x = null;
+	<script>		
+	var x = null;
 		var name = x && "newlec";		// name은 newlec 반환
 	</script
-	```	
+	```	
+
 - 정리*** : ||는 처음으로 참이 되는 경우에, &&는 처음으로 거짓이 되는 경우를 찾을 때 이용한다.
 	
 <br>		
@@ -711,7 +727,7 @@ console.log(exam);
 - NaN : Not a Number
 
 ```html
-
+<script>
 	var x = 3;
 	var y = '3';
 	console.log(x*y);		// 문자가 숫자로 바뀐다.
@@ -725,7 +741,7 @@ console.log(exam);
 	
 	if(isNaN(x))
 		console.log("오류 발생");
-
+</script>
 ```
 
 <br>	<br>
@@ -733,41 +749,51 @@ console.log(exam);
 - for in, for of : index를 꺼내거나 value를 꺼내서 반환
 
 	- for in은 index를 어떤 것을 쓰겠다고 알려주면, 인덱스가 알아서 증가한다.
-
+	
 	```html
+	<script>
 		var ar = ["철수","영희","맹구","동천"];
 		
 		for(i in ar)
 			console.log(ar[i]);
+	</script>
 	```
 
 <br>
 	- for of는 ES6에 존재하고 index를 꺼내는 방법이다. (배열 요소의 위치 반환)
 
 	```html
+	<script>
 		var ar2 = ["철수","영희","맹구","동천"];
 		
 		for(v of ar2)
 			console.log(v);
+	</script>
 	```
 
 <br>
 	- for in, for of에는 Object 형태도 넣어서 값을 꺼낼 수 있다.(map 형태 : key, value)
 		- for in은 key값을 이용해서 출력해준다.
+		
 		```html
+		<script>
 			var record = {kor:30, eng:40, math:50};		
 			
 			for(var k in record)
 				console.log(record[k]);
+		</script>
 		```
 
 <br>
-		- for of은 value값을 이용해서 출력해준다.	
+		- for of은 value값을 이용해서 출력해준다.
+		
 		```html
+		<script>
 			var record = {kor:30, eng:40, math:50};
 			
 			for(var v of record)		// ES6에서 사용된다, 
 				console.log(v);				// map 콜렉션에서 사용할 것이고 
+		</script>
 		```
 
 <br>	
