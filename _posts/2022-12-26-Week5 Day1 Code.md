@@ -290,7 +290,7 @@ public class WrapperTest {
 # 3. Javascript 이용 : 22.12.27  
 
 <br>
-### 1) Wrapper 클래스 정리
+### 1) Wrapper 클래스 정리(javascript은 모든 것이 객체형태이므로 Wrapper 클래스 형태이다.)
 
 ```java 
 package ex8.wrapper;
@@ -375,7 +375,7 @@ nums[2] = 5;
 
 
 <br><br>
-### 3) [javascript #1]
+### 3) [javascript Array 사용법 #1]
 
 ```html
 <!DOCTYPE html>
@@ -433,7 +433,7 @@ nums[2] = 5;
 ```
 
 <br><br>
-### 4) [javascript #2]
+### 4) [javascript Array 사용법 #2]
 
 - 자바스크립트에서 배열이 1개만 받으면 크기이고 1개를 넘어서는 순간, 초기값을 설정한다.
 
@@ -567,7 +567,9 @@ alert(exam.kor + exam.eng);
 ---
 
 <br><br>
-# 4. 자바스크립트 사용법 :
+# 4. 자바스크립트 객체와 JSON 사용법 및 기본 문법 :
+
+- JSON은 데이터를 저장하고 조회할 때, 사용하는 데이터 타입이다.
 
 <br>
 ### 1) 자바스크립트 객체의 속성 설정
@@ -672,41 +674,41 @@ console.log(exam);
 
 <br>	
 - 논리 연산자 및 값 비교
-	- if문이 유연하다. 0이 아니면 전부 true이다.(자바에서는 불가능)
+  - if문이 유연하다. 0이 아니면 전부 true이다.(자바에서는 불가능)
 	
-	- Truthy : if([]), if({})
-	- Falsy : if(""), if(NaN)
+  - Truthy : if([]), if({})
+  - Falsy : if(""), if(NaN)
 	
-	- [Or 연산자(||)] : 가장 앞에 것이 참이면 바로 앞에 것을 반환, 만약 앞에 것이 거짓이면, 뒤에 것이 결과가 된다.(이경우에는 뒤에 값은 무엇이든 결과에 상관이 없다.)
+  - Or 연산자(||) : 가장 앞에 것이 참이면 바로 앞에 것을 반환, 만약 앞에 것이 거짓이면, 뒤에 것이 결과가 된다.(이경우에는 뒤에 값은 무엇이든 결과에 상관이 없다.)
 	
-	```html
-		<script>
-								// 가장앞에것을 반환
-		console.log('Cat' || 'Dog');			// true : 빈문자가 아니면 true일 듯?
-		console.log('null' || '' || ' ' || 0);	// true 반환한다.(' '가 빈공백이라서 0보다는 크다.)
-		</script>
-	```
+```html
+  <script>
+  								// 가장 앞에 것을 반환
+    console.log('Cat' || 'Dog');		// true : 빈문자가 아니면 true일 듯?
+    console.log('null' || '' || ' ' || 0);	// true 반환한다.(' '가 빈공백이라서 0보다는 크다.)
+  </script>
+```
 
 	<br>
 	- null이 들어오면, 기본값으로 설정된 값이 입력된다.
 	
-	```html
-		<script>	
-			var x = null;
-			var name = x || "newlec";		// name은 newlec 출력	
-		</script>
-	```	
+```html
+  <script>	
+    var x = null;
+    var name = x || "newlec";		// name은 newlec 출력	
+  </script>
+```	
 
-	<br>
-	- [And 연산자(&&)] : 보통 앞에 true가 없으면(false) 뒤에 것을 반환
-	- 또한, 첫번째 항이 참인 경우에는 두번째 항이 참이냐 거짓이냐는 결과에 영향을 미치지 않습니다. 따라서 'aaa' && 'bbb' 처럼 두번째 항이 참인 경우도, 'aaa' && 0 처럼 두번째 항이 거짓인 경우도 첫번째 항인 'aaa'가 모두 참이므로 모두 결과는 두번째 항이 됩니다.
+<br>
+  - [And 연산자(&&)] : 보통 앞에 true가 없으면(false) 뒤에 것을 반환
+  - 또한, 첫번째 항이 참인 경우에는 두번째 항이 참이냐 거짓이냐는 결과에 영향을 미치지 않습니다. 따라서 'aaa' && 'bbb' 처럼 두번째 항이 참인 경우도, 'aaa' && 0 처럼 두번째 항이 거짓인 경우도 첫번째 항인 'aaa'가 모두 참이므로 모두 결과는 두번째 항이 됩니다.
 	
-	```html
-	<script>		
-	var x = null;
-		var name = x && "newlec";		// name은 newlec 반환
-	</script
-	```	
+```html
+  <script>		
+    var x = null;
+    var name = x && "newlec";		// name은 newlec 반환
+  </script>
+```	
 
 - 정리*** : ||는 처음으로 참이 되는 경우에, &&는 처음으로 거짓이 되는 경우를 찾을 때 이용한다.
 	
@@ -740,7 +742,7 @@ console.log(exam);
 	var x = 3*'a';
 	
 	if(isNaN(x))
-		console.log("오류 발생");
+	    console.log("오류 발생");
 </script>
 ```
 
@@ -748,7 +750,7 @@ console.log(exam);
 ### 5) 제어구조
 - for in, for of : index를 꺼내거나 value를 꺼내서 반환
 
-	- for in은 index를 어떤 것을 쓰겠다고 알려주면, 인덱스가 알아서 증가한다.
+  - for in은 index를 어떤 것을 쓰겠다고 알려주면, 인덱스가 알아서 증가한다.
 	
 	```html
 	<script>
@@ -806,7 +808,7 @@ console.log(exam);
 ---
 
 <br><br>
-# 4. javascript day3 : 22.12.28
+# 4. javascript function : 22.12.28
 
 
 ### 1) 자바스크립트의 함수 정의
@@ -819,7 +821,7 @@ console.log(exam);
 	console.log(add(3,4));
 </script>
 ```
-	- 인자와 반환값을 나눠서 함수 객체를 만든다.
+  - 인자와 반환값을 나눠서 함수 객체를 만든다.
 
 
 - 자바 스크립트에서 함수를 정의하는 방법 : 정의한 것이 아니라 함수 이름을 붙여 준것이라서 참조가 가능하다.
@@ -848,7 +850,7 @@ console.log(exam);
 
 - 특이한 자바스크립트 함수 특징 : 
 
-	- 자바스크립트는 argument랑 값을 모두 컬렉션이 받는다. 따라서, 입력값의 개수는 의미가 없다.
+  - 자바스크립트는 argument랑 값을 모두 컬렉션이 받는다. 따라서, 입력값의 개수는 의미가 없다.
 
 ```html
     <script>
@@ -862,18 +864,18 @@ console.log(exam);
 ```
 
 
-----------------------------------------------
+
+
+
+---
+
+<br><br>
+# 5. 특이한 자바스크립트 함수 특징 정리
+
+### 1) 자바스크립트의 콜렉션 사용?
 
 ```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-
-    <script>
+  <script>
         // var add = new Function("x,y","return x+y");
         // console.log(add(3,4));
 
@@ -893,48 +895,63 @@ console.log(exam);
         // }
         // // 자바스크립트는 arguments랑 값을 모두 컬렉션이 받는다. 따라서, 입력값의 개수는 의미가 없다.
         // console.log(add(4,5));      
+  </script>
+```
 
-        // alert(a);           // 선언한 적이 있어서 undefined가 나오는 것이다.
-        //                     // 내가 실행하여 사용하기 전에 코드가 stack에 저장된다.
-        // var a= 1;
+<br>
+### 2) 자바스크립트의 var 선언과 전역 객체(window)의 의미
+
+```html
+    <script>
+        alert(a);           // 선언한 적이 있어서 undefined가 나오는 것이다.
+                            // 내가 실행하여 사용하기 전에 코드가 stack에 저장된다.
+        var a= 1;
 
         // ------- 전역 객체 --------------
-        // a = 1;              // var로 선언되지 않는데 1로 출력된다. 아직 stack에 쌓이지 않았다.
-        //                     // 아무개에 저장이되는 것인데 아무개가 전역 객체(window)이며 전역 객체에 속성으로 들어간다.
-        // alert(a);
+        a = 1;              // var로 선언되지 않는데 1로 출력된다. 아직 stack에 쌓이지 않았다.
+                            // 아무개에 저장이되는 것인데 아무개가 전역 객체(window)이며 전역 객체에 속성으로 들어간다.
+        alert(a);
 
 
         //------- 심볼의 의미 --------------
-        // alert(a);           // Uncaught ReferenceError: a is not defined
-        // a = 1;              // a라는 심볼이 아예 없다는 뜻이다.(undefined와 다른 의미이다.)
+        alert(a);           // Uncaught ReferenceError: a is not defined
+        a = 1;              // a라는 심볼이 아예 없다는 뜻이다.(undefined와 다른 의미이다.)
 
         //------- 전역 객체(기본적으로 window)의 의미 --------------          
-        // a = 1;              // 아무개인 window가 전역객체라서 this와 같은 역할이다.
-        // alert(window.a);    // 여기서 a가 window 그자체이고 window.a는 a와 같다. 그래서, window를 생략할 수 있다.
+        a = 1;              // 아무개인 window가 전역객체라서 this와 같은 역할이다.
+        alert(window.a);    // 여기서 a가 window 그자체이고 window.a는 a와 같다. 그래서, window를 생략할 수 있다.
+
+  </script>
+```
 
 
+<br>
+### 3) 객체의 변수 범위 정하는 법
+
+```html
+  <script>
         //------- 전역 객체(기본적으로 window)의 범위? --------------       
         // 내가 정리 : 전역객체가 새로운 함수로 범위를 묶어버려도 전역객체의 범위를 없애진 않는다.
         // ** 최종 정리 : 다른 함수가 사용되어도 전역객체를 사용할 수 있다.
-        // var f1 = function() {
-        //     a = 1;
-        //     console.log(window.a);
-        // }
+        var f1 = function() {
+            a = 1;
+            console.log(window.a);
+        }
 
-        // f1();
+        f1();
 
         // *** 이렇게 자바스크립트는 자유도가 높다.
 
         // -----------------------------
-        // var f2 = function(){
-        //     a=1;
-        //     var a;
+        var f2 = function(){
+            a=1;
+            var a;
             
-        //     console.log(window.a);      // 1이 출력된다. 공간이 다르게 선언된다.(전역 객체 vs 스택에 변수)
+            console.log(window.a);      // 1이 출력된다. 공간이 다르게 선언된다.(전역 객체 vs 스택에 변수)
             
-        // }
+        }
         
-        // f2();
+        f2();
 
         // ------------------------------
         var f3 = function(){
@@ -945,32 +962,38 @@ console.log(exam);
             var a;                // 변수 선언이 밑에 있지만 코드를 저장하면서 먼저 stack에 쌓여 있어서 
         }                         // window.a는 다른 공간이다. 
         f3();
+  </script>
+```
 
+<br>
+### 4) 변수의 재선언 및 지역화 개념
 
+```html
+    <script>
 
         // ------------------------------
-        // var a1 = 1;
+        var a1 = 1;
         
         
         
         
         
         
-        // var a1 = 2;                 // 코드가 길어져도 아래에서 다시 재선언해도 에러가 안난다.(자바에서는 에러가 난다.)
-        //                             // ES6에서는 이러한 문제점이 해결되었지만, TypeScript가 컴파일러 과정을 만들어줘서 에러나게 해준다.
+        var a1 = 2;                 // 코드가 길어져도 아래에서 다시 재선언해도 에러가 안난다.(자바에서는 에러가 난다.)
+                                    // ES6에서는 이러한 문제점이 해결되었지만, TypeScript가 컴파일러 과정을 만들어줘서 에러나게 해준다.
 
 
-        // alert(a1);
+        alert(a1);
 
 
         // ----------- 중괄호가 사용하는 경우(지역화 X) ---------
         
         
-        // {
-        //     var a = 1;
-        // }
+        {
+            var a = 1;
+        }
 
-        // alert(a);           // 지역 변수를 지정할 수 없다.
+        alert(a);           // 지역 변수를 지정할 수 없다.
                             // 즉, 스크립트 파일을 100개로 만들어도 된다. 하나의 공간을 바라보기 때문이다.
                             // *** 따라서, 이러한 문제점을 해결하기 위해서 ES6가 만들어졌다.
 
@@ -978,32 +1001,49 @@ console.log(exam);
 
         // ----------------- 지역화 O ----------------
         // 자바 스크립트에서는 지역화를 함수 내부에서만 가능(var로 변수를 생성하면, scope 영역이 function로 한정된다!!, 나중에 let, const 개념도 확인할 것)
-        // function f4() {
-        //     var a = 1;
-        // }
-        // alert(a);				// 에러 발생
+        function f4() {
+            var a = 1;
+        }
+        alert(a);				// 에러 발생
 
 
-        // function f5() {
-        //     a = 1;
-        // }
-        // alert(a);				// 1이 출력(a는 전역객체의 변수이다.)
+        function f5() {
+            a = 1;
+        }
+        alert(a);				// 1이 출력(a는 전역객체의 변수이다.)
 
+  </script>
+```
 
+<br>
+### 5) 함수의 중복 선언
+
+```html
+    <script>
+    
         // ----------------- 함수 중복 선언 가능(JS 특징) ----------------
-        // function f6() {
-        //     a = 1;
-        //     f2();
-        //     function f7() {
-        //         a = 2;
-        //         f3();
-        //         function f8() {
-        //         a = 3;
-        //         }
-        //     }
-        //     console.log(a);     // f1 함수 내부에서 출력.
-        // }
+        function f6() {
+            a = 1;
+            f2();
+            function f7() {
+                a = 2;
+                f3();
+                function f8() {
+                a = 3;
+                }
+            }
+            console.log(a);     // f1 함수 내부에서 출력.
+        }
 
+  </script>
+```
+
+<br>
+### 6) 함수의 중복 선언 및 outer 변수 개념
+
+```html
+    <script>
+    
         // --------- outer 변수 개념 ------------------
         function func1() {
             var b = 10;
@@ -1014,8 +1054,7 @@ console.log(exam);
             
             function func2() {
                 b = 20;
-            }
-            
+            }  
         }
 
         function func1() {
@@ -1072,54 +1111,55 @@ console.log(exam);
             
             console.log(a);
         }
-
     </script>
-</head>
-<body>
-    
-</body>
-</html>
 ```
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<br>
+### 7) var의 깊은 의미 및 window 전역 객체의 클로저 초반 개념
 
+```html
     <script>
     
-    // var f3 = function(){
-    //     a=1;
+    var f3 = function(){
+        a=1;
 
-    //     console.log(a);          // 1이 출력(window가 아니라 var a로 인식한다.)
+        console.log(a);          // 1이 출력(window가 아니라 var a로 인식한다.)
 
-    //     console.log(window.a);   // undefined 출력(window로부터 값을 가져와야하는데 a를 var a로 인식해서 undefined)
+        console.log(window.a);   // undefined 출력(window로부터 값을 가져와야하는데 a를 var a로 인식해서 undefined)
         
-    //     var a;                 // 변수 선언이 밑에 있지만 코드를 저장하면서 먼저 stack에 쌓여 있어서 a(여기선, a가 var a를 의미)와 window.a는 다른 공간에 있다.
-    // };                         // window.a는 다른 공간이다. 
-    // f3();
+        var a;                 // 변수 선언이 밑에 있지만 코드를 저장하면서 먼저 stack에 쌓여 있어서 a(여기선, a가 var a를 의미)와 window.a는 다른 공간에 있다.
+    };                         // window.a는 다른 공간이다. 
+    f3();
 
 
-    // var func3;
-    // function func1(){
-    //     var a = 10;
+    var func3;
+    function func1(){
+        var a = 10;
 
-    //     var func2 = function(){
-    //         a++;
-    //     };
-    //     func2();
+        var func2 = function(){
+            a++;
+        };
+        func2();
 
-    //     console.log(a);     // 11이 출력
-    // }
+        console.log(a);     // 11이 출력
+    }
+  </script>
+```
 
 
-    // ** 추가 질문 : f1 함수가 변수에 의해서 참조되고 있어서 자원 반납을 하지 못 하는 상황이라고 말씀하셨는데 그 말은 곧 f1함수가 return을 하였음에도 스택 메모리에서 사라지지 않고 있는 상황이라고 이해를 해도 될까요?
-    // ** 추가 정답 : f1 변수는 스택에 있고 그 변수가 클로저를 참조하고 있는 한 클로저가 사용하는 outer 변수들은 사라지지 못합니다.
+<br>
+### 8) 클로저의 문제점
 
+![이미지](/assets/images/closure.jpg)
+
+- 추가 질문 : f1 함수가 변수에 의해서 참조되고 있어서 자원 반납을 하지 못 하는 상황이라고 말씀하셨는데 그 말은 곧 f1함수가 return을 하였음에도 스택 메모리에서 사라지지 않고 있는 상황이라고 이해를 해도 될까요?
+- 추가 정답 : f1 변수는 스택에 있고 그 변수가 클로저를 참조하고 있는 한 클로저가 사용하는 outer 변수들은 사라지지 못합니다.
+
+<br>
+
+```html
+    <script>
+    
     // ---------------- outer 변수의 메모리 누수 문제(함수의 return이 없어서) -------------
     var func6;
 
@@ -1141,21 +1181,27 @@ console.log(exam);
 
 
 
-    // 중간 코드가 길면.
+    // 이 부분은 중간 사이의 코드가 길게 있다고 가정한다.
 
                                  // *** 최종 정리 : 
     func4();                     // func4 재호출 시, func4는 여전히 구형으로 살아있고(살아 있는 이유 : 함수에 return이 없어서!!)
                                  // func5, func6는 신형으로 다시 만들어져서 살아 있다. 결국 메모리 누수!!
+  </script>
+```
 
+<br>
+### 9) 클로저를 이해하는 과정 :
 
-    // ---- ---- ---- ---- ---- ---- ---- ---- ----
+- 함수를 선언할 때, 환경(Lexical 환경)이 구성되면서 closure와 결합되면서 다양한 결합 가능
+- 여전히 outer 함수를 물고 있어서 closure라고 부른다. 
+- 안쪽에 있는 함수가 사라지기 전까지 생명선이 존재한다.
+- 이것은 나중에 JS에서 은닉화에 성공하여 캡슐화로 사용되고 변수를 공유하는 역할을 해준다.
 
+<br>
 
-    // ----- [Closure] --------- (함수가 선언할 때 환경이 구성되면서 closure와 결합되면서 다양한 결합 가능)
-
-    // 여전히 outer 함수를 물고 있어서 closure라고 부른다. 
-    // 안쪽에 있는 함수가 사라지기 전까지 생명선이 존재한다.
-
+```html
+    <script>
+    
     // ----- [Closure]를 이해하는 과정 ---------
     var funcs = [];
 
@@ -1177,47 +1223,37 @@ console.log(exam);
         funcs[a]();
     }
 
-    // 함수가 죽지 못해 살아 남는 과정
-       
-
+    // 함수가 죽지 못해 살아 남는 과정 ******
 
     </script>
-
-</head>
-<body>
-    
-</body>
-</html>
+```
 
 
+---
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<br><br>
+# 10. 자바스크립트 객체 특징 정리
 
+```html
     <script>
         // ------- 1. 객체를 삭제하는 방법
-        // exam = null;
+        exam = null;
 
         // ------- 2. 객체 속성 제거하는 방법(JS의 모든 객체는 속성을 갖고 있고 삭제할 수 있다.)
-        // delete exam.kor;
-        // delete exam.kor;
+        delete exam.kor;
+        delete exam.kor;
         
         // ------- 3. JS 기본 객체 사용법
-        // var ar = [];
-        // ar.papa = function(){
-        //     console.log(ar);
-        // }
-        // ar.papa();
+        var ar = [];
+        ar.papa = function(){
+            console.log(ar);
+        }
+        ar.papa();
     
         // ------- 4. JS 클래스의 Expand 기능 지원 X 
-        // var name = new String("newlec");
-        // name.kor = 20;
-        // console.log(name.kor);     //에러가 발생한다.
+        var name = new String("newlec");
+        name.kor = 20;
+        console.log(name.kor);     //에러가 발생한다.
 
         // 확장을 가능하게 할 것인지 말건지 할 수 있다.
         // 자바스크립트에서는 Wrapper 클래스가 기본형이라서, Primitive 클래스(자바스크립트에서는 Wrraper클래스가 Primitive 클래스이다.)는 Expand가 지원하지 않는다.
@@ -1225,51 +1261,51 @@ console.log(exam);
 
 
         // ------- 5-1. 객체 사용법(new의 의미)   
-        // function Exam(){
-        //     kor = 30;
-        // }
+        function Exam(){
+            kor = 30;
+        }
 
-        // var exam1 = Exam(); // 이것은 함수를 호출하기만 하는 것이고 return이 없어서 받을 수는 없다.
+        var exam1 = Exam(); // 이것은 함수를 호출하기만 하는 것이고 return이 없어서 받을 수는 없다.
         
-        // console.log(exam1);
-        // console.log(exam1.kor);
+        console.log(exam1);
+        console.log(exam1.kor);
 
         // ------- 5-2. 객체 사용법(new의 의미)   
 
-        // function Exam(){
-        //     kor = 30;
-        // }
+        function Exam(){
+            kor = 30;
+        }
 
-        // var exam1 = new Exam(); // new로 함수를 호출하는 것이 아니라 객체를 만들줘서 값을 참조해주면, 값을 출력할 수 있다?
-        //                         // 앞에 new를 쓰면, 객체를 만드는게 이것을 함수가 먹어서 함수 내에서 사용할 수 있고 속성을 추가할 수 있다.(사용자가 임의로 바꿀수 있고 생성자를 의미한다.)
-        //                         // 즉, 데이터 초기화하려고 대문자 로 사용한다.
-        // console.log(exam1);
-        // console.log(exam1.kor); 
+        var exam1 = new Exam(); // new로 함수를 호출하는 것이 아니라 객체를 만들줘서 값을 참조해주면, 값을 출력할 수 있다?
+                                // 앞에 new를 쓰면, 객체를 만드는게 이것을 함수가 먹어서 함수 내에서 사용할 수 있고 속성을 추가할 수 있다.(사용자가 임의로 바꿀수 있고 생성자를 의미한다.)
+                                // 즉, 데이터 초기화하려고 대문자로 사용한다.
+        console.log(exam1);
+        console.log(exam1.kor); 
         
         // ----------- 6. this의 의미 -------------
-        // function Exam(){
-        //     this.kor = 30;      // this라는 것은 자기가 사용할 수 있는 기본객체
-        //     console.log(kor);   // 에러가 발생한다. why? 자바스크립트에서는 this를 이용해서 변수를 만들면 출력시에도 this를 써주어야 한다.
-        // }
-        // new Exam();             // 새로운 객체 생성!(자기만의 객체이며 this이용)
+        function Exam(){
+            this.kor = 30;      // this라는 것은 자기가 사용할 수 있는 기본객체
+            console.log(kor);   // 에러가 발생한다. why? 자바스크립트에서는 this를 이용해서 변수를 만들면 출력시에도 this를 써주어야 한다.
+        }
+        new Exam();             // 새로운 객체 생성!(자기만의 객체이며 this이용)
 
-        // Exam();                 // 앞에 this가 생략 되어있다.
-        //                         // 앞에 new를 하면, 자기만의 객체이고 new를 빼면, 전역객체이다.                     
+        Exam();                 // 앞에 this가 생략 되어있다.
+                                // 앞에 new를 하면, 자기만의 객체이고 new를 빼면, 전역객체이다.                     
 
 
         // ----- 7. 자바스크립도 자기만의 객체 생성 가능(this + new 이용) : 약갼의 객체지향스러운 모습이 있지만 은닉성을 보장 못한다. -------
-        // function Exam(){
-        //     this.kor = 30;
-        //     this.eng = 20;
-        //     this.math = 40;
+        function Exam(){
+            this.kor = 30;
+            this.eng = 20;
+            this.math = 40;
 
-        //     this.total = function(){
-        //         return this.kor+this.eng+this.math; // this를 넣으면 값이 나온다. this를 빼면 에러 발생!!
-        //     }
-        // }
+            this.total = function(){
+                return this.kor+this.eng+this.math; // this를 넣으면 값이 나온다. this를 빼면 에러 발생!!
+            }
+        }
 
-        // var exam = new Exam();                      // 자기만의 객체 이용가능.
-        // console.log(exam.total());
+        var exam = new Exam();                      // 자기만의 객체 이용가능.
+        console.log(exam.total());
          
         // 나중에 ES6에서 사용하지 않는 이유를 알기 위해서 이렇게 배운다
         // 나중에는 람다 함수 사용하지 말기, 익명 함수?
@@ -1295,10 +1331,4 @@ console.log(exam);
         console.log(exam1.total()); 
 
 </script>
-
-</head>
-<body>
-    
-</body>
-</html>
 ```
