@@ -53,6 +53,7 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.datasource.url=jdbc:mysql://localhost:3306/newlecture?useUnicode=true&serverTimezone=Asia/Seoul
 spring.datasource.username=newlecture
 spring.datasource.password=3144
+
 ```
 
 
