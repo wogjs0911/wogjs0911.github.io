@@ -1,16 +1,35 @@
 ---
 key: /2023/01/05/Error-Collect.html
 title: ERROR - Error 모음
-tags: java javascript spring springboot eclipse
+tags: java javascript spring springboot eclipse mysql oracleDB
 ---
 
 # 1. Javascript 에러 
 
+<br>
 ### 1) Canvas JS 
 
 - 새로운 페이지 등록 시, main.html 파일에서는 url 연결 시켜주기! 
   `<script src="./item/background.js"></script>`
 
+
+<br>
+### 2) JS에서 전역 변수, 전역 객체를 사용하는 방법
+
+<br>
+
+```javascript
+
+// 1. 전역 변수를 사용하는 방법
+skiobj.point;		
+
+// 2. 전역 객체를 사용하는 방법
+skiobj.objs = this.objs		// 전역 객체 선언!!
+
+for(let obj of this.objs)
+	obj.draw(this.ctx);	
+
+```
   
 --- 
   
