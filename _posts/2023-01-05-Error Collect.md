@@ -1,6 +1,6 @@
 ---
 key: /2023/01/05/Error-Collect.html
-title: ERROR - Error 모음
+title: Error - Error 모음
 tags: java javascript spring springboot eclipse mysql oracleDB
 ---
 
@@ -83,7 +83,7 @@ spring.datasource.password=3144
 
 - Error Code: 1046. No database selected Select the default DB to be used by double-clicking its name in the SCHEMAS list in the sidebar.
 
-	- DB 연결 후, select로 table 조회하는데 나온 에러이다. 어떤 DB를 쓸건지 지정해주어야함. 아니면 'use DB명'으로 어떤 데이터 테이블을 사용하겠다 설정해준 후 사용할 수 있다.
+	- 해결 방법 : DB 연결 후, select로 table 조회하는데 나온 에러이다. 어떤 DB를 쓸건지 지정해주어야함. 아니면 'use DB명'으로 어떤 데이터 테이블을 사용하겠다 설정해준 후 사용할 수 있다.
 
 ```	
 
@@ -103,6 +103,20 @@ SELECT * FROM newlecture.noticeview;
 
 ```
 
+### 2) 테이블에 데이터가 추가되지 않는 경우
 
+- Error Code:  Error 1064, you have an error in your SQL Syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at Line 4
+	
+	- SQL 문법에러이며, 이 에러는 대부분 값들의 Line 4 부분에 작은 따옴표('') 를 닫지 않아서 거나 짝수가 아니어서 나는 에러일 경우가 많다.
 
+	- 해결 방법 : 테이블에 데이터를 추가 후 MySQL에서는 Apply 버튼을 눌러 업데이트를 시키는데 SQL script에서 직접 변경해주자!
+	
+```
+// 수정 전
 
+INSERT INTO `newlecture`.`notice` (`id`, `title`, `content`, `hit`, `pub`, `memberId`) VALUES ('16', '이거 직접 바꿔야한다..', '정말 귀찬ㅇㅎ은 일이다..', '8', b'0', b'2');
+
+// 수정 후(데이터 타입이 안 맞아서 에러가 발생했다. memberId 타입이 bit 형에서 int 형으로 데이터를 넣어주자!)
+INSERT INTO `newlecture`.`notice` (`id`, `title`, `content`, `hit`, `pub`, `memberId`) VALUES ('16', '이거 직접 바꿔야한다..', '정말 귀찬ㅇㅎ은 일이다..', '8', b'0', '2');
+
+```
