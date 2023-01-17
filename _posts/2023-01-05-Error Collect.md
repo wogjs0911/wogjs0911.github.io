@@ -31,6 +31,16 @@ for(let obj of this.objs)
 
 ```
   
+
+
+<br>
+### 3) Canvas JS에서 캔버스 전환하기(2가지 방식)
+
+- app.js에서 콜백함수로 제어하기
+
+- pause라는 인스턴스 변수와 상태 변수를 통해 캔버스를 전환할 수 있다.
+
+
 --- 
   
   
@@ -75,6 +85,54 @@ spring.datasource.password=3144
 
 ```
 
+<br><br>
+### 2) JUnit Test case 에러 발생 : 아직 해결 못 함.
+
+- `@AutoConfigureTestDatabase(replace=Replace.NONE)`, `@MybatisTest`는 필수적으로 필요하다!
+
+- 각각은 datasource 정보 가져오거나 Unit Test를 위해 사용된다.
+
+<br>
+
+```java
+package com.newlecture.web.dao;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+
+import com.newlecture.web.entity.NoticeView;
+
+@AutoConfigureTestDatabase(replace=Replace.NONE)
+@MybatisTest
+class NoticeDaoTest {
+
+	@Autowired
+	private NoticeDao noticeDao;
+	
+	@Test
+	void test() {
+		List<NoticeView> list = noticeDao.getViewList(0, 1, null, null, false);
+		
+		System.out.println(list.get(0));
+	}
+
+}
+
+```
+
+- `List<NoticeView> list = noticeDao.getViewList(0, 1, null, null, false);` 에서 list.get(0)의 정보를 주소 정보만 가져오는 이유는? 
+
+- 나는 해당 list의 데이터 정보가 필요하다.
+
+<br>
+
+---
 
 <br><br>
 # 3. MySQL 에러 
