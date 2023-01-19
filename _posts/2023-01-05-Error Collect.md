@@ -41,6 +41,23 @@ for(let obj of this.objs)
 - pause라는 인스턴스 변수와 상태 변수를 통해 캔버스를 전환할 수 있다.
 
 
+<br>
+### 4) 상대 경로  vs 절대 경로의 의미
+
+- 상대 경로 : 
+
+	- 상대 경로는 `./image/nana.png`와 `../image/nana.png`처럼 사용한다.
+	
+	- `./image/nana.png`의 경우에는 현재 디렉토리라서 `image/nana.png`와 같이 생략이 가능하다. 
+
+	- `../image/nana.png`는 현 위치에서 한 단계 위인 상위 폴더를 의미한다. 2단계 위 디렉토리를 의미하려면, `../../image/nana.png`이다.
+
+<br>
+- 절대 경로 : 
+
+	- 절대 경로는 root에서 시작하는 디렉토리이며 `/game/image/nana.png` 이런 식으로 사용한다.
+
+
 --- 
   
   
