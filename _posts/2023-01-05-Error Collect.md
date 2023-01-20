@@ -55,7 +55,7 @@ for(let obj of this.objs)
 <br>
 - 절대 경로 : 
 
-	- 절대 경로는 root에서 시작하는 디렉토리이며 `/game/image/nana.png` 이런 식으로 사용한다.
+	- 절대 경로는 root에서 시작하는 디렉토리이며 `/game/image/nana.png` 이런 식으로 사용한다
 
 
 --- 
