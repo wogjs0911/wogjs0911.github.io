@@ -213,7 +213,7 @@ INSERT INTO `newlecture`.`notice` (`id`, `title`, `content`, `hit`, `pub`, `memb
 
 - 추후에 다른 팀원들과 팀프로젝트를 위해 코드를 합쳐야 하므로 context root의 설정이 매우 중요하다.
 
-- 프로젝트마다 context root에 프로젝트명을 붙여 context root를 달리해줘야 하고 그에 따라 패키명 가장 앞에도 프로젝트명을 붙여 줘야 한다.
+- 프로젝트마다 context root에 프로젝트명을 붙여 context root를 달리해줘 한다.
 
 ```java
 // context root
@@ -221,15 +221,16 @@ INSERT INTO `newlecture`.`notice` (`id`, `title`, `content`, `hit`, `pub`, `memb
 /webprj2 
 ```
 
-<br>
 
-```java
-// package명  
-  
-webprj2.com.newlecture.web 
-```
 
 - 이렇게 설정하지 않으면 다른 프로젝트와 충돌이 나기 때문에 설정해줘야 한다.
+
+```
+// 실제 동작하는 url
+http://localhost/webprj2/
+
+http://localhost/webprj2/hello?c=10
+```
 
 
 
