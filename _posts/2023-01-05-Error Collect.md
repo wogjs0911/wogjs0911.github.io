@@ -59,6 +59,8 @@ for(let obj of this.objs)
 
 
 --- 
+
+
   
   
 <br><br>
@@ -178,6 +180,7 @@ SELECT * FROM newlecture.noticeview;
 
 ```
 
+<br>
 ### 2) 테이블에 데이터가 추가되지 않는 경우
 
 - Error Code:  Error 1064, you have an error in your SQL Syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at Line 4
@@ -195,3 +198,42 @@ INSERT INTO `newlecture`.`notice` (`id`, `title`, `content`, `hit`, `pub`, `memb
 INSERT INTO `newlecture`.`notice` (`id`, `title`, `content`, `hit`, `pub`, `memberId`) VALUES ('16', '이거 직접 바꿔야한다..', '정말 귀찬ㅇㅎ은 일이다..', '8', b'0', '2');
 
 ```
+
+<br><br>
+# 5. Servlet 에러 
+
+### 1) web project 초기 설정
+
+- 무조건, web과 관련된 모든 파일은 src에서 만들어져야하며, context root가 중요하다.
+
+
+<br>
+
+### 2) context root가 중요한 이유
+
+- 추후에 다른 팀원들과 팀프로젝트를 위해 코드를 합쳐야 하므로 context root의 설정이 매우 중요하다.
+
+- 프로젝트마다 context root에 프로젝트명을 붙여 context root를 달리해줘야 하고 그에 따라 패키명 가장 앞에도 프로젝트명을 붙여 줘야 한다.
+
+```java
+// context root
+
+/webprj2 
+```
+
+<br>
+
+```java
+// package명  
+  
+webprj2.com.newlecture.web 
+```
+
+- 이렇게 설정하지 않으면 다른 프로젝트와 충돌이 나기 때문에 설정해줘야 한다.
+
+
+
+
+
+
+
