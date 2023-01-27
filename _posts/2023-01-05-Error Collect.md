@@ -1,8 +1,22 @@
 ---
 key: /2023/01/05/Error-Collect.html
 title: Error - Error 모음
-tags: java javascript spring springboot eclipse mysql oracleDB
+tags: java javascript spring springboot eclipse mysql oracleDB  servlet
 ---
+
+# 0. Project 주의 :
+
+### 1) 프로젝트 진행 시 유의 사항 :
+
+- vscode던 이클립스던 프로젝트 진행 시, 폴더 열기는 항상 root 경로가 주된 프로젝트 1개만 있어야 한다. 
+
+- 프로젝트 설계시, 물리적인 구조인 디렉토리 구조를 잘 잡고 가야 한다.(html이나 jsp 파일은 우리가 문장으로 썼을 때, 명사 위주로 설계한다. ) 
+
+
+
+---
+
+<br><br>
 
 # 1. Javascript 에러 
 
