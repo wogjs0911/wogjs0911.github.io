@@ -39,8 +39,10 @@ tags: docker
 
 - 컨테이너 이미지 삭제 : 
 	- docker rmi [이미지 id]
+
+---
 	
-	
+<br><br>
 ### 2) Colima 설정 :
 
 - 로컬용 오라클 실행하는 방법 : 도커에 오라클을 띄우기 위해서는 도커 엔진에 Colima를 올려서 오라클 이미지를 띄우게 된다.(아키텍쳐가 다른 것을 해결해준다.)
@@ -55,6 +57,7 @@ colima start --memory 4 --arch x86_64
 colima list // colima가 되었는지 확인하자 
 ```
 
+<br>
 - 지정된 경로에 볼륨을 설정해서 oracleDB를 저장해두었다면, colima를 먼저 실행하고  해당 경로로 이동해서 기존의 docker도 지우고 다시 docker를 생성해서 docker start 명령어로 실행하자!(해당 블로그의 볼륨 설정해서 컨테이너 띄우기(위치지정!!)처음부터 다시!!)
 
 ```
@@ -72,11 +75,36 @@ docker start oracle		// temp 폴더에서 docker start 명령어로 저장되었
 docker ps -a				// 도커의 모든 컨테이너 확인 
 ```
 
-- 이렇게 까지 했는데도 처음부터 비밀번호 설정을 다시 해주어야 한다. (colima 지우고 다시 깔면 처음부터 다시 설정해줘야 한다. )
+---
 
-- 결론 : Colima는 강제종료 하지말고 docker stop으로 먼저 끄고 colima stop으로 colima 끄고 종료한다! 킬때는 colima start로 켜주고 docker를 켜주자1! (순서 중요!!)
+<br>
+- 이렇게 까지 했는데도 에러가 발생해서 처음부터 다시 해주어야 한다. 
+
+- 즉, colima 에러 발생으로 colima를 지우고 다시 깔면, colima부터 docker까지 처음부터 다시 설정해줘야 한다. (추가적으로 볼륨 설정을 위해서도 비밀번호 설정까지 다시 해주어야 한다. )
+
+- 결론 : Colima는 강제종료 하지말고 docker stop으로 먼저 끄고 colima stop으로 colima 끄고 종료한다! 킬때는 colima start로 켜주고 docker를 켜주자! (순서 중요!!) **
 
 
+---
+
+<br><br>
+- 로컬용 오라클db 서버 끄고 키는 방법 :
+
+	- docker에서 db 서버가 켜져있는 경우의 명령어 순서 : 
+
+```
+- DB 서버 끄는 방법 : 
+0) cd temp
+1) docker stop oracle
+2) colima stop
+
+- DB 서버 키는 방법 :
+0) cd temp
+1) colima start
+2) docker start oracle
+3) docker logs -f oracle
+4) DBeaver에 들어가서 DB 서버가 켜지는 들어가서 확인하기
+```
 	
 	
 	
