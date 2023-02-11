@@ -299,7 +299,7 @@ tags: OS
 ### 4) DMA(direct memory access)
 - 메인 메모리에 직접 접근할수 있음
 - 동시에 CPU와 메모리에 접근할때를 조율하기 위해서 memory controller
-- 목적: I/O가 너무 많은 intrrupt를 발생시킬 수 있기에 중간중간 발생하는 Local buffer의 내용을 복사해서 한번에 메모리에 올려서 CPU로 알려줌
+- 목적: I/O가 너무 많은 intrrupt를 발생시킬 수 있기에 중간중간 발생하는 Local buffer의 내용을 복사해서 한번에 메모리에 올려서 CPU로 알려줌.
 
 <br>
 #### a. 입출력(I/O)의 수행
