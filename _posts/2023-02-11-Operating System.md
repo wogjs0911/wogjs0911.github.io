@@ -929,7 +929,7 @@ tags: OS
 ---
 
 <br><br>
-#  8. Process Management 2
+#  9. Process Management 2
 
 <br>
 - Copy-on-write (cow)
@@ -941,7 +941,7 @@ tags: OS
 ---
 
 <br>
-- fork() 시스템콜
+### 1) fork() 시스템콜
 
 ```cpp
 int main()
@@ -963,7 +963,7 @@ int main()
 ---
  
 <br>
-- exec() 시스템콜
+### 2) exec() 시스템콜
 
 
 ```cpp
@@ -984,7 +984,7 @@ int main()
 ---
 
 <br>
-- execlp
+### 3) execlp
 - exec 시스템 콜을 함
 - 이전의 기억을 지우고 새로운 프로그램으로 덮어씌워짐
 - 새로운 프로그램의 시작 부분부터 실행됨
@@ -1001,6 +1001,7 @@ int main() {
 ---
 
 <br>
+### 4) fork, exec, execlp 정리
 - fork() 안하고 exec()
 - execlp(" ", " ", ~~~~, (char *) 0);
 	- 프로그램 이름 두번, 전달할 argument (""로 구분), 마지막엔 (char*)0
@@ -1025,7 +1026,7 @@ hello 3
 
  
 <br>
-- wait() 시스템 콜
+### 5) wait() 시스템 콜
 - 프로세스 A가 wait() 시스템 콜을 호출하면
 - 커널은 child가 종료될 때까지 프로세스 A를 Sleep시킴 (block상태)
 - 자식이 종료되기를 기다리며 block 상태가 되는 것
@@ -1033,26 +1034,35 @@ hello 3
 - 부모가 block 상태 → ready 상태로 바뀜 (CPU를 얻을 수 있게 됨)
  
 
+
 ---
+
  
 <br>
-- exit() 시스템콜
-- 프로세스의 종료
-	- 자발적 종료
-		- 마지막 statement 수행 후 exit() 시스템콜을 통해
-		- 프로그램에 명시적으로 적어주지 않아도 main 함수가 리턴되는 위치에 컴파일러가 넣어줌
-	- 비자발적 종료
-		- 부모 프로세스가 자식 프로세스를 강제 종료시킴
-		- 자식 프로세스가 한계치를 넘어서는 자원 요청
-		- 자식에게 할당된 태스크가 더 이상 필요하지 않음
-		- 키보드로 kill, break 등을 친 경우
-		- 부모가 종료하는 경우
-		- 부모 프로세스가 종료하기 전에 자식들이 먼저 종료됨
+### 6) exit() 시스템콜
+
+<br>
+#### a. 프로세스의 종료 방법 :
+
+<br>
+- 자발적 종료
+	- 마지막 statement 수행 후 exit() 시스템콜을 통해
+	- 프로그램에 명시적으로 적어주지 않아도 main 함수가 리턴되는 위치에 컴파일러가 넣어줌
+	
+<br>
+- 비자발적 종료
+	- 부모 프로세스가 자식 프로세스를 강제 종료시킴
+	- 자식 프로세스가 한계치를 넘어서는 자원 요청
+	- 자식에게 할당된 태스크가 더 이상 필요하지 않음
+	- 키보드로 kill, break 등을 친 경우
+	- 부모가 종료하는 경우
+	- 부모 프로세스가 종료하기 전에 자식들이 먼저 종료됨
  
 ---
+
  
 <br>
-- 프로세스와 관련한 시스템콜
+### 7) 프로세스와 관련한 시스템콜
 - fork : create a child (copy)
 - exec : overlay new image
 - wait : sleep until child is done
@@ -1060,32 +1070,46 @@ hello 3
  
 ---
  
+ 
 <br>
-- 프로세스 간 협력
-	- 독립적 프로세스
-		- 프로세스는 각자의 주소 공간을 가지고 수행되므로
-		- 원칙적으로 하나의 프로세스는 다른 프로세스의 수행에 영향을 미치지 못함
-	- 협력 프로세스
-		- 프로세스 협력 메커니즘을 통해 하나의 프로세스가 다른 프로세스의 수행에 영향을 미칠 수 있음
+### 9) 프로세스 간 협력
 
+<br>
+#### a. 독립적 프로세스
+- 프로세스는 각자의 주소 공간을 가지고 수행되므로
+- 원칙적으로 하나의 프로세스는 다른 프로세스의 수행에 영향을 미치지 못함
+
+<br>
+#### b. 협력 프로세스
+- 프로세스 협력 메커니즘을 통해 하나의 프로세스가 다른 프로세스의 수행에 영향을 미칠 수 있음
+		
 ---
 
+ 
 <br>
-- 프로세스 간 협력 메커니즘 (IPC: Interprocess Communication)
-	- 프로세스간 정보를 주고받을 수 있는 방법
-		- Message passing: 커널을 통해 메시지 전달
-			- Direct Communication: 통신하려는 프로세스의 이름을 명시적으로 표시
-			- Indirect Communication: mailbox(또는 port)를 통해 메시지를 간접 전달
-			- Direct, Indirect → 커널 통해 전달하는건 똑같음!
-			- Indirect → 누가 꺼내볼지는 명시 안함
-		- Shared memory: 서로 다른 프로세스 간에도 일부 주소 공간을 공유하게 하는 shared memory 메커니즘이 있음
-			- 커널한테 shared memory를 쓴다는 시스템 콜을 해서 mapping 해놓고
-			- share하게 해놓은 다음에
-			- 그 때부터 사용자 프로세스끼리 공유
+### 10) 프로세스 간 협력 메커니즘 (IPC: Interprocess Communication)
+
+<br>
+#### a. 프로세스간 정보를 주고받을 수 있는 방법
+
+<br>
+- Message passing: 커널을 통해 메시지 전달
+	- Direct Communication: 통신하려는 프로세스의 이름을 명시적으로 표시
+	- Indirect Communication: mailbox(또는 port)를 통해 메시지를 간접 전달
+	- Direct, Indirect → 커널 통해 전달하는건 똑같음!
+	- Indirect → 누가 꺼내볼지는 명시 안함
+
+<br>
+- Shared memory: 서로 다른 프로세스 간에도 일부 주소 공간을 공유하게 하는 shared memory 메커니즘이 있음
+	- 커널한테 shared memory를 쓴다는 시스템 콜을 해서 mapping 해놓고
+	- share하게 해놓은 다음에
+	- 그 때부터 사용자 프로세스끼리 공유
 			
 ---
 
+ 
 <br>
+### 11) 추가 내용
 - A가 Shared Memory에 어떤 내용을 적으면
 - B는 자신의 주소 공간에도 포함되어 있기 때문에, 그 내용을 바로 전달받아서 볼 수 있음
 
