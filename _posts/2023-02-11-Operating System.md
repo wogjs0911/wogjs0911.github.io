@@ -766,21 +766,345 @@ tags: OS
 - 여기서 큐에 들어가는 것은 process를 관리하기 위해 만들어진 pcb임. pcb를 큐에 넣어서 관리함.
 - (pcb는 context switching을 통해 해당 process를 되살릴 수 있는 정보들을 갖고 있다. 따라서, pcb를 큐에 넣고 저장한다는 것은, 해당 process의 context를 지닌 정보를 큐에 넣고 저장한다는 것과 일맥상통)
 
- 
-
- 
 
 ---
 
 <br><br>
 # 6. Process 2
 
-### 1) 
+<br>
+### 1) Thread 란? 
+- thread 란 process 내부에 cpu 수행 단위
+- “A thread(or lightweight process) is a basic unit of CPU utilization”
+
+--- 
+
+<br>
+### 2) Thread의 구성 
+- Program Counter
+- Register Set
+- Stack Space
+ 
+--- 
+
+<br>
+### 3)  Thread가 동료 Thread와 공유하는 부분(=Task)**
+- Code Section
+- Data Section
+- OS Section
+ 
+--- 
+
+<br>
+### 4)  Thread 구성 
+- 전통적인 개념의 heavy weight process는 하나의 thread를 가지고 있는 task로 볼 수 있다.
+- process 내부에서 똑같은 code 를 가지고 동시에 여러 작업을 하기 위해,
+- thread 개수에 맞춰 pc(program counter) 를 여러개 둠.
+- pcb에서 pc와 해당 pc 위치에서 실행되는 코드에서 사용하는 레지스터가 여러개 생기겠지.
+
+
+--- 
+
+<br>
+### 5)  Thread 장점 및 정리
+- Thread는 Program Counter와 레지스터를 여러 개 두어서 코드의 실행부분을 나누는 것임. 
+- 스택도 별도로 메모리 주소공간을 공유 
+- 프로세스 상태도 공유
+- 프로세스가 사용하는 각종 자원들도 공유
+- CPU수행과 관련된 정보만 공유하지 않음!!!
+
+<br>
+- 다중 스레드로 구성된 태스크 구조에서는 하나의 서버 스레드가 blocked(wating) 상태인 동안에도 동일한 태스크 내의 다른 쓰레드가 실행(Running)되어 빠른 처리를 할 수 있다.(=비동기처리?)
+- 동일한 일을 수행하는 다중 쓰레드가 협력하여 높은 처리율(throughput)과 성능 향상을 얻을 수 있다.(주소공간=메모리를 공유하므로 자원절약을 할 수 있어 효율이 좋음!)
+- 쓰레드를 사용하면 병렬성을 높일 수 있다.(CPU가 여러개 달린 컴퓨터에서만 가능)
+
 
 ---
 
 <br><br>
 # 7. Process 3
 
-### 1) 
+<br>
+### 1) 쓰레드의 장점
+ 
+<br>
+#### a. Responsiveness(응답성)
+- multi-threaded Web - if one thread is blocked (e.g. Network) another thread continues (e.g. Display)
+- 웹브라우저의 html에서 텍스트를 먼저 보여주고 이미지를 나중에 보여주는 과정(텍스트와 이미지를 비동기식으로 처리) 
+- 이렇게 하면, 사용자에게 답답함을 줄여준다!
+
+<br>
+#### b. Resource Sharing(자원 공유)
+- n threads can share binary code!, data!, resource of the process
+
+<br>
+#### c. Economy
+- Creating & CPU switching thread(rather than a process)
+- Solaris의 경우 프로세스를 생성하는 경우와 스레드를 CPU 스위칭할 때, overhead가 각각 30배, 5배 정도 차이가 난다. 
+- 프로세스 하나를 생성하고 CPU를 스위칭하는 것보다 스레드 사이에서 CPU 스위칭은 오버헤드가 적다.
+
+<br>
+#### d. Utilization of MP Architectures(CPU가 여러개 있는 환경에서만)
+- MP = Multi-Processor
+- each thread may be running in parallel on a different processor
+ 
+--- 
+ 
+<br>
+### 2) 쓰레드의 구현
+
+- '커널 쓰레드'는 커널이 쓰레드를 관리하며, 쓰레드가 몇개 있는지는 운영체제가 알고 있다, 다른 쓰레드로 넘기는것도 커널이 넘김
+- '유저 쓰레드'의 경우는 운영체제(커널)가 쓰레드가 몇 개 있는지 쓰레드에 대한 정보를 알지 못하고 라이브러리를 지원받아서 구현된다. → 구현상에 제약이 있을 수가 있음(유저용 쓰레드임.)
+- 추가적으로 'Real-Time Threads'도 있다. 
+
+
+
 ---
+
+
+<br><br>
+#  8. Process Management 1
+
+### 1) 프로세스 생성 방법
+
+- 부모 프로세스가 자식 프로세스를 만든다.
+- 프로세스는 복제 방법을 이용한다.
+- 족보는 트리형태로 만들어 진다. 
+- 자원을 공유하는 모델도 있고 아닌 모델도 있다. 보통은 공유하지 않고 경쟁하는 모델이 일반적이다.
+
+---
+
+<br>
+#### a. 수행
+
+부모, 자식 공존하며 수행되는 모델
+자식이 종료(terminate)될 때까지 부모가 기다리는(wait -> blocked 상태) 모델
+
+<br>
+#### b. 주소 공간
+
+자식은 부모의 공간을 복사함 (ex. 운영체제에 있는 data들 (PCB, 자원) == binary and OS data)
+자식은 그 공간에 새로운 프로그램으로 덮어씌울 수 있음
+
+<br>
+#### c. 유닉스의 예(fork, exec의 시스템 콜)
+
+<br>
+- fork() 시스템 콜이 새로운 프로세스 생성
+	- 부모를 그대로 복사 (PID를 제외한 OS data + binary)
+	- 주소 공간 할당
+
+<br>
+- exec() 시스템 콜
+	- fork() 다음에 이어짐
+	- 새로운 프로그램을 메모리에 올림 (다른 프로그램으로 덮어 씌움)
+	- 복제만 해놓고 덮어 씌우지 않을 수도 있음
+	- 자식 프로세스 만들지 않고 exec() 하면 새로운 프로세스로 바꿀 수도 있음!!
+	 
+
+--- 
+
+<br>
+### 2) 프로세스 종료 방법
+
+#### a. 일반적인 프로세스 종료(exit!!) : 
+- 프로세스가 마지막 명령을 수행한 후 운영체제에게 이를 알려줌 (exit - 프로세스 종료시킴)
+- 자발적으로 프로세스 종료할 때
+- 자식이 부모에게 output data를 보냄 (wait 시스템 콜을 통해서)
+- 프로세스의 각종 자원들이 운영체제에게 반납됨
+- 보통, 프로세스 생태계에서는 자식 프로세스가 먼저 죽고 그다음에 부모 프로세스가 죽는다. 
+
+<br>
+#### b. 강제 종료 시키는 방법 : 
+- 부모 프로세스가 자식의 수행을 종료시킴 (abort)
+- 비자발적으로 프로세스 종료할 때
+- 자식이 자원의 한계치를 넘어선 요청을 할 때
+- 자식에게 더 이상 시킬 일이 없음
+
+<br>
+#### c. 부모가 종료(exit)되는 경우	 : 
+- 운영체제는 부모 프로세스가 종료하는 경우, 자식이 더 이상 수행되도록 두지 않음
+- 단계적인 종료가 일어남
+
+---
+
+<br><br>
+#  8. Process Management 2
+
+<br>
+- Copy-on-write (cow)
+- write가 발생했을 때 그 때 copy하겠다.
+- write: 원래있던 내용을 바꾸는 것
+- copy: 부모의 code, data, stack 복사
+- write가 발생하기 전까지는 부모 자원 공유
+
+---
+
+<br>
+- fork() 시스템콜
+
+```cpp
+int main()
+{
+	int pid;
+  pid = fork();
+  if (pid == 0)  /* this is child */
+    	printf("\n Hello, I am child!\n");
+  else if (pid > 0) /* this is parent */
+    	printf("\n Hello, I am parent!\n");
+}
+```
+
+<br>
+- fork() : 자식 만들어짐!
+- 자식에서는 fork()를 실행한 그 이후 시점부터 실행됨!
+- 부모의 context가 복사되므로 program counter 값도 복사되니까!
+ 
+---
+ 
+<br>
+- exec() 시스템콜
+
+
+```cpp
+int main()
+{
+	int pid;
+  pid = fork();
+  if (pid == 0) { /* this is child */
+    	printf("\n Hello, I am child! Now I'll run date \n");
+    	execlp("/bin/date", "/bin/date", (char *)0);
+  }  
+  else if (pid > 0) /* this is parent */
+    	printf("\n Hello, I am parent!\n");
+}
+
+```
+
+---
+
+<br>
+- execlp
+- exec 시스템 콜을 함
+- 이전의 기억을 지우고 새로운 프로그램으로 덮어씌워짐
+- 새로운 프로그램의 시작 부분부터 실행됨
+- 다시 돌아갈 수 없음 (새로운 프로그램 실행 다 하면 수행 끝!)
+ 
+```cpp
+int main() {
+	printf("\n Hello, I am child! Now I'll run date \n");
+  execlp("/bin/date", "/bin/date", (char *)0);
+  printf("\n Hello, I am parent!\n"); // 이 코드는 실행 불가능!!!!!!!!!
+}
+```
+
+---
+
+<br>
+- fork() 안하고 exec()
+- execlp(" ", " ", ~~~~, (char *) 0);
+	- 프로그램 이름 두번, 전달할 argument (""로 구분), 마지막엔 (char*)0
+ 
+```cpp
+int main() {
+	printf("1");
+  execlp("echo", "echo", "hello", "3", (char *)0);
+  printf("2");
+}
+```
+
+<br>
+- 출력
+
+```
+1
+hello 3
+```
+
+---
+
+ 
+<br>
+- wait() 시스템 콜
+- 프로세스 A가 wait() 시스템 콜을 호출하면
+- 커널은 child가 종료될 때까지 프로세스 A를 Sleep시킴 (block상태)
+- 자식이 종료되기를 기다리며 block 상태가 되는 것
+- 자식 프로세스가 종료되면 프로세스 A를 깨움 (ready상태)
+- 부모가 block 상태 → ready 상태로 바뀜 (CPU를 얻을 수 있게 됨)
+ 
+
+---
+ 
+<br>
+- exit() 시스템콜
+- 프로세스의 종료
+	- 자발적 종료
+		- 마지막 statement 수행 후 exit() 시스템콜을 통해
+		- 프로그램에 명시적으로 적어주지 않아도 main 함수가 리턴되는 위치에 컴파일러가 넣어줌
+	- 비자발적 종료
+		- 부모 프로세스가 자식 프로세스를 강제 종료시킴
+		- 자식 프로세스가 한계치를 넘어서는 자원 요청
+		- 자식에게 할당된 태스크가 더 이상 필요하지 않음
+		- 키보드로 kill, break 등을 친 경우
+		- 부모가 종료하는 경우
+		- 부모 프로세스가 종료하기 전에 자식들이 먼저 종료됨
+ 
+---
+ 
+<br>
+- 프로세스와 관련한 시스템콜
+- fork : create a child (copy)
+- exec : overlay new image
+- wait : sleep until child is done
+- exit : frees all the resources, notify parent
+ 
+---
+ 
+<br>
+- 프로세스 간 협력
+	- 독립적 프로세스
+		- 프로세스는 각자의 주소 공간을 가지고 수행되므로
+		- 원칙적으로 하나의 프로세스는 다른 프로세스의 수행에 영향을 미치지 못함
+	- 협력 프로세스
+		- 프로세스 협력 메커니즘을 통해 하나의 프로세스가 다른 프로세스의 수행에 영향을 미칠 수 있음
+
+---
+
+<br>
+- 프로세스 간 협력 메커니즘 (IPC: Interprocess Communication)
+	- 프로세스간 정보를 주고받을 수 있는 방법
+		- Message passing: 커널을 통해 메시지 전달
+			- Direct Communication: 통신하려는 프로세스의 이름을 명시적으로 표시
+			- Indirect Communication: mailbox(또는 port)를 통해 메시지를 간접 전달
+			- Direct, Indirect → 커널 통해 전달하는건 똑같음!
+			- Indirect → 누가 꺼내볼지는 명시 안함
+		- Shared memory: 서로 다른 프로세스 간에도 일부 주소 공간을 공유하게 하는 shared memory 메커니즘이 있음
+			- 커널한테 shared memory를 쓴다는 시스템 콜을 해서 mapping 해놓고
+			- share하게 해놓은 다음에
+			- 그 때부터 사용자 프로세스끼리 공유
+			
+---
+
+<br>
+- A가 Shared Memory에 어떤 내용을 적으면
+- B는 자신의 주소 공간에도 포함되어 있기 때문에, 그 내용을 바로 전달받아서 볼 수 있음
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
