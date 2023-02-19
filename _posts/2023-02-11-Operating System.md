@@ -425,7 +425,7 @@ tags: OS
 
 - 동기식 입출력 방법 구현 방법 1:
 	- 사용자 process 에서 io 가 발생하면 cpu 가 os 에게 넘어감
-	- os 는 io 명령을 수행하고 io 응답이 올 때 까지 기다림(cpu 는 아직도 os 에게 있음)**
+	- os 는 io 명령을 수행하고 io 응답이 올 때 까지 기다림(cpu 는 아직도 OS에게 있음)**
 	- io 응답이 오면 그제서야 사용자 process memory 에 결과를 넣고
 	- 사용자 process 에게 cpu 를 돌려줌.
 	- cpu 낭비가 엄청나다. 또한 매시점 하나의 io 만 일어나기 때문에 다른 io 디바이스들도 노는 꼴이 됨.
@@ -440,7 +440,7 @@ tags: OS
 
 ---
 
-<br>
+<br><br>
 ### 2) asynchronous IO :
 
 - A라는 사용자 process 에서 io 가 발생하면 cpu 가 os 에게 넘어감
@@ -449,50 +449,42 @@ tags: OS
 
  
 <br>
-- ex) JAVA 프로그램을 예로 들어 쉽게 설명하자면,
-- 동기식 입출력은 io 를 요청한 후 process가 멈춤. io 응답이 오면 그제서야 process가 계속됨.
+- **정리 : 예로 들어 쉽게 설명하자면, 동기식 입출력은 io 를 요청한 후 process가 멈춤. io 응답이 오면 그제서야 process가 계속됨.
 - 여기서 process 가 계속 멈춰있으면 cpu 가 놀게 되니까, 그 때 다른 process 에게 cpu 를 줄 수 있음.
 - 비동기식 입출력은 io 를 요청한 후 응답이 오든 말든 process 는 다음 명령을 계속 수행함.
 - io 응답이 오면 응답 결과를 가지고 다시 일처리를 하겠지.
 
 ---
  
-<br>
+<br><br>
 ### 3) DMA  작동 과정 :
 
 - 컴퓨터에 DMA(Direct Memory Access) 라는 장치가 있음.
-- io 디바이스들이 하도 cpu 에 interrupt 를 여러번 거니까 cpu 효율이 나빠짐.
-- DMA 는 cpu 가 받는 io interrupt 들을 자신이 받아 미리 처리하고(memory 에 io 응답값을 넣는 등)
-- cpu 에게는 "일을 내가 거의 끝내놨다. 너는 마무리 작업을 해라" 라고 말하며 cpu 에게 한 번만 interrupt 를 걸어줌.
+- io 디바이스들이 하도 cpu 에 interrupt 를 여러 번 거니까 cpu 효율이 나빠짐.
+- DMA는 cpu가 받는 io interrupt 들을 자신이 받아 미리 처리하고(memory에 io 응답값을 넣는 등)
+- cpu에게는 "일을 내가 거의 끝내놨다. 너는 마무리 작업을 해라" 라고 말하며 cpu 에게 한 번만 interrupt 를 걸어줌.
 - 이렇게 cpu 의 부담을 줄여주는 것이 DMA.
 
 
----
-
 <br>
-
 - 예를 들어, 키보드의 키 하나를 누르면 1byte 정보가 키보드 버퍼에 쌓이고
-- 키보드의 device controller 가 cpu 에 interrupt 를 걸어
+- 키보드의 device controller가 cpu에 interrupt를 걸어
 - 메모리 내로 방금 생성한 1byte 정보를 복사하라고 요청
 - 이런 방식으로 키보드를 사용하면 수많은 interrupt 들이 생성될텐데,
 - 이 interrupt 들이 계속 cpu 를 방해하면 성능이 떨어짐.
 
-- DMA 는 이런 상황에서 필요함.
-- DMA 는 키보드에서 생성한 1byte 에 대한 interrupt 를 자신이 받아서
-- 메모리에 직접 정보를 넣음.
+<br>
+- DMA는 이런 상황에서 필요함.
+- DMA는 키보드에서 생성한 1byte 에 대한 interrupt 를 자신이 받아서 메모리에 직접 정보를 넣음.
 - 메모리에 넣은 정보가 특정 단위(페이지 혹은 블럭)를 넘어서면 그제서야 DMA 가
-
-- cpu 에게 "네가 할 일 내가 미리 끝내놓음. 나머지 작업 네가 처리하셈" 라고 말하며
-- cpu 에게 한 번 interrupt 를 걸어줌.
-- DMA 덕분에 cpu 가 interrupt 당하는 빈도가 줄어 성능이 향상됨.
-- DMA 는 메모리에 직접 접근이 가능함(그래서 io 응답 처리가 가능함)
+- cpu에게 "네가 할 일 내가 미리 끝내놓음. 나머지 작업 네가 처리하셈" 라고 말하며
+- cpu에게 한 번 interrupt 를 걸어줌. DMA 덕분에 cpu 가 interrupt 당하는 빈도가 줄어 성능이 향상됨.
+- DMA는 메모리에 직접 접근이 가능함(그래서 io 응답 처리가 가능함)
 
 
-
- 
 ---
 
-<br>
+<br><br>
 ### 4) 프로그램 절차 :
 
 - 아래는 프로그램이 어떻게 실행되는지 그 절차를 설명함.
@@ -503,7 +495,7 @@ tags: OS
 - 각 프로그램들이 할당받은 공간의 주소는10, 
 
 <br>
-- 예를들어,
+- 예를 들어,
 - 프로그램A는 2553~6754 이고 프로그램 B는 88552~91502, 12204~53582, 이렇게 예쁘지 않은 주소 공간임. 게다가 나란히 존재하지 않고 쪼개져 있을 가능성이 농후함.
 - 하지만 각 프로그램 입장에서는 아주 예쁘게 0부터 1024 처럼 정렬된 공간처럼 보임. 이것이 virtual memory. 
 - 프로그램은 자신을 실행시키기 위해 할당받은 메모리 공간에 code, data, stack 영역으로 나눈 후 각 영역의 역할에 맞게 사용.
@@ -514,12 +506,14 @@ tags: OS
 - data : code 에서 실행할 전역변수 등을 넣는 영역으로 사용.
 - stack : code 가 동작할 때 사용하는 stack 영역(함수를 실행하는 데 사용하는 stack 영역) 으로 사용.
 
+<br>
 - 흔히 쓰이는 JAVA 프로그램의 경우 할당받은 메모리 공간을 메소드, 스택, 힙 영역으로 나눠서 사용.
 - 각 프로그램이 할당받은 메모리 공간이 모두 memory 를 차지하고 있지 않음(모두 메모리에 올라가 있지 않음)
 - 각 프로그램에서 실제 사용해야 하는 부분만 메모리에 올림. 다 올리면 프로그램에서 안 사용하는 부분까지 올라가게 되어 메모리가 낭비되니까. 
 - 그럼 메모리 공간에 올라가지 않은 나머지 프로그램부분은 어디에 있을까? 아직 disk 에 있다.
 - 즉, disk 에서 프로그램이 실행을 위해 필요한 부분만 읽어 메모리에 넣은 다음 cpu 를 통해 실행시키는 것.
 
+<br>
 - 다르게 말하면, 메모리에 올라가 있는 프로그램 부분 중에 안 사용하는 부분은 메모리에서 내려와서 다시 disk 로 돌아감
 - 커널 역시 프로그램(상시 돌아가는 process)이기 때문에 자신의 메모리 주소 공간을 갖고 있음. 위 이미지에서 흰 색 박스 부분.
 
@@ -527,7 +521,7 @@ tags: OS
 
 ---
 
-<br>
+<br><br>
 ### 5) 커널  
 - 커널은 os 라서 중요하니까 커널의 주소 공간 내용을 구체적으로 살펴보자.
 - 커널의 코드 부분에는 다음과 같은 코드들이 들어있음.
@@ -538,12 +532,11 @@ tags: OS
  
 <br>
 - data 부분에는 cpu, memory 등 자원 관리하기 위한 자료구조 들이 들어있음.
-- 또한 동작하는 process 들을 관리하기 위한 자료구조(PCB) 들이 들어있음.
-- 예를 들어 process A 가 cpu 를 얼마나 썼는지, 다음 process 에게 메모리는 얼마나 줘야 하는지 등
+- 또한, 동작하는 process 들을 관리하기 위한 자료구조(PCB) 들이 들어있음.
+- 예를 들어, process A가 cpu 를 얼마나 썼는지, 다음 process 에게 메모리는 얼마나 줘야 하는지 등
 - 이걸 보고 PCB(Process Control Block) 이라고 함.
 
-- 즉 프로그램마다 PCB 가 하나씩 만들어져서 os 가 관리함.
-- 그리고 그것이 (위 그림처럼) data 영역에 들어있음.
+- 즉, 프로그램마다 PCB 가 하나씩 만들어져서 os 가 관리함. 그리고 그것이 data 영역에 들어있음.
 
 
 <br>
@@ -555,7 +548,7 @@ tags: OS
  
 ---
 
-<br>
+<br><br>
 ### 6) 함수
 - 프로그램은 함수로 이루어짐.
 - C로 짜든 JAVA 로 짜든 프로그램은 함수로 구성됨.
@@ -563,35 +556,231 @@ tags: OS
 
  
 <br>
-- 사용자 정의 함수 : 코드 내에 사용자가 직접 만든 함수. myfunc 같은 것이다.
-- 라이브러리 함수 : 라이브러리를 통해 불러온(import) 함수 혹은 내장 함수.
-- 커널 함수 : os 가 정의함, os 프로그램의 함수. 즉 system call.
+- 함수의 종류 :
+	- 사용자 정의 함수 : 코드 내에 사용자가 직접 만든 함수. myfunc 같은 것이다.
+	- 라이브러리 함수 : 라이브러리를 통해 불러온(import) 함수 혹은 내장 함수.
+	- 커널 함수 : os 가 정의함, os 프로그램의 함수. 즉 system call.
 
-- 예를 들어, read("/home/eyeballs/README.md") 라는 함수를 실행하면
-- 해당 path 의 file 을 읽어달라는 명령이 실행되는데
-- 이 때 system call 이 불림. 이 system call 에 의해 실행되는 (실질적으로 device 에 가서 읽는) 함수는 os 에서 제공해주는 함수임.
+<br>
+- 예를 들어, 'read'라는 함수를 실행하면 해당 path의 file을 읽어달라는 명령이 실행되는데
+- 이 때, system call이 불림. 이 system call 에 의해 실행되는(실질적으로 device에 가서 읽는) 함수는 os에서 제공해주는 함수임.
 
- 
-
-- 사용자 정의 함수, 라이브러리 함수는 process 가 할당받은 메모리 공간의 code 영역에 들어감.
-- 커널 함수는 os 이 갖고 있는 kernal 메모리 공간의 code 영역에 들어감.
-
- 
-
-- 따라서 사용자 정의 함수, 라이브러리 함수를 실행할 때는
-- cpu interrupt 가 걸리지 않고 자기 메모리 공간 내에서 계속 실행이 가능
+<br>
+- 사용자 정의 함수, 라이브러리 함수는 process가 할당받은 메모리 공간의 code 영역에 들어감.
+- 커널 함수는 os이 갖고 있는 kernal 메모리 공간의 code 영역에 들어감.
+- 따라서, 사용자 정의 함수, 라이브러리 함수를 실행할 때는 cpu interrupt 가 걸리지 않고 자기 메모리 공간 내에서 계속 실행이 가능
 - 커널 함수(system call)를 실행할 때는 interrupt 가 걸림.
 
+---
+
+
+<br><br>
+# 5. Process 1
+
+### 1) Process 개념
+
+- process 란 실행중인 프로그램임. 
+
+<br>
+- process 의 context 는, 현재 실행중인 process 가 어떤 상태에 있고 어디까지 실행했는지 등을 나타냄.
+- process는 메모리에 개인 주소 공간을 갖고 있고 이곳에 코드(기계어)를 올림.
+- PC(Program Counter) 가 process 의 실행 코드(기계어) 어느 부분을 가리킴
+- PC가 가리키는 부분에서 코드(기계어)를 읽어서 CPU 안의 레지스터에 저장한 후 ALU(산술 논리 연산장치)에서 처리함.
+- 그 결과를 레지스터에 다시 저장하거나 혹은 메모리에 다시 저장함.
+
+---
+
+<br>
+### 2) Process Context 개념
+
+- 따라서, 현재 process 가 어디까지 실행했는지 알기 위한 context 를 위해, pc가 어디를 가리키는지, 메모리 주소 공간에 어떤 코드와 어떤 함수, 어떤 데이터를 올려두었는지 CPU 레지스터에는 어떤 값을 저장하고 있는가 등을 알아야 함.
+- 이렇게 process 의 현재 상태를 알 수 있는 것을 'Context'라고 함.
+
+<br>
+- Context는 아래 세가지로 나타낼 수 있음.
+	- CPU 수행 상태를 나타내는 하드웨어 문맥
+	- CPU 내의 PC(program counter)
+	- CPU 내의 각종 레지스터들
+
+---
+
+<br>
+### 3) Process 메모리, 커널 구조
+- 프로세스의 메모리 주소 공간
+	- Code, Data, Stack 으로 나타내어지는 공간들
+
+<br>
+- 프로세스 관련 커널 자료 구조
+- PCB(Process Control Block) : process 를 관리하기 위해 os 가 갖고 있는 자료구조. 
+- OS의 메모리 주소공간 data 영역에 process 별로 하나씩 갖고 있음.
+- 어떤 process 에게 메모리를 얼마나 줘야 할지, cpu는 얼마나 줘야 하는지 등을 관리
+	- Kernel Stack : process 가 system call 을 했을 때 실행되는 os 함수의 stack 영역
+	
+<br>
+- 커널도 함수로 실행되기 때문에 I/O 등의 System Call을 함수로 실행.   
+- 따라서, 함수가 쌓이는 stack 영역에 실행 함수를 쌓아둠.
+- 이 때, PC는 process 의 code 를 가리키지 않고 os 의 코드를 가리킴(실행하는 system call 함수 부분)
+- process별로 스택을 다르게 둠. 이를테면 A process 가 실행하는 system call 
+- stack은 23번지에, B process가 실행하는 'System Call Stack'은 6674번지에 쌓는 등.
+
+      
+
+---
+
+<br>
+### 4) Process 과정
+- process 는 크게 세가지 상태를 갖음.
+	- Running : 현재 CPU 를 잡고 명령을 수행중인 상태
+	- Ready : CPU 를 기다리는 상태. CPU 만 잡으면 바로 명령 수행이 가능함. 즉, io waiting 이나 메모리에 코드 올리는 기타 작업들을 이미 모두 마쳐둔 상태.
+	- Blocked( wait, sleep ) : CPU 를 주어도 명령 수행을 할 수 없는 상태. io 응답을 기다리고 있거나, 메모리에 실행 코드가 바뀌어 올라오고 있을 때(기존 것을 버리고 새로 실행할 코드를 올릴 때) 등
+
+<br>
+- 이 외 다른 상태도 있음.
+	- New : 프로세스가 초기에 생성중인 상태
+	- Terminated : process의 모든 명령 수행이 끝난 상태. 메모장을 닫으면 Terminated 상태가 되겠다.
+	- Suspended (stopped) : 외부적인 이유로 process 의 수행을 정지한 상태.  메모리에서 process 의 메모리값들을 모두 disk 로 내쫓은(swap out) 상태. 즉, 메모리에 페이지가 전혀 올라와 있지 않은 상태
+
+<br>
+- 예를 들어, 메모리에 너무 많은 process 가 올라와 있는 상황에서
+- 시스템이 process 를 잠시 중단시키기 위해 Suspended 상태로 만든다고 함. 혹은 linux 에서 process 실행중에 Ctrl+Z 를 눌러서 일시정지 시키는 것이 Suspended 라고 함)
+
+- Blocked 와 Suspended 상태가 헷갈릴 수 있음.
+- Blocked 는 자신이 요청한 event 가 만족되면 Ready 가 갈 수 있음.
+
+<br>
+- 또한, 메모리에 process 가 올라와있음. Suspended 는 외부에서 resume 해 주어야 Active 가 된다고 함. 
+- 메모리에 process 가 올라와있지 않음.
+
+---
+
+<br>
+- 참고로, process 가 system call 를 통해 os 에게 cpu 를 넘겼을 때 "OS가 Running 상태에 있다" 라고 표현하지는 않음.
+- 단지 유저모드에서 커널모드로 넘어갔다, 커널모드에서 running 하고 있다 라고만 말 함.
+- 위의 이미지에서도 user mode Running 에서 system call, trap 이 발생하면, monitor mode Running 이 되는데 이것을 os 가 running 한다 라고 말 하지 않음.
+- 왜냐면 system call 을 발생시킨 현재 process 가 아직 running 중이란 것을 전제로 하기 때문에.
+
+ 
+---
+
+<br>
+### 5) Process Queue 과정
+
+- OS는 자신의 메모리 주소 data 공간에 Process의 상태에 해당하는 process 큐를 하나씩 만들어 둠.
+- 예를 들어, running 상태의 process 를 위한 공간
+- Ready 상태를 위한 큐(cpu 자리가 비면 바로 큐에서 하나 뽑아서 cpu 에 넣을 수 있도록)
+- Blocked 상태를 위한 큐(어떤 큐는 키보드 입력을 받는 프로세스를 넣는 큐,
+- 어떤 큐는 File IO를 기다리는 프로세스를 넣는 큐,
+- process 끼리 공유하는 데이터에 대해, 일관성을 위해 한 번에 하나의 process 만 접근 가능한
+- 정책이 시행중일 때, 공유 데이터를 얻기 위해 기다리고 있는 프로세스를 넣는 큐 등)
+
  
 <br>
-- 아래 이미지는 프로그램을 실행시키는 절차를 보여준다.
+- 위에 그림에서는 일반 큐처럼 그려놓았지만,
+- 사실은 process priority 를 기준으로 하는 우선순위 큐임.
+- 즉 우선순위가 높은 프로세스부터 큐에서 빠져나옴.
+- 물론 이건 정책에 따라 달라짐.
+- 일반 큐처럼 하는 것은 round robin 방식이지. 
+- os 는 (위에서 말한 것 처럼) PCB 를 통해 process 를 관리함.
+- 각 process를 관리하기 위해 process 당 유지하는 정보가 PCB 에 저장됨.
 
-
- 
-
+---
 
 <br>
-- 빨간색 선은 프로그램이 cpu 를 잡고 있을 때
-- 파란색 선은 os(커널)가 cpu 를 잡고 있을 때
+### 6) PCB
+
+- PCB 에 저장하는 데이터는 다음과 같음
+
+<br>
+- os 가 관리상 사용하는 정보
+	- process status(running, ready 등)
+	- process ID
+	- 스케줄링 info
+	- priority : 큐에서 먼저 실행되어야하는 순서
+
+<br>
+- CPU 수행 관련 하드웨어 값
+	- PC, CPU 의 레지스터들
+
+<br>
+- 메모리 위치 정보	
+	- code, data, stack 의 위치 정보. code data stack 이 메모리의 어디 위치해있는지.
+	
+<br>
+- 파일 관련 정보
+	- open file descriptors... 등 해당 process가 사용중인 파일이 어떤건지.
+
+---
+
+<br>
+### 7) 헷갈리기 쉬운 내용 정리 
+
+- Context Switching 을 하기 위해 기존 process A의 정보들(pc, memory 위치 정보, 레지스터 값 등)을
+- os가 관리하는 데이터 영역내, process A를 위한 pcb 자리에 저장(백업)함.
+- 그 후 process B 의 pcb 정보들을 cpu와 메모리 등에 올리고 process B 를 실행
 
  
+<br>
+- 헷갈리기 쉬운 것 중 하나는,
+- 사용자 process 가 실행중인 상태에서 하드웨어 interrupt(timer 가 아닌 interrupt)나 system call등에 의해
+- cpu 를 os 에게 넘기는 것은 context switching이 아니라고 함.
+- 왜냐면 os 가 일을 처리한 후 다시 방금까지 실행중이던 process에게 cpu 를 줄 것이기 때문에.
+
+ 
+<br>
+- 반대로 timer interrupt 나 io 요청 system call 을 하는 process 는 cpu 를 놓고
+- 다른 process 에게 cpu를 넘겨야 하기 때문에 context switching 이라고 부름.
+
+---
+
+<br>
+### 8) 추가 정보
+
+- 첫번째 케이스에서 cpu가 os에게 넘어갔을 때 역시 process의 정보들이 pcb 에 담기고
+- os의 정보값들이 cpu에 담기는 절차(context switching 이 일어날 때 교환되는 절차들)가
+- 발생할 것 같은데... 어쨌든간에 cpu를 사용하기 위해선 process든 os든 정보를 cpu에 넣어야 할 것 아닌가? 
+
+<br>
+- os가 cpu 레지스터 사용 없이 실행될리 만무하고 그럼 첫번째 케이스가 context switching이라고 불리지 않는 이유는 
+- 단지 논리적으로 process가 다른 process로 바뀌지 않기 때문인가? 실제로 벌어지는 일은 똑같은데?
+-> 교수님이 이어서 해주신 설명에 해당 내용이 있음.
+
+<br>
+- process에서 os로 cpu가 넘어갈 때 물론 정보 백업 등이 일어나고 context switching 절차가 발생하기는 하지만, 그 overhead가 일반 context switching보다 적다고 함.
+
+<br>
+- 예를 들어, cpu내의 cache memory를 보자.
+- 일반 context switching이 일어나면 다른 process 로 바뀌기 위해 현재 cache memory가 모두 flush되어야 함. 이것은 상당한 overhead라고 함
+- 근데 (위에서 말하는 첫번째 케이스) os로 CPU가 넘어가는 경우는 cache memory flush가 일어날 필요가 없기 때문에(다시 해당 process에게 cpu 를 돌려주기 때문) 오버헤드가 적음
+- cache memory flush 절차를 생략하고 os에게 cpu가 넘어감. 그리고 다시 해당 procss에게 cpu가 넘어가겠지. 
+- 이런 overhead가 적기 때문에 context switching이라고 부르지 않는가 봄.
+
+---
+ 
+<br>
+- 위에서 설명한 큐를 나타내는 이미지.
+- 여기서 말하는 큐는 os의 메모리 주소 data 공간에 process 들을 상태별로 관리하기 위해 만들어둔 것이라고 설명하였음.
+
+<br>
+- 위에 이미지를 보면 상태별로, 그리고 device별로 큐가 구현되어있는 것을 볼 수 있음.
+- 어떤 process는 ready에 들어가 있고, 어떤 process는 disk에 들어가 있고...
+- 여기서 큐에 들어가는 것은 process를 관리하기 위해 만들어진 pcb임. pcb를 큐에 넣어서 관리함.
+- (pcb는 context switching을 통해 해당 process를 되살릴 수 있는 정보들을 갖고 있다. 따라서, pcb를 큐에 넣고 저장한다는 것은, 해당 process의 context를 지닌 정보를 큐에 넣고 저장한다는 것과 일맥상통)
+
+ 
+
+ 
+
+---
+
+<br><br>
+# 6. Process 2
+
+### 1) 
+
+---
+
+<br><br>
+# 7. Process 3
+
+### 1) 
+---
