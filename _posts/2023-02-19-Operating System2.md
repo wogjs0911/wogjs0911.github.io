@@ -281,7 +281,7 @@ tags: OS
 ---
  
 <br>
-### 9) RR(Round Robin) - 현대의 운영체제가 사용하는 방법
+### 10) RR(Round Robin) - 현대의 운영체제가 사용하는 방법
  
 
 - 각 프로세스는 동일한 크기의 할당시간(time quantum)을 가짐
@@ -307,7 +307,7 @@ tags: OS
 ---
  
 <br>
-### 10) Multilevel Queue
+### 11) Multilevel Queue
  
 <br>
 - Ready Queue를 여러개로 분할
@@ -333,7 +333,7 @@ tags: OS
 ---
  
 <br>
-### 11) Multilevel Feedback Queue
+### 12) Multilevel Feedback Queue
  
 - 프로세스가 다른 큐로 이동 가능
 - 에이징(aging)을 이와 같은 방식으로 구현할 수 있다(오래되면 프로세스를 다른 큐로 이동 시켜서)
@@ -350,7 +350,7 @@ tags: OS
 ---
  
 <br>
-### 12) Multiple-Processor Scheduling
+### 13) Multiple-Processor Scheduling
  
 
 - CPU가 여러개인 경우 스케쥴링은 더욱 복잡해짐
@@ -376,7 +376,7 @@ tags: OS
 ---
  
 <br>
-### 13) Real-Time Scheduling
+### 14) Real-Time Scheduling
  
 - periodic한 성격의 작업이 많다.
 
@@ -391,7 +391,7 @@ tags: OS
 ---
  
 <br>
-### 14) Thread Scheduling
+### 15) Thread Scheduling
 
 <br>
 - Local Scheduling
@@ -404,7 +404,7 @@ tags: OS
 ---
  
 <br>
-### 15) Algorithm Evaluation
+### 16) Algorithm Evaluation
  
 <br>
 #### a. Queueing models
@@ -424,8 +424,8 @@ tags: OS
  
 ---
  
-<br><br>
-### 16) 다음 CPU Burst Time의 예측
+<br>
+### 17) 다음 CPU Burst Time의 예측
  
 <br>
 - 다음번 CPU burst time을 어떻게 알 수 있는가?
