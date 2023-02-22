@@ -435,7 +435,527 @@ tags: OS
 - 추정(estimate)만이 가능하다
 - 과거의 CPU burst time을 이용해서 추정 (exponential averaging)
  
+---
 
+<br><br>
+### 18) 최종 정리
+
+
+- CPU 가 하나인 상황에서의 스케줄링 기법
+
+
+<br>
+#### a. FCFS : First Come, First Served
 
  
 
+- 먼저 온 순서대로 먼저 처리함. 무슨 process 인지, 우선순위가 어떤지도 따지지 않고 그냥 먼저 오는 순으로 처리. 이것은 nonpreemptive 스케줄링임. 즉, CPU 를 갖게 되면 자발적으로 내려놓지 않는 이상 CPU 를 빼앗기지 않음. 이것은 비효율적임. CPU 를 길게 쓰는 IO Bound 가 먼저 와서 CPU 점유해버리면 나중에 온 CPU Bound 잡들이 계속 기다리게 되기 때문에 비효율적임. 이렇게 긴 job 때문에 짧은 job 들이 큐에서 기다리는 현상을 Convoy Effect 라고 함.
+
+--- 
+
+<br>
+#### b. SJF : Shortest Job First 
+
+ 
+- 실행 시간이 짧은 Job 부터 처리함. 스케줄링 기법 중 Job들의 평균 대기 시간(Average Waiting Time) 이 가장 짧음. 근데 긴 Job 이 영원히 기다릴 수 있음(이것을 starvation 현상이라고 함)
+
+- preemptive 버전과 nonpreemptive 버전이 있음.
+
+- preemptive 버전은, 짧은 job이 CPU 점유하고 있는 와중에 더 짧은 job이 오면 CPU 를 빼앗김.
+
+- nonpreemptive 버전은 빼앗기지 않고 다 끝낸 다음에 가장 짧은 job이 CPU 를 얻음.
+
+---
+
+<br>
+#### c. Priority 
+
+
+- 우선순위가 제일 높은 Process 먼저 CPU 를 줌. 이 역시 preemptive 버전과 nonpreemptive 버전이 있음. 
+
+- 또한, starvation 현상 역시 발생 가능. starvation 을 방지하기 위해, Aging 이라는 기법을 사용.
+
+- 우선 순위가 낮은 Process 가 순서를 빼앗기면서 오래오래 기다리게 되면, 오래 기다린 만큼 우선 순위가 올라가서 CPU 를 점유할 수 있도록 기법.
+
+---
+ 
+<br>
+#### d.  Round Robin 
+ 
+
+- 위의 스케줄링에서는 preemptive 가 아닌 이상에야 job 이 끝날 때 까지 CPU 를 선점하지만, RR 은 CPU 를 줄 때 정해진 시간 만큼만 줘서 job 이 끝나지 않았음에도 CPU 를 강제로 빼앗음(preemptive) 
+
+- process 들이 CPU 를 최초로 얻기까지 걸리는 시간인 '응답시간 response time' 이 빨라짐. 왜냐면 CPU 를 조금씩 줬다 빼앗었다 하기 때문에. CPU 를 나눠주는 기준은? 모든 Process 에게 균등하게 기회를 한 번씩 주나봄. 그러면, FCFS 의 time preemptive 버전이라고 볼 수 있을까? 그렇다.
+
+- RR 의 특징 중 하나는, CPU 를 길게 쓰는 process 는 기다리는 시간이 길고 (CPU 기다리는 횟수가 많음) CPU 를 짧게 쓰는 process 는 기다리는 시간이 짧음 (CPU 기다리는 횟수 적음)
+
+- 왜냐면 짧은 process 들은 n만큼 기다렸다가 CPU 할당받고 금방 쓰고 나가는데 긴 process 들은 n만큼 기다렸다가 CPU 할당받고 쓰고 빼앗기는 일을 여러번 반복해야 하기 때문에.
+
+
+- CPU 를 점유하는 시간을 q 라고 하자. q를 길게 하면 할수록 FCFS 와 똑같아지고(Convoy Effect) q를 짧게 하면 CPU 점유하는 process 간 context switching 이 계속 일어나기 때문에 시스템 전체 성능이 떨어짐. 결국, 적당한 q 가 좋음 ( 대략 10~100 ms 라고 함 )
+
+- SJF 보다 average turnaround time 이 길지만 response time (최초로 CPU 를 받는 데 걸리는 시간) 은 짧다. 응답 시간이 짧다는 것이 중요한 장점!
+
+ 
+- 실행 시간이 모두 100s 로 똑같은 job 이 5개가 있다고 하자. RR 의 q가 1초라면, 5개의 job 들은 1초씩 번갈아가며 CPU 를 할당받다가, 500초가 될 때 5개의 job 들이 차례대로 끝이 나게 된다. 
+
+- 이 말은, 500초 동안 어떤 job들도 끝나지 않는다는 말. 차라리 q를 100으로 두어서, 100초에 job 하나 끝내고, 200초에 job 하나 끝내고... 하는 편이 먼젓번의 예보다는 나음. 일반적으로는 긴 process 와 짧은 process 가 섞여있기 때문에 위의 일이 많이 일어나지 않음  이런 특수한 상황도 있다는 걸 알아두자.
+
+ 
+
+ 
+---
+ 
+<br>
+#### e. Multilevel Queue
+
+
+- Multilevel Queue 는 우선순위가 각기 다른 레디큐를 여러개 두는 것임. 위에 이미지에서 보는 것 처럼, 가장 위에 system 이 1순위, 그 다음 interactive 가 2순위, ,,, 마지막 student 가 5순위임. 이렇게 계급별로 나눠진 큐에 각 process 들이 들어가서 기다림. CPU 는 하나뿐이기 때문에, 1순위 큐에 있는 process 들이 먼저 CPU 를 사용함. 1순위 큐가 비면 2순위 큐의 process 들이 CPU 를 사용하고.... 이렇게 큐의 계급을 따라서 CPU 를 사용하게 됨.
+
+ 
+
+- 여기서 우선순위의 기준은 무엇인가? 또한, 하나의 큐에서 CPU 를 사용하는 기준은 또 무엇인가? 전자와 후자의 기준은 상황에 따라 다를 수 있음. process 들은 전자의 기준에 따라 들어가는 큐가 달라지게 될 것임. 여기서 말하는 상황이라는 것을 아래 예를 들어 이해해보자.
+
+
+- 두 개의 큐 (foreground, background) 가 있다고 하자. 이 두 개의 큐의 우선순위는 foreground 가 높다. forground 큐에서 process 를 선출할 때는 RR 방식을 이용(왜냐면 interactive 한 process 이기 때문에 응답 시간이 빨라야 하므로) background 큐에서 process 를 선출할 때는 FCFS 방식을 이용(왜냐면 batch job 이라서 응답시간이 빠를 필요없이 천천히 진행해도 괜찮기 때문)
+
+
+- 근데 forg 에 process 가 계속 쌓이면 우선순위가 낮은 backg 내의 process 들이 영원히 처리되지 않는 startvation 현상이 빚어질 수 있기 때문에, time slice 를 둠. 8:2 로 두어서, 적어도 단위 시간의 20%는 backg 가 쓸 수 있도록 함.
+
+---
+
+
+<br><br>
+- CPU 가 여러개일 때의 스케줄링 기법
+
+<br>
+#### a. Real-Time Scheduling 
+
+ 
+- Hard Real-Time system : 반드시 정해진 시간 내에 task 를 끝내도록 스케줄링해야 함. 정해진 task 처리 시간을 넘기면 실패하는 경우 (자동차의 air-bag 등)
+
+
+- Soft Real-Time system : 일반 프로세스에 비해 높은 priority 를 갖고 task 를 실행함. 정해진 task 처리 시간을 넘기면 성능이 감소하는 경우 (streaming video 등)
+
+- (그래서 최대한 빨리 끝낼 수 있도록. dead line 이 있긴 하지만 조금 넘어도 상관 없음)
+
+- 이벤트가 발생하고 나서부터 응답 할 때까지의 시간을 Event Latency 라고 함
+
+ 
+ 
+<br>
+#### b. Thread Scheduling
+
+ 
+- User level thread : process 내부에서만 thread 의 존재를 알고 있음. 커널은 몰라. 사용자 process 가 직접 thread 를 관리.
+
+- Kernel level thread : 커널이 process 내부의 thread 존재를 알고 있음.
+
+ 
+<br>
+- Local Scheduling : 사용자 Process 가 CPU 를 잡고 있을 때, Process 가 직접 어떤 thread 에게 CPU 를 나눠줄지 스케줄링하는 것. 커널은 이 Process 에게 CPU 만 줄 뿐 thread 관리 측면에서는 전혀 손대지 않음.
+
+- Global Scheduling : 커널이 thread 의 존재를 알고 있고 직접 thread 를 관리하고 CPU 스케줄링함. 커널이 특정 스케줄링에 의해 Process 에게 CPU 주듯이 thread 에게도 특정 스케줄링에 의해 CPU 를 나눠줌.
+
+
+---
+
+<br><br>
+# 3. Process Syschronization
+
+- 데이터의 접근
+
+---
+
+<br> 
+### 1) Race Condition
+
+- a. 공유 메모리를 사용하는 프로세스들
+- b. 커널 내부 데이터를 접근하는 루틴들 간(시스템콜)
+ 
+---
+
+<br> 
+### 2)OS에서 언제 Race Condition이 발생하는가?
+ 
+- a. Kernel 수행 중 인터럽트 발생 시, inturrupt를 disable시켜서 해결. 순차적으로 하도록!
+
+- b. Process가 System call을 하여 Kernel mode로 수행중인데 context switch가 일어나는 경우
+
+- c. Multiprocessor에서 shared memory 내의 kernel data
+
+
+ 
+---
+
+<br> 
+### 3) Process Synchronization 문제
+ 
+
+- 공유데이터 shared data의 동시 접근 concurrent access는 데이터의 불일치 문제 inconsistency를 발생시킬 수 있다.
+일관성 consistency 유지를 위해서는 협력 프로세스 cooperating process 간의 실행 순서 orderly execution를 정해주는 매커니즘 필요
+ 
+---
+
+<br> 
+### 4) Race Condition
+ 
+
+- 여러 프로세스들이 동시에 공유 데이터를 접근하는 상황
+- 데이터의 최종 연산 결과는 마지막에 그 데이터를 다룬 프로세스에 따라 달라짐
+- Race condition을 막기 위해서는 concurrent process는 동기화 Sycnhronize되어야 한다
+
+- Example of a Race Condition
+- 보통은 문제가 안생기지만, 공유데이터에 접근하는 등의 위의 예에서는 문제가 될 수도 있다.
+ 
+---
+
+<br> 
+### 5) The Critical-Section Problem
+
+- Critical-Section = 임계구역
+
+ 
+
+- n개의 프로세스가 공유 데이터를 동시에 사용하기를 원하는 경우 각 프로세스의 code segment에는 공유데이터를 접근하는 코드인 critical section이 존재
+- Problem
+	- 하나의 프로세스가 critical section에 있을 때 다른 모든 프로세스는 critical section에 들어갈 수 없어야 한다
+
+→ 이 문제를 어떻게 해결할까? 를 고민하는 챕터
+
+ 
+---
+
+<br> 
+### 6) Initial Attempts to Solve Probelm
+ 
+
+- 두개의 프로세스가 있다고 가정
+- 프로세스들의 일반적인 구조
+
+```cpp
+do {
+	entry section
+	ciritical section
+	exit section
+	remainder section
+} while (1);
+
+```
+
+- 프로세스들은 수행의 동기화(synchronize)를 위해 몇몇 변수를 공유할 수 있다 → synchronization variable
+ 
+---
+
+<br> 
+### 7) 프로그램적 해결법의 충족조건
+ 
+<br>
+- Mutual Exclusion(상호 배제)
+	- 프로세스 Pi가 critical section 부분을 수행 중이면 다른 모든 프로세스들은 그들의 critical section에 들어가면 안된다.
+
+<br>
+- Progress
+	- 아무도 critical section에 있지 않은 상태에서 critical section에 들어가고자 하는 프로세스가 있으면 critical section에 들어가게 해주어야 한다.
+
+<br>
+- Bounded Waiting(유한대기)
+	- 프로세스가 critical section에 들어가려고 요청한 후부터 그 요청이 허용될 때까지 다른 프로세스들이 critical section에 들어가는 횟수에 한계가 있어야 한다.
+
+<br>
+- 가정: 
+	- 1) 모든 프로세스의 수행속도는 0보다 크다
+	- 2) 프로세스들 간의 상대적인 수행속도는 가정하지 않는다
+	
+<br>
+* 코드로 작성된 문장의 고급언어이기 때문에 단일 instruction이 아니라서 CPU를 빼앗길 수 있는 상황을 가정
+
+ 
+
+---
+
+<br> 
+### 8) Algorithm 모음
+
+<br> 
+#### a. Algorithm 1
+
+- 문제점: Progress를 충족 못함
+- 설명 :
+ 
+---
+
+<br> 
+#### b. Algoritm 2
+ 
+- 설명 :
+ 
+---
+
+<br> 
+#### c. Algoritm 3 (Peterson’s Algoritm)
+
+- 설명 :
+
+- 턴과 플래그를 모두 사용
+- 상대방이 깃발과 턴을 모두 가지고있지 않을때만 대기하고 있음
+- 문제점: Busy Waiting(=spin lock) / 계속 CPU와 메모리 자원을 쓰면서 기다린다.
+ 
+---
+
+<br> 
+### 9) Synchronization Hardware
+ 
+
+- 하드웨어적으로 Test & Modify를 atomic(intruction 단위로 끊어)하게 수행할 수 있도록 지원하는 경우 앞의 문제는 간단히 해결된다.
+
+ 
+---
+
+<br> 
+### 10) Semaphores
+ 
+<br>
+- 앞의 방식들을 추상화시킴
+	- 추상자료형(object, operation) → 더 알아보기
+
+<br>
+- Semaphore S
+	- integer variable
+	- 아래의 두가지 automic 연산에 의해서만 접근 가능
+
+<br>
+#### a. Busy Wait
+
+Critical Section of n Processes By Semaphore - Spin Lock
+ 
+
+단점: Spin Lock
+Block & Wakeup 방식의 구현도 가능 (=sleep lock)
+
+<br> 
+#### b. Block & Await
+ 
+- Critical Section of n Processes By Semaphore - Block & WakeUp
+- 구체적인 구현(block/wakeup)
+- P: 자원반출 / V: 자원반납
+
+<br> 
+#### c. 어떤 방식이 더 나을까? (busy wait vs block wakeup)
+ 
+<br>
+- Block/wakeup overhead versus Critical Section의 길이
+	- Critical section의 길이가 긴 경우 Block Wakeup이 적당
+	- Critical section의 길이가 매우 짧은 경우 Block/Wakeup 오버헤드가 Busy-wait오버헤드보다 더 커질 수 있음
+	- 일반적으로는 Block/WakeUP 방식이 더 좋음
+ 
+<br>
+#### d. 두가지 타입의 세마포어
+ 
+<br>
+- Counting semaphore
+	- 도메인이 0 이상인 임의의 정수값
+	- 주로 resource counting에 사용
+<br>
+- Binary semaphore(=mutex)
+	- 0 또는 1 값만 가질 수 있는 semaphore
+	- 주로 mutual exclusion (lock/unlock)에 사용
+ 
+---
+
+<br> 
+### 11) Deadlock and Starvation의 문제
+ 
+<br>
+- Deadlock: 둘 이상의 프로세스가 서로 상대방에 의해 충족될 수 있는 event를 무한정 기다리는 현상
+- S와 Q가 1로 초기화된 semaphore라 했을때,
+
+<br>
+- Starvation
+	- Indefinite blocking: 프로세스가 suspend된 이유에 해당하는 세마포어 큐에서 빠져나갈 수 없는 현상
+	- 식사하는 철학자 문제(데드락 문제도 발생할수 있음! 생각해보자)
+	- Dining-Philosophers Problem
+	- 해결방법 : 자원의 획득 순서를 정의해주면 된다.(프로그래머가 유의해서 작성해야 할 문제임)
+ 
+---
+
+<br> 
+### 12) Bounded-Buffer Problem(생산자-소비자 문제)
+ 
+<br>
+- 버퍼의 크기가 유한한 환경에서
+- 생산자 프로세스, 소비자 프로세스가 각각 여러개 있는 상황
+- 버퍼가 가득 찼을때는 생산자도 버퍼에 데이터를 쓰지 못함
+- 세마포어의 역할이 2가지
+	- 동시 접근을 방해하기 위해(전체버퍼에 대한 접근을 막는건가?)
+	- 가용자원을 표시하기 위해(생산자: 비어있는 버퍼, 소비자: 내용이 있는 버퍼)
+
+<br>
+- Synchronization Variables
+	- semaphore full = 0, empty = n, mutex = 1
+
+```cpp
+//Producer
+do { 
+	...
+	produce an item in x
+	...
+	P(empty);
+	P(mutex):
+	...
+	add x to buffer
+	V(mutex);
+	V(full);
+} while (1);
+ 
+//Consumer
+ 
+do { 
+	P(full);
+	P(mutex):
+	...
+	remove an item from buffer to y
+	...
+	V(mutex);
+	V(empty);
+	...
+	consume the item in y
+	...
+} while (1);
+``` 
+ 
+---
+
+<br> 
+### 13) Readers-Writers Problem
+ 
+<br>
+- 한 프로세스가 DB에 write 중일 때, 다른 프로세스가 접근하면 안됨
+- read는 동시에 여럿이 해도 됨
+
+<br>
+- 해결책
+	- Writer가 DB에 접근 허가를 아직 얻지 못한 상태에서는 모든 대기중인 Reader들을 다 DB에 접근하게 해준다.
+	W- riter는 대기 중인 Reader가 하나도 없을 때 DB접근이 허용된다
+	- 일단 Writer가 DB에 접근 중이면 Reader들은 접근이 금지된다
+	- Writer가 DB에서 빠져나가야만 Reader의 접근이 허용된다
+	
+<br>
+- Shared data
+	- DB 자체
+	- readcount; (현재 DB에 접근 중인 Reader의 수)
+
+<br>
+- Synchronization variables
+	- mutex: 공유변수 readcount를 접근하는 코드(critical section)의 mutual exclusion 보장을 위해
+	- db: Reader와 Writer가 공유 DB자체를 올바르게 접근하는 역할
+
+
+```cpp
+/*
+Shared data 
+- int readcount = 0;
+- DB 자체
+Synchronization variables
+- semaphore mutex = 1, db = 1
+*/
+ 
+//Writer
+P(db);
+...
+writing DB is performed
+...
+V(db);
+// Starvation 발생 가능
+ 
+//Reader
+P(mutex); // 공유변수 lock
+readcount++;
+if (readcount == 1) P(db); /* block writer */
+V(mutex);
+    ...
+reading DB is performed
+    ...
+P(mutex);
+readcount--;
+if (readcount == 0) V(db); /* enable writer */
+V(mutex):
+
+```
+
+<br>
+- Starvation을 어떻게 해결해야 하나?
+	- Writer의 차례를 한번씩 주는걸로 해결할 수 있다.
+ 
+---
+
+<br> 
+### 14) Dining-Philosophers Problem
+ 
+
+- Synchronization Variables
+- semaphore chopstick[5] (모든 처음 값은 1]
+- Philosopher i
+
+
+
+```cpp
+do {
+	P(chopstick[i]);
+	P(chopstock[(i+1) % 5]);
+	...
+	eat();
+	...
+	V(chopstick[i]);
+	V(chopstick[(i+1) % 5]);
+	...
+	think();
+	...
+} while (1);
+```
+
+<br>
+- 위 코드의 문제점 : 
+	- Deadlock 가능성이 있다.
+	- 모든 철학자가 동시에 배가 고파져 왼쪽 젓가락을 집어버린 경우
+
+---
+
+<br>
+- 해결방안 : 
+	- 4명의 철학자만이 테이블에 동시에 앉을 수 있도록 한다
+	- 젓가락을 두개 모두 집을 수 있을 때에만 젓가락을 잡을 수 있게
+	- 비대칭 : 짝수 철학자는 왼쪽 젓가락부터 잡도록, 홀수는 오른쪽 부터
+
+```cpp
+
+enum { thinking, hungry, eating } state[5];
+semaphore self[5]=0 ;
+semaphore mutex=1;
+ 
+Philosopher i
+do { 
+  pickup(i);
+  eat();
+  putdown(i);
+  think();
+} while(1);
+ 
+void putdown(int i) {
+  P(mutex);
+  state[i] = thinking;
+  test((i+4) % 5);
+  test((i+1) % 5);
+  V(mutext);
+}
+ 
+void pcickup(int i) {
+
+```
+
+
+
+---
+
+
+<br>
