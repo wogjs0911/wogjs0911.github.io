@@ -395,11 +395,11 @@ tags: OS
 
 <br>
 - Local Scheduling
-	- User level thread의 경우 사용자 수준의 thread library에 의해 어떤 thread를 스케쥴 할지 결정
+	- User level thread의 경우 사용자 수준의 thread library에 의해 어떤 thread를 스케쥴 할지 결정(유저용)
 
 <br>
 - Global Scheduling
-	- Kernel level thread의 경우 일반 프로세스와 마찬가지로 커널의 단기 스케줄러가 어떤 thread를 스케줄 할지 결정
+	- Kernel level thread의 경우 일반 프로세스와 마찬가지로 커널의 단기 스케줄러가 어떤 thread를 스케줄 할지 결정(커널용)
 
 ---
  
@@ -420,7 +420,7 @@ tags: OS
 <br>
 #### c. Simulation(모의 실험)
 
-- 알고리즘을 모의 프로그램으로 작성 후 trace(시뮬레이션 프로그램의 인풋으로 들어갈 테스트케이스?)를 입력으로 하여 결과 비교
+- 알고리즘을 모의 프로그램으로 작성 후 trace(시뮬레이션 프로그램의 입력값으로 들어갈 테스트케이스?)를 입력으로 하여 결과 비교
  
 ---
  
