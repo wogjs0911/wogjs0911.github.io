@@ -163,7 +163,15 @@ class NoticeDaoTest {
 
 - 나는 해당 list의 데이터 정보가 필요하다.
 
-<br>
+
+<br><br>
+### 3) 쿠키 에러 
+
+- 쿠키를 받기 위해서 쿠키를 먼저 심는 url로 이동해서 쿠키를 심고 나중에 쿠키를 받았는지 다른 페이지에서도 확인할 수 있다. 
+
+- index 페이지에서 쿠키를 심었으면, reg 페이지에서 쿠키를 확인할 수 있다.
+
+
 
 ---
 
@@ -248,7 +256,54 @@ http://localhost/webprj2/hello?c=10
 
 
 
+---
 
+# 4. JSP 에러
+
+### 1) EL 태그 못 읽는 에러
+
+- EL 태그를 사용하기 위해서는 JSTL의 taglib 지시자 블럭이 필요하다. 주의하기!
+
+<br>
+- list.jsp
+
+```java
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>admin 메뉴 목록 페이지</h1>
+
+	<nav>
+		<hl>페이저</h1>  
+		<form>
+			<label>size: </label>
+			<!-- <input name="s" value="10"> -->
+			<select>
+				<option value="10">10</option>
+				<option value="20">20</option>
+				<option value="30">30</option>	
+			</select>
+			<input type="submit" value="변경">
+		</form>
+		
+		<ul>
+		<c:forEach var="n" begin="1" end="5">
+			<li><a href="list?p=${n}&q=${m}">${n}</a></li>
+		</c:forEach>
+	
+		</ul>
+	</nav>
+</body>
+</html>
+```
 
 
 
