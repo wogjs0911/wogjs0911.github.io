@@ -576,7 +576,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
 
 <br> 
-### 2)OS에서 언제 Race Condition이 발생하는가?
+#### a. OS에서 언제 Race Condition이 발생하는가?
  
 - a. Kernel 수행 중 인터럽트 발생 시, inturrupt를 disable시켜서 해결. 순차적으로 하도록!
 
@@ -589,7 +589,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
 
 <br> 
-### 3) Process Synchronization 문제
+#### b. Process Synchronization 문제
  
 
 - 공유데이터 shared data의 동시 접근 concurrent access는 데이터의 불일치 문제 inconsistency를 발생시킬 수 있다.
@@ -598,7 +598,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
 
 <br> 
-### 4) Race Condition
+#### c. Race Condition
  
 
 - 여러 프로세스들이 동시에 공유 데이터를 접근하는 상황
@@ -611,7 +611,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
 
 <br> 
-### 5) The Critical-Section Problem
+### 2) The Critical-Section Problem
 
 - Critical-Section = 임계구역
 
@@ -627,7 +627,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
 
 <br> 
-### 6) Initial Attempts to Solve Probelm
+#### a. Initial Attempts to Solve Probelm
  
 
 - 두개의 프로세스가 있다고 가정
@@ -648,7 +648,7 @@ do {
 ---
 
 <br> 
-### 7) 프로그램적 해결법의 충족조건
+#### b. 프로그램적 해결법의 충족조건
  
 <br>
 - Mutual Exclusion(상호 배제)
@@ -675,7 +675,7 @@ do {
 ---
 
 <br> 
-### 8) Algorithm 모음
+### 3) Algorithm 모음
 
 <br> 
 #### a. Algorithm 1
@@ -704,7 +704,7 @@ do {
 ---
 
 <br> 
-### 9) Synchronization Hardware
+### 4) Synchronization Hardware
  
 
 - 하드웨어적으로 Test & Modify를 atomic(intruction 단위로 끊어)하게 수행할 수 있도록 지원하는 경우 앞의 문제는 간단히 해결된다.
@@ -713,7 +713,7 @@ do {
 ---
 
 <br> 
-### 10) Semaphores
+#### a. Semaphores
  
 <br>
 - 앞의 방식들을 추상화시킴
@@ -725,7 +725,7 @@ do {
 	- 아래의 두가지 automic 연산에 의해서만 접근 가능
 
 <br>
-#### a. Busy Wait
+##### a) Busy Wait
 
 Critical Section of n Processes By Semaphore - Spin Lock
  
@@ -734,14 +734,14 @@ Critical Section of n Processes By Semaphore - Spin Lock
 Block & Wakeup 방식의 구현도 가능 (=sleep lock)
 
 <br> 
-#### b. Block & Await
+##### b) Block & Await
  
 - Critical Section of n Processes By Semaphore - Block & WakeUp
 - 구체적인 구현(block/wakeup)
 - P: 자원반출 / V: 자원반납
 
 <br> 
-#### c. 어떤 방식이 더 나을까? (busy wait vs block wakeup)
+##### c) 어떤 방식이 더 나을까? (busy wait vs block wakeup)
  
 <br>
 - Block/wakeup overhead versus Critical Section의 길이
@@ -750,7 +750,7 @@ Block & Wakeup 방식의 구현도 가능 (=sleep lock)
 	- 일반적으로는 Block/WakeUP 방식이 더 좋음
  
 <br>
-#### d. 두가지 타입의 세마포어
+##### d) 두가지 타입의 세마포어
  
 <br>
 - Counting semaphore
@@ -764,7 +764,7 @@ Block & Wakeup 방식의 구현도 가능 (=sleep lock)
 ---
 
 <br> 
-### 11) Deadlock and Starvation의 문제
+### 5) Deadlock and Starvation의 문제
  
 <br>
 - Deadlock: 둘 이상의 프로세스가 서로 상대방에 의해 충족될 수 있는 event를 무한정 기다리는 현상
@@ -780,7 +780,7 @@ Block & Wakeup 방식의 구현도 가능 (=sleep lock)
 ---
 
 <br> 
-### 12) Bounded-Buffer Problem(생산자-소비자 문제)
+#### a. Bounded-Buffer Problem(생산자-소비자 문제)
  
 <br>
 - 버퍼의 크기가 유한한 환경에서
@@ -827,7 +827,7 @@ do {
 ---
 
 <br> 
-### 13) Readers-Writers Problem
+#### b. Readers-Writers Problem
  
 <br>
 - 한 프로세스가 DB에 write 중일 때, 다른 프로세스가 접근하면 안됨
@@ -890,7 +890,7 @@ V(mutex):
 ---
 
 <br> 
-### 14) Dining-Philosophers Problem
+#### c. Dining-Philosophers Problem
  
 
 - Synchronization Variables
@@ -959,7 +959,7 @@ void pcickup(int i) {
 
 
 <br><br>
-#4. DeadLock
+# 4. DeadLock
 
 <br>
 
