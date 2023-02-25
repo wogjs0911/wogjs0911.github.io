@@ -125,7 +125,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 2) CPU-burst Time의 분포
+#### a. CPU-burst Time의 분포
 
 - 여러 종류의 job(process)들이 섞여있기 때문에 CPU 스케줄링이 필요하다.
 	- Interactive job에게 적절한 response 제공 요망
@@ -134,7 +134,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 3) 프로세스의 특성 분류
+#### b. 프로세스의 특성 분류
 
 <br>
 - I/O- bound process
@@ -149,7 +149,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 4) CPU Scheduler & Dispatcher
+#### c. CPU Scheduler & Dispatcher
  
 - 운영체제의 특정 기능임
 
@@ -175,7 +175,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 5) Scheduling Criteria
+#### d. Scheduling Criteria
 
 - Performance Index ( = Performance Measure, 성능 척도)
 - 위의 2가지는 CPU입장, 밑의 3가지는 프로세스 입장
@@ -204,7 +204,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 6) Scheduling Algoritm
+### 2) Scheduling Algoritm
  
 
 - FCFS
@@ -218,7 +218,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br> 
-### 7) FCFS(First-Come First-Served)
+#### a. FCFS(First-Come First-Served)
  
 
 - 비선점형(unpreemptive)
@@ -227,7 +227,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 8) SJF(Shortes-Job-First)
+#### b. SJF(Shortes-Job-First)
  
 
 - 각 프로세스의 다음번 CPU burst time을 가지고 스케쥴링에 적용
@@ -257,7 +257,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 9) Priority Scheduling
+#### c. Priority Scheduling
  
 <br>
 - A priority number(integer) is associated with each process
@@ -281,7 +281,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 10) RR(Round Robin) - 현대의 운영체제가 사용하는 방법
+#### d. RR(Round Robin) - 현대의 운영체제가 사용하는 방법
  
 
 - 각 프로세스는 동일한 크기의 할당시간(time quantum)을 가짐
@@ -307,7 +307,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 11) Multilevel Queue
+#### e. Multilevel Queue
  
 <br>
 - Ready Queue를 여러개로 분할
@@ -333,7 +333,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 12) Multilevel Feedback Queue
+#### f. Multilevel Feedback Queue
  
 - 프로세스가 다른 큐로 이동 가능
 - 에이징(aging)을 이와 같은 방식으로 구현할 수 있다(오래되면 프로세스를 다른 큐로 이동 시켜서)
@@ -350,7 +350,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 13) Multiple-Processor Scheduling
+### 3) Multiple-Processor Scheduling
  
 
 - CPU가 여러개인 경우 스케쥴링은 더욱 복잡해짐
@@ -376,7 +376,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 14) Real-Time Scheduling
+### 4) Real-Time Scheduling
  
 - periodic한 성격의 작업이 많다.
 
@@ -391,7 +391,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 15) Thread Scheduling
+### 5) Thread Scheduling
 
 <br>
 - Local Scheduling
@@ -404,7 +404,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 16) Algorithm Evaluation
+### 6) Algorithm Evaluation
  
 <br>
 #### a. Queueing models
@@ -425,7 +425,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
  
 <br>
-### 17) 다음 CPU Burst Time의 예측
+### 7) 다음 CPU Burst Time의 예측
  
 <br>
 - 다음번 CPU burst time을 어떻게 알 수 있는가?
@@ -438,7 +438,7 @@ tags: OS CpuScheduling ProcessSyschronization Deadlock
 ---
 
 <br><br>
-### 18) 최종 정리
+### 8) 최종 정리
 
 
 - CPU 가 하나인 상황에서의 스케줄링 기법
