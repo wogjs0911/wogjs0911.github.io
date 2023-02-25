@@ -1,7 +1,7 @@
 ---
 key: /2023/02/11/Operating-System.html
 title: CS - 운영체제(1)
-tags: OS
+tags: OS SystemStructure ComputerStructure ProgramExecution Process ProcessManagement
 ---
 
 # 1. Intro
