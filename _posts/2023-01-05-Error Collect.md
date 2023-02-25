@@ -165,13 +165,127 @@ class NoticeDaoTest {
 
 
 <br><br>
-### 3) 쿠키 에러 
+### 3) Context Path 에러
+
+- Context Path가 root 말고도 설정되어 있다면 uri를 url과 비교할 때, Context Path도 설정해주자! 
+
+- 주의할 코드 부분 :
+
+```java
+
+@Override
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		PrintWriter out = response.getWriter();
+		
+		String uri = request.getRequestURI();
+		String url = request.getRequestURL().toString();
+		
+		String viewSrc = "/WEB-INF/view/notfound.jsp";
+		
+		out.printf("uri:%s\n", uri);
+		out.printf("url:%s\n", url);
+		
+		if(uri.equals("/webprj2/menu/list"))
+			viewSrc = new ListPOJOController5().requestHandler();
+	}
+```
+
+<br>
+- 전체 코드 : 
+
+```java
+package com.newlecture.web.controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import com.newlecture.web.controller.menu.DetailPOJOController;
+import com.newlecture.web.controller.menu.ListPOJOController5;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+// 바꿔주기
+@WebServlet("/")
+public class JSPDispatcherServlet extends HttpServlet{
+	
+	// 반복하기위해서 배열에 넣어준다.
+	String[] urls = {"/webprj2/menu/list", "/webprj2/menu/detail"};
+	
+	String[] controllers = {
+			"com.newlecture.web.controller.menu.ListPOJOController5",
+			"com.newlecture.web.controller.menu.DetailPOJOController"
+			};
+			
+			
+	@Override
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		PrintWriter out = response.getWriter();
+		
+		String uri = request.getRequestURI();
+		String url = request.getRequestURL().toString();
+		
+		String viewSrc = "/WEB-INF/view/notfound.jsp";
+		
+		out.printf("uri:%s\n", uri);
+		out.printf("url:%s\n", url);
+		
+		
+		// 방법 2: 컴퓨터가 반복하는 코드
+		while(uri.equals("/webprj2/menu/list"))
+			viewSrc = new ListPOJOController5().requestHandler();
+	
+		for(int i=0; i<urls.length; i++) {
+			
+			?? controller = null;
+			
+			if(uri.equals(urls[i])) {
+				controller = (??) Class.forName(controllers[i]).newInstance();
+				
+				controller.requestHandler();	//  우리는 controller를 포함하는 가시 형식 필요하는 공통 형식이 필요하다!
+				
+				// 개체 정보를 다 찾아서 함수 호출을 찾아서 다 꺼내서 사용할 수 있다. 
+				// 자바 '리플렉션'이라는 개념이 필요하다!
+			}
+		}
+		
+		
+		// 방법 1: 
+		// 디스패처가 해당 url과 일치하면, 해당 POJO 컨트롤러를 가져온다.
+		// 컨텍스트 path가 있는 경우, 위에서 출력된 uri 경로를 여기에 그대로 넣어줘서 비교한다!!** 
+		// uri는 url에서 localhost를 뺀 나머지의 경로이다. 
+		if(uri.equals("/webprj2/menu/list"))
+			viewSrc = new ListPOJOController5().requestHandler();
+		
+		if(uri.equals("/webprj2/menu/detail"))
+			viewSrc = new DetailPOJOController().requestHandler();
+		
+		out.write("Hello Front");
+		
+		request.getRequestDispatcher(viewSrc)
+		.forward(request, response);
+		
+	// 앞으로 할 것!
+	// /menu/list 요청이 오면 Listcontroller의 requestHandler()를 호출하고 
+	// /menu/detail 요청이 오면 DetailController의 requestHandle()를 호출한다.
+	
+	} 
+}
+
+
+``` 
+
+<br><br>
+### 4) 쿠키 에러 
 
 - 쿠키를 받기 위해서 쿠키를 먼저 심는 url로 이동해서 쿠키를 심고 나중에 쿠키를 받았는지 다른 페이지에서도 확인할 수 있다. 
 
 - index 페이지에서 쿠키를 심었으면, reg 페이지에서 쿠키를 확인할 수 있다.
 
-
+- 해결 방법 : 하지만, 원래 쿠키는 모든페이지에서 심게 해야하므로 cookie.setPath("/") 설정을 해주면 이러한 고민이 사라진다.**
 
 ---
 
@@ -258,11 +372,15 @@ http://localhost/webprj2/hello?c=10
 
 ---
 
+<br><br>
 # 4. JSP 에러
 
+<br>
 ### 1) EL 태그 못 읽는 에러
 
+<br>
 - EL 태그를 사용하기 위해서는 JSTL의 taglib 지시자 블럭이 필요하다. 주의하기!
+	- 필요한 것 : `<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>`
 
 <br>
 - list.jsp
