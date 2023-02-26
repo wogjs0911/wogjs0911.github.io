@@ -1,7 +1,7 @@
 ---
 key: /2023/01/05/Error-Collect.html
 title: Error - Error 모음
-tags: java javascript spring springboot eclipse mysql oracleDB  servlet
+tags: java javascript spring springboot eclipse mysql oracledb servlet
 ---
 
 # 0. Project 주의 :
