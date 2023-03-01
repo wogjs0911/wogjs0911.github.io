@@ -518,22 +518,25 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 
 ### 1) Demand Paging
 
+<br>
 - 실제로 필요할 때 page를 메모리에 올리는 것
-- I/O 양의 감소
-- Memory사용량 감소
-- 빠른 응답 시간
-- 더 많은 사용자 수용
-- Valid / Invalid bit의 사용
-- Invalid의 의미
-- 사용되지 않는 주소 영역인 경우(아래 그림의 6, 7번)
-- 페이지가 물리적 메모리에 없는 경우(아래 그림의 1, 3, 4)
-- 처음에는 모든 page entry가 invalid로 초기화
-- address translation 시에 invalid bit이 set되어 있으면
-→ “Page Fault”
+	- I/O 양의 감소
+	- Memory사용량 감소
+	- 빠른 응답 시간
+	- 더 많은 사용자 수용
 
+<br>
+- Valid / Invalid bit의 사용
+	- Invalid의 의미
+		- 사용되지 않는 주소 영역인 경우(아래 그림의 6, 7번)
+	- 페이지가 물리적 메모리에 없는 경우(아래 그림의 1, 3, 4)
+	- 처음에는 모든 page entry가 invalid로 초기화
+	- address translation 시에 invalid bit이 set되어 있으면
+	→ “Page Fault”
+
+<br>
 - 원통이 swap area(disk/ backing store)
  
-
 
 ---
 
@@ -541,37 +544,36 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 
 ### 2) Page Fault
 
+<br>
 - Invalid page를 접근하면 MMU가 trap을 발생시킴(페이지 폴트 트랩)
-
 - 커널 모드로 들어가서 페이지 폴트 핸들러가 invoke 됨
 
-- Page Falut의 처리 순서
+<br>
+- Page Falut의 처리 순서 :
+	- Invalid reference? (eg. bad address, protection violation) → abort process
+	- Get an empty page frame (없으면 뺏어온다: replace)
+	- 해당 페이지를 disk에서 memory로 읽어온다.
+	- disk I/O가 끝나기까지 이 프로세스는 CPU를 preempt 당함(block)
+	- Disk read가 끝나면
+		- 1) page tables entry 기록, 
+		- 2) valid/invalid bit 를 “valid”로 수정
+	- ready queue에 process를 insert → dispatch later
 
-- Invalid reference? (eg. bad address, protection violation) → abort process
-Get an empty page frame (없으면 뺏어온다: replace)
-- 해당 페이지를 disk에서 memory로 읽어온다.
-
-- disk I/O가 끝나기까지 이 프로세스는 CPU를 preempt 당함(block)
-
-- Disk read가 끝나면
-	- 1) page tables entry 기록, 
-	- 2) valid/invalid bit 를 “valid”로 수정
-
-- ready queue에 process를 insert → dispatch later
-
+<br>
 - 이 프로세스가 CPU를 잡고 다시 running
-아까 중단되었던 instruction을 재개
+- 아까 중단되었던 instruction을 재개
 
 
 ---
 
 <br>
-
 ### 3) Demand Paging의 성능
 
+<br>
 - Page Falut Rate 0 ≤ p ≤ 1.0 (일반적으로 0에 가깝다.)
-- 0이면 페이지 폴트가 발생하지 않는것, 1이면 매번 발생하는 것
+	- 0이면 페이지 폴트가 발생하지 않는것, 1이면 매번 발생하는 것
 
+<br>
 - 페이지폴트 처리 시간, 스왑 아웃, 스왑인, 재시작 비용 등
  
 
@@ -582,16 +584,23 @@ Get an empty page frame (없으면 뺏어온다: replace)
 
 ### 4) Free Frame이 없는 경우 → page replacement 발생
 
+<br>
 - Page Replacement
-- 어떤 frame을 빼앗아 올지 결정해야 함
-- 곧바로 사용되지 않을 page를 쫓아내는 것이 좋음
-- 동일한 페이지가 여러 번 메모리에서 쫓겨났다가 다시 들어올 수 있음
+	- 어떤 frame을 빼앗아 올지 결정해야 함
+	- 곧바로 사용되지 않을 page를 쫓아내는 것이 좋음
+	- 동일한 페이지가 여러 번 메모리에서 쫓겨났다가 다시 들어올 수 있음
+
+<br>
 - 교체 알고리즘
-- 페이지 폴트 rate을 최소화 하는 것이 목표
+	- 페이지 폴트 rate을 최소화 하는 것이 목표
+
+<br>
 - 알고리즘의 평가
-- 주어진 page reference string에 대해 pge falut를 얼마나 내는지 조사
+	- 주어진 page reference string에 대해 pge falut를 얼마나 내는지 조사
+
+<br>
 - reference string의 예
-- 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5(일련의 페이지 번호)
+	- 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5(일련의 페이지 번호)
 
 
 ---
@@ -612,7 +621,7 @@ Get an empty page frame (없으면 뺏어온다: replace)
 #### b. FIFO(First In First Out) Algorithm
 
 - FIFO Anomaly(Belady’s Anomaly)
-- 더 많은 프레임을 가질 수록 페이지 폴트가 더 발생한다.
+	- 더 많은 프레임을 가질 수록 페이지 폴트가 더 발생한다.
 
 <br>
 
@@ -625,13 +634,15 @@ Get an empty page frame (없으면 뺏어온다: replace)
 #### d. LFU(Least Frequently Used) Algorithm
 
 - 참조 횟수가 가장 적은 페이지를 지움
-- 최저 참조 횟수인 페이지가 여러개 있는 경우?
-- LFU 알고리즘 자체에서는 여러 page 중 임의로 선정한다
-- 성능 향상을 위해 가장 오래 전에 참조된 page를 지우게 구현할 수도 있다.
+	- 최저 참조 횟수인 페이지가 여러개 있는 경우?
+	- LFU 알고리즘 자체에서는 여러 page 중 임의로 선정한다
+	- 성능 향상을 위해 가장 오래 전에 참조된 page를 지우게 구현할 수도 있다.
+
+<br>
 - 장단점
-- LRU처럼 직전 참조 시점만 보는 것이 아니라 장기적인 시간 규모를 보기 때문에 page의 인기도를 좀 더 정확히 반영할 수 있음
-- 참조 시점의 최근성을 반영하지 못함
-- LRU보다 구현이 복잡함
+	- LRU처럼 직전 참조 시점만 보는 것이 아니라 장기적인 시간 규모를 보기 때문에 page의 인기도를 좀 더 정확히 반영할 수 있음
+	- 참조 시점의 최근성을 반영하지 못함
+	- LRU보다 구현이 복잡함
 
 <br>
 
@@ -646,8 +657,10 @@ Get an empty page frame (없으면 뺏어온다: replace)
 #### f. LRU와 LFU 알고리즘의 구현
 
 - LRU → Linked List
+
+<br>
 - LFU → Heap(힙을 사용하지 않으면 O(N)이 걸리게 되므로)
-높이가 n개 일때 log(n)
+	- 높이가 n개 일때 log(n)
 
 
 ---
@@ -656,17 +669,23 @@ Get an empty page frame (없으면 뺏어온다: replace)
 ### 6) 다양한 캐싱 환경
 
 - 캐싱 기법
-- 한정된 빠른공간(캐시)에 요청된 데이터를 저장해 두었다가 후속 요청 시 캐쉬로부터 직접 서비스하는 방식
-- 페이징 시스템(디스크의 swap area) 외에도, 캐시 메모리, 버퍼 캐싱(디스크의 file system), 웹 캐싱 등 다양한 분야에서 사용
-- 캐시 운영의 시간 제약
-- 교체 알고리즘에서 삭제할 항목을 결정하는 일에 지나치게 - 많은 시간이 걸리는 경우 실제 시스템에서 사용할 수 없음
-- 버퍼 캐싱이나 웹 캐싱의 경우 → LFU, LRU 사용 가능
-- O(1)에서 O(logN)정도까지 허용
-- 페이징 시스템인 경우 → 사용할 수 없음
-- 페이지 폴트인 경우에만 OS가 관여함
-- 페이지가 이미 메모리에 존재하는 경우 참조시각 등의 정보를 OS가 알 수 없음
-- O(1)인 LRU의 list 조작조차 불가능(운영체제는 뭐가 제일 최근에 사용됐는지 알 수 없음/ 페이지 폴트가 날때만 운영체제에 CPU가 넘어가지 않기 때문에!!!)
+	- 한정된 빠른공간(캐시)에 요청된 데이터를 저장해 두었다가 후속 요청 시 캐쉬로부터 직접 서비스하는 방식
+	- 페이징 시스템(디스크의 swap area) 외에도, 캐시 메모리, 버퍼 캐싱(디스크의 file system), 웹 캐싱 등 다양한 분야에서 사용
+	
+<br>	
+- 캐시 운영의 시간 제약 1 :
+	- 교체 알고리즘에서 삭제할 항목을 결정하는 일에 지나치게 - 많은 시간이 걸리는 경우 실제 시스템에서 사용할 수 없음
+	- 버퍼 캐싱이나 웹 캐싱의 경우 → LFU, LRU 사용 가능
+		- O(1)에서 O(logN)정도까지 허용
 
+<br>		
+- 캐시 운영의 시간 제약 2 :
+	- 페이징 시스템인 경우 → 사용할 수 없음
+	- 페이지 폴트인 경우에만 OS가 관여함
+	- 페이지가 이미 메모리에 존재하는 경우 참조시각 등의 정보를 OS가 알 수 없음
+	- O(1)인 LRU의 list 조작조차 불가능(운영체제는 뭐가 제일 최근에 사용됐는지 알 수 없음/ 페이지 폴트가 날때만 운영체제에 CPU가 넘어가지 않기 때문에!!!)
+
+<br>	
 - 그럼 뭘 사용해야 되나? → 아래에서 살펴본다
 
 
@@ -678,21 +697,26 @@ Get an empty page frame (없으면 뺏어온다: replace)
 
 - LRU의 근사 알고리즘
 - 페이징 교체에서 일반적으로 사용되는 알고리즘임
-- 여러 명칭으로 불림
-- Second Chance Algorithm
-- NUR(Not Used Recently) 또는 NRU(Not Recently Used) → 최근에 사용되지 않은 페이지
-- 동작 방식
-- 페이지 폴트 발생 시 Reference bit(하드웨어가 기록하는 것)을 사용해서 교체 대상 페이지 선정(circular list)
-- reference bit가 0인 것을 찾을 때까지 포인터를 하나씩 앞으로 이동
-- 포인터 이동하는 중에 reference bit 1은 모두 0으로 바꿈
-- Reference bit이 0인 것을 찾으면 그 페이지를 교체
-한바퀴 되돌아와서도(= second chance) 0이면 그때는 replace 교체당함
-- 자주 사용되는 페이지라면 second chance가 올때 1(시계바늘이 돌때 한번 더 참조되었으니 최근에 참조되었다는 뜻)
 
+<br>	
+- 여러 명칭으로 불림
+	- Second Chance Algorithm
+	- NUR(Not Used Recently) 또는 NRU(Not Recently Used) → 최근에 사용되지 않은 페이지
+
+<br>	
+- 동작 방식
+	- 페이지 폴트 발생 시 Reference bit(하드웨어가 기록하는 것)을 사용해서 교체 대상 페이지 선정(circular list)
+	- reference bit가 0인 것을 찾을 때까지 포인터를 하나씩 앞으로 이동
+	- 포인터 이동하는 중에 reference bit 1은 모두 0으로 바꿈
+	- Reference bit이 0인 것을 찾으면 그 페이지를 교체
+	한바퀴 되돌아와서도(= second chance) 0이면 그때는 replace 교체당함
+	- 자주 사용되는 페이지라면 second chance가 올때 1(시계바늘이 돌때 한번 더 참조되었으니 최근에 참조되었다는 뜻)
+
+<br>	
 - Clock Algorithm의 개선
-- reference bit과 modified bit(dirty bit)을 함께 사용
-- reference bit = 1 : 최근에 참조 된 페이지
-- modified bit = 1 : 최근에 변경된 페이지 (I/O, write를 동반하는 페이지 - 한번 쓰여졌기 때문에 backing store에 수정된 내용을 반영을 한다음에 메모리에서 내려야 함)
+	- reference bit과 modified bit(dirty bit)을 함께 사용
+	- reference bit = 1 : 최근에 참조 된 페이지
+	- modified bit = 1 : 최근에 변경된 페이지 (I/O, write를 동반하는 페이지 - 한번 쓰여졌기 때문에 backing store에 수정된 내용을 반영을 한다음에 메모리에서 내려야 함)
 
 
 ---
@@ -705,16 +729,21 @@ Get an empty page frame (없으면 뺏어온다: replace)
 
 - 프로그램이 실행되면서 충분한 페이지가 주어지지 않으면 빈번한 page fault가 발생할 수 있기 때문에 이를 위한 고민
 
+<br>	
 - Allocation Problem: 각 process에 얼마만큼의 page frame을 할당할 것인가?
+
+<br>	
 - Allocation의 필요성
-- 메모리 참조 명령어 수행 시 명령어, 데이터 등 여러 페이지 동시 참조
-- 명령어 수행을 위해 최소한 할당되어야 하는 frame의 수가 있음
-- Loop를 구성하는 page들은 한꺼번에 allocate 되는 것이 유리함
-- 최소한의 allocation이 없으면 매 loop마다 page fault
+	- 메모리 참조 명령어 수행 시 명령어, 데이터 등 여러 페이지 동시 참조
+		- 명령어 수행을 위해 최소한 할당되어야 하는 frame의 수가 있음
+	- Loop를 구성하는 page들은 한꺼번에 allocate 되는 것이 유리함
+		- 최소한의 allocation이 없으면 매 loop마다 page fault
+
+<br>	
 - Allocation Scheme
-- Equal Allocation: 모든 프로세스에 똑같은 개수 할당
-- Proprtional Allocation: 프로세스 크기에 비례하여 할당
-- Priority Allocation: 프로세스의 Priority에 따라 다르게 할당
+	- Equal Allocation: 모든 프로세스에 똑같은 개수 할당
+	- Proprtional Allocation: 프로세스 크기에 비례하여 할당
+	- Priority Allocation: 프로세스의 Priority에 따라 다르게 할당
 
 
 ---
@@ -735,7 +764,6 @@ Get an empty page frame (없으면 뺏어온다: replace)
 #### b. Local Replacement(위의 할당을 진행한 경우)
 
 - 자신에게 할당 된 Frame 내에서만 Replacement
-
 - FIFO, LRU, LFU등의 알고리즘을 process 별로 운영 시
 
 
@@ -747,6 +775,7 @@ Get an empty page frame (없으면 뺏어온다: replace)
 
 - 프로세스의 원활한 수행에 필요한 최소한의 page frame 수를 할당받지 못한 경우 발생
 
+<br>	
 - 페이지 폴트 rate가 매우 높아짐
 - CPU Utilization이 낮아짐
 - OS는 MPD(Multiprogramming degree: 프로그램의 숫자)를 높여야 한다고 판단(일반적으로 MPD가 올라가면 utilization이 올라가기 때문에 이렇게 판단하게 되는 것)
@@ -756,6 +785,7 @@ Get an empty page frame (없으면 뺏어온다: replace)
 - 대부분의 시간에 CPU는 한가함
 - low throughput(낮은 데이터 처리량)
 
+<br>	
 - MPD에 따라 CPU Utilization이 지속적으로 높아지다가 trashing이 발생한 순간 급격히 감소하게 된다. 각 프로그램에 할당된 메모리가 너무 작기 때문에 swap이 빈번하게 발생해서!
 → 이를 해결하기 위해 동시에 메모리에 올라가 있는 프로세스의 수를 조절해야함. 아래의 알고리즘이 그것을 해결하기 위한 방법이다.
 
@@ -767,13 +797,14 @@ Get an empty page frame (없으면 뺏어온다: replace)
 
 ### 11) Working-Set Model
 
-- Locality of reference
+#### a. Locality of reference
+
 - 프로세스는 특정 시간 동안 일정 장소만을 집중적으로 참조한다.
 - 집중적으로 참조되는 해당 page들의 집합을 locality set이라 함
 
 <br>
 
-#### a. Working-set Model
+#### b. Working-set Model
 
 - Locality에 기반하여 프로세스가 일정시간 동안 원활하게 수행되기 위해 한꺼번에 메모리에 올라와 있어야 하는 page들의 집합을 Working Set이라 정의함(locality set의 개념)
 
@@ -781,13 +812,24 @@ Get an empty page frame (없으면 뺏어온다: replace)
 
 - Trashing을 방지함
 - Multiprogramming degree(MPD)를 결정함
-- Working-Set Algorithm
-- Working Set의 결정
-- Working set window를 통해 알아냄(시간에 따라 계속 바뀐다)
-- window size가 Δ인 경우
-- 시각 t(i)에서의 Working set WS(t(i))
-- Time Interval[t(i)-Δ, t(i)] 사이에 참조된 서로 다른 페이지들의 집합
-- Working set에 속한 page는 메모리에 유지, 속하지 않은 것은 버림 (즉, 참조된 후 Δ시간 동안 해당 page를 메모리에 유지한 후 버림)
+
+
+---
+
+<br>
+
+### 12) Working-Set Algorithm
+
+<br>
+- Working Set의 결정 1 :
+	- Working set window를 통해 알아냄(시간에 따라 계속 바뀐다)
+	- window size가 Δ인 경우
+		- 시각 t(i)에서의 Working set WS(t(i))
+			- Time Interval[t(i)-Δ, t(i)] 사이에 참조된 서로 다른 페이지들의 집합
+
+<br>
+- Working Set의 결정 2 : 
+	- Working set에 속한 page는 메모리에 유지, 속하지 않은 것은 버림 (즉, 참조된 후 Δ시간 동안 해당 page를 메모리에 유지한 후 버림)
 
 - 워킹셋이 1,2,5,6,7 이므로 5개의 공간을 줄 수 있으면 유지하고 아니면 이 프로세스를 swap out / suspended 시킴
 
@@ -801,10 +843,12 @@ Get an empty page frame (없으면 뺏어온다: replace)
 
 - 이 방식은 위의 방식처럼 워킹셋을 추정하는게 아니라 현재시점의 각 프로세스의 페이지 폴트의 값을 보고 판단한다.
 
-
+<br>
 - page-fault rate의 상한값과 하한값을 둔다
-- Page fault rate이 상한값을 넘으면 frame을 더 할당한다
-- Page fault rate이 하한값 이하이면 할당 frame 수를 줄인다
+	- Page fault rate이 상한값을 넘으면 frame을 더 할당한다
+	- Page fault rate이 하한값 이하이면 할당 frame 수를 줄인다
+
+<br>
 - 빈 frame이 없으면 일부 프로세스를 swap out
 
 
@@ -815,15 +859,20 @@ Get an empty page frame (없으면 뺏어온다: replace)
 ### 13) Page Size의 결정
 
 - Page Size를 감소시키면
-- 페이지 수 증가
-- 페이지 테이블 크기 증가(메모리 낭비가 심해지지만 테이블 내부에서 사용되지 않은 부분이 적어지므로 trade off 관계)
-- Internal fragmentation 감소
-- Disk transfer의 효율성 감소
-- Seek/rotation vs transfer (seek하는 시간이 길어지기 때문에…)
-- 필요한 정보만 메모리에 올라와 메모리 이용이 효율적
-- Locality의 활용 측면에서는 좋지 않음(페이지 크기가 크면 - 하나만 올려 놓으면 다음에 폴트가 날 확률이 낮아지기 때문)
-Trend
-- 그렇기 떄문에 Larger page size가 요즘에 추세이다.
+	- 페이지 수 증가
+	- 페이지 테이블 크기 증가(메모리 낭비가 심해지지만 테이블 내부에서 사용되지 않은 부분이 적어지므로 trade off 관계)
+	- Internal fragmentation 감소
+	- Disk transfer의 효율성 감소
+		- Seek/rotation vs transfer (seek하는 시간이 길어지기 때문에…)
+
+<br>
+-또한, Page Size를 감소시키면 
+	- 필요한 정보만 메모리에 올라와 메모리 이용이 효율적
+		- Locality의 활용 측면에서는 좋지 않음(페이지 크기가 크면 - 하나만 올려 놓으면 다음에 폴트가 날 확률이 낮아지기 때문)
+
+<br>
+- Trend
+	- 그렇기 떄문에 Larger page size가 요즘에 추세이다.
 
 
 
