@@ -866,7 +866,7 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 		- Seek/rotation vs transfer (seek하는 시간이 길어지기 때문에…)
 
 <br>
--또한, Page Size를 감소시키면 
+- 또한, Page Size를 감소시키면 
 	- 필요한 정보만 메모리에 올라와 메모리 이용이 효율적
 		- Locality의 활용 측면에서는 좋지 않음(페이지 크기가 크면 - 하나만 올려 놓으면 다음에 폴트가 날 확률이 낮아지기 때문)
 
