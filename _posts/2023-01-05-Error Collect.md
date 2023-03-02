@@ -287,6 +287,14 @@ public class JSPDispatcherServlet extends HttpServlet{
 
 - 해결 방법 : 하지만, 원래 쿠키는 모든페이지에서 심게 해야하므로 cookie.setPath("/") 설정을 해주면 이러한 고민이 사라진다.**
 
+<br><br>
+### 5) 에러 :  기본 클래스을(를) 찾거나 로드할 수 없습니다.
+
+- STS4를 잘못 종료하여 강제 종료가 되면, JDK가 손상되어서 그 JDK를 읽지 못하여 기존에 설치되었던 jdk 버전을 인식한다.
+
+- 해결 방법 : 기존에 설치되었던 JDK 17.0.5-tem을 homebrew를 통해 삭제하고 다시 재설치한다. 
+
+
 ---
 
 <br><br>
