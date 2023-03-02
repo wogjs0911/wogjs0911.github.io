@@ -1,7 +1,7 @@
 ---
 key: /2023/01/05/Error-Collect.html
 title: Error - Error 모음
-tags: java javascript spring springboot eclipse mysql oracledb servlet
+tags: java javascript spring springboot eclipse mysql oracledb servlet jsp mariaDB
 ---
 
 # 0. Project 주의 :
@@ -336,7 +336,7 @@ INSERT INTO `newlecture`.`notice` (`id`, `title`, `content`, `hit`, `pub`, `memb
 ```
 
 <br><br>
-# 5. Servlet 에러 
+# 4. Servlet 에러 
 
 ### 1) web project 초기 설정
 
@@ -373,7 +373,7 @@ http://localhost/webprj2/hello?c=10
 ---
 
 <br><br>
-# 4. JSP 에러
+# 5. JSP 에러
 
 <br>
 ### 1) EL 태그 못 읽는 에러
