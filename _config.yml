@@ -22,7 +22,7 @@ url     : https://wogjs0911.github.io # the base hostname & protocol for your si
 baseurl : "" # does not include hostname
 title   : JH'Lab
 description: > # this means to ignore newlines until "Language & timezone"
-  Your Site Description
+ 다양한 기술을 적용시키는 개발을 하고 싶습니다.
 
 
 ## => Language and Timezone

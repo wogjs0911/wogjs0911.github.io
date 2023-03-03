@@ -1,0 +1,14 @@
+#search-bar {
+    margin: 32px auto;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 0 20px;
+}
+
+#search-bar #search-input {
+    width: calc(100% - 30px);
+    border: none;
+    line-height: 44px;
+    outline: none;
+    border-style: none;
+}

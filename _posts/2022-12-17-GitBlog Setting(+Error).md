@@ -1,7 +1,7 @@
 ---
 key: /2022/12/17/GitBlog-Setting(+Error).html
 title: GitBlog-GitBlog 설정(에러 해결)
-tags: TeXt, gitblog
+tags: TeXt gitblog gitalk GoogleAnalytics
 
 ---
 
@@ -69,6 +69,26 @@ tags: TeXt
 ```
 
 <br><br>
+### 6) gitalk 모든 해결 : 댓글 중복 해결, 댓글 저장소 문제, 댓글이 안 써지는 경우
+
+- 마크다운 문법을 이용하는 md 파일을 만들 때, 아래에 있는 마크다운 설정처럼 key 부분의 `/2022/12/17/GitBlog-Setting(+Error).html`와 md 파일명을 일치시켜야 한다. 하지만, md는 html로 바꾼다. 
+
+<br>
+- 왠만한 특수문자, 한글을 쓰면 안 된다. md 파일 명에 컴마(",")도 불가능하다.
+
+<br>
+- 실습 코드 : 
+
+```
+---
+key: /2022/12/17/GitBlog-Setting(+Error).html
+title: gitblog 설정시, error 해결
+tags: TeXt
+---
+```
+
+
+
 ---
 
 
@@ -98,5 +118,18 @@ tags: TeXt
 
 <br><br>
 # 4. gitblog의 카테고리 추가하는 방법
+
+- 실패했다. 테마가 겹쳐서 깨져 보인다.
+
+
+<br><br>
+# 5. 나의 gitblog 내에서 통합 검색 설정
+
+- 제목만 검색말고 포스트된 블로그의 내용도 같이 검색하고 싶다.
+
+
+
+
+
 
 
