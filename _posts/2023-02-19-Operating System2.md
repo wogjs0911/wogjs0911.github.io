@@ -727,11 +727,11 @@ do {
 <br>
 ##### a) Busy Wait
 
-Critical Section of n Processes By Semaphore - Spin Lock
+- Critical Section of n Processes By Semaphore - Spin Lock
  
 
-단점: Spin Lock
-Block & Wakeup 방식의 구현도 가능 (=sleep lock)
+- 단점: Spin Lock
+- Block & Wakeup 방식의 구현도 가능 (=sleep lock)
 
 <br> 
 ##### b) Block & Await
@@ -1007,18 +1007,12 @@ void pcickup(int i) {
 - Cicular wait(순환 대기)
 	- 자원을 기다리는 프로세스 간에 사이클이 형성
 
- 
 ---
 
 
 <br><br> 
-
 ## 3) Resource-Allocation Graph(자원할당 그래프)
  
-
-
-
-- 좌측은 데드락, 우측은 데드락 아님.
 - 그래프에 cycle이 없으면 deadlock이 아니다.
 - 그래프에 cycle이 있으면
 	- if only one instance per resource type, then deadlock(그림에서 점의 개수가 instance의 수)
@@ -1081,7 +1075,7 @@ void pcickup(int i) {
  
 <br><br> 
 
-### b. Deadlock Avoidance(항상 sfae를 유지하는 보수적이고 매우 안전한 방법)
+### b. Deadlock Avoidance(항상 safe를 유지하는 보수적이고 매우 안전한 방법)
  
 <br>
 - 자원 요청에 대한 부가정보를 이용해서 자원할당이 deadlock으로 부터 안전한지를 동적으로 조사해서 안전한 경우에만 할당
@@ -1106,7 +1100,7 @@ void pcickup(int i) {
 
 <br>
 
-#### Deadlock Avoidance
+#### a) Deadlock Avoidance
 - 시스템이 unsafe state에 들어가지 않는 것을 보장
 
 <br>
@@ -1119,7 +1113,7 @@ void pcickup(int i) {
 
 <br>
 
-#### Resource Allocation Graph Algorithm(자원당 인스턴스가 하나일 때)
+#### b) Resource Allocation Graph Algorithm(자원당 인스턴스가 하나일 때)
 
 <br>
 - Claim edge Pi → Rj
@@ -1139,7 +1133,7 @@ void pcickup(int i) {
 
  
 <br>
-#### Bankers Algorithm(자원 당 인스턴스가 여러개일 때)
+#### c) Bankers Algorithm(자원 당 인스턴스가 여러 개일 때) : 어렵다.
 
 <br>
 - 가정1. 모든 프로세스는 자원의 최대사용량을 미리 명시
