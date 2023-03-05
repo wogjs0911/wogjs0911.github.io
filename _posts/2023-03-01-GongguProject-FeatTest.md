@@ -66,7 +66,7 @@ tags: springboot jsp websocket HTTP mariaDB
 <br><br>
 
 
-### 2) Lombok, Jackson ObjectMapper 개념
+### 2) Lombok
 
 <br>
 #### a. Parameter와 Argument의 차이
@@ -169,7 +169,7 @@ Customer customer = new Customer(2L, "김철수", 23);
 ---
 
 <br>
-##### b) 문제점** :
+##### b) 생성자 주입의 문제점 및 주의점** :
 - 위에서 언급했던 것처럼 @AllArgsConstructor 어노테이션은 생성자를 생성할 때,
 - class 내부에 선언된 field의 순서인 cancelPrice, orderPrice 순으로 생성자 파라미터를 생성한다.
 
@@ -208,7 +208,7 @@ public class Order {
 
 <br>
 ##### c) 해결방법** :
-- DE 자동 생성 기능 등으로 아래처럼 생성자를 직접 만들고, 필요한 경우에는 직접 만든 생성자에 @Builder 어노테이션을 붙이는 것을 권장하기도 한다.
+- IDE 자동 생성 기능 등으로 아래처럼 생성자를 직접 만들고, 필요한 경우에는 직접 만든 생성자에 @Builder 어노테이션을 붙이는 것을 권장하기도 한다.
 - 이 방법은 파라미터 순서가 아닌 이름으로 값을 설정하기 때문에 리팩토링에 유연하게 대응이 가능하다.
 
  
@@ -236,11 +236,12 @@ Order order = Order.builder().orderAmount(5).cancelAmount(4).build();
 ---
 
 <br>
-##### d) 계속해서 생성자 주입이 나오는 이유 : 
-- 순환 참조 방지
-- 테스트 코드 작성 용이
-- 코드 악취 제거
-- 객체 변이 방지 (final 가능)
+##### d) 스프링에서 계속해서 생성자 주입이 나오는 이유(스프링 팀에서 추천) : 
+- 순환 참조 방지가 가능하다. 
+- 테스트 코드 작성에 용이하다. 
+- 코드 악취 제거할 수 있다.
+- 객체 변이 방지(final 가능)를 할 수 있다.
+- 결론** : 따라서, 파라미터에 @Autowired를 통해 주입하기보다는 생성자에 주입하자!
 
 ---
 
@@ -257,16 +258,307 @@ Order order = Order.builder().orderAmount(5).cancelAmount(4).build();
 	- bean lifecycle에서 오직 한 번만 수행된다는 것을 보장할 수 있다. (WAS가 올라가면서 bean이 생성될 때 딱 한 번 초기화함) 그래서 @PostConstruct를 사용하면 bean이 여러번 초기화되는 것을 방지할 수 있다.
 	- 정리 : `@PostConstruct`는 `@Autowired` + `생성자를 생성하고 초기화`하여 최초로 빈 객체를 한 번만 초가화할 때, 사용한다.(빈 라이프 사이클에서 빈 객체가 여러 번 초기화되는 것을 방지한다.)  
 	
-<br>
-- `@Builder` : 생성자 대신에 Builder를 사용할 수 있다. 
 
+---
 
 <br><br>
-#### c. 프로젝트를 개발을 위한 추가적으로 필요한 클래스들 
+### 3) @Builder
+- `@Builder` : 생성자 대신에 Builder를 사용할 수 있다. 
 
 <br>
-- `ObjectMapper objectMapper` : jackson의 ObjectMapper는 일반적으로 데이터 바인딩에 사용한다. Model과 같은 역할? 
-	- 내용 추가하기. 
+- 결론** : 객체를 생성하는 대부분의 경우에는 빌더 패턴을 적용하는 것이 좋다. 물론 예외적인 케이스가 있을 수 있는데, 대표적으로 크게 다음의 2가지 상황에서는 빌더를 구현할 필요가 없다.
+	- 객체의 생성을 라이브러리로 위임하는 경우
+	- 변수의 개수가 2개 이하이며, 변경 가능성이 없는 경우
+
+
+<br>
+#### a. Builder pattern 개념
+- 생성자를 통해 객체를 생성하는데 몇 가지 단점이 있어 객체를 생성하는 별도 builder를 두는 방법이 있다. 이를 "빌더 패턴"이라고 한다.
+
+<br>
+- 실습 코드 : 
+	- 객체를 생성할 수 있는 빌더를 builder() 함수를 통해 얻고 거기에 셋팅하고자 하는 값을 셋팅하고 마지막에 build()를 통해 빌더를 작동 시켜 객체를 생성한다.
+
+```java
+Bag bag = Bag.builder()
+		.name("name")
+        	.money(1000)
+        	.memo("memo")
+        	.build();
+ ```
+
+---
+
+<br>
+#### b. Builder pattern을 사용해야 하는 이유, 장점 
+
+<br>
+##### a) 생성자 파라미터가 많을 경우 가독성이 좋지 않다.
+- 예를 들어, Bag 클래스는 생성자 파라미터를 3개만 받는다. 3개까지는 괜찮다. 하지만 생성자 파라미터로 받아야하는 값이 수업이 많아진다면? 각 값들이 어떤 값을 의미하는지 이해하기 힘들 것이다.
+
+```java
+Bag bag = new Bag("name", 1000, "memo", "abc", "what", "is", "it", "?");
+```
+
+<br>
+- 이를 빌더 패턴으로 구현하면 각 값들은 빌더의 각 값들의 이름 함수로 셋팅이 되지 각각 무슨 값을 의미하는지 파악하기 쉽다. 따라서, 생성자로 설정해야하는 값이 많을 경우 빌더를 쓰는 것이 생성자보다 가독성이 좋다. 
+
+```java
+Bag bag = Bag.builder()
+		.name("name")
+        	.money(1000)
+        	.memo("memo")
+            .letter("This is the letter")
+            .box("This is the box")
+        	.build();
+```
+
+- 위의 코드와 비교해보기!! 
+
+<br>
+
+##### b) 어떤 값을 먼저 설정하던 상관 없다
+- 생성자의 경우는 정해진 파라미터 순서대로 꼭 값을 넣어줘야한다. 하지만, 빌더 패턴은 빌더의 필드 이름으로 값을 설정하기 때문에 순서에 종속적이지 않다.
+
+<br>
+
+##### c) Builder Pattern의 장점 
+
+- [1] 필요한 데이터만 설정할 수 있음 :
+	- 결국 요구사항은 계속 변하게 되어있고, 반복적인 변경을 필요로 하면서 시간 낭비로 이어지게 된다. 하지만 빌더를 이용하면 동적으로 이를 처리할 수 있다.
+
+
+<br>	
+- [2] 유연성을 확보할 수 있음 : 
+	- 객체를 생성하는 코드가 100개 있다면 모든 로직을 수정해주거나 생성자를 따로 추가하는 등의 불필요한 조치를 해주어야 할 것이다. 하지만 빌더 패턴를 기반으로 코드가 작성되어 있다면 기존의 코드는 수정할 필요가 없다. 왜냐하면 빌더 패턴은 유연하게 객체의 값을 설정할 수 있도록 도와주기 때문이다.
+	
+<br>
+- [3] 가독성을 높일 수 있음 : 
+	- 빌더 패턴을 적용하면 직관적으로 어떤 데이터에 어떤 값이 설정되는지 쉽게 파악하여 가독성을 높일 수 있다.
+
+```java
+User user = User.builder()
+             .name("망나니 개발자")
+             .age(28)
+             .height(180)
+             .iq(150).build();
+```
+
+<br>
+- [4] 변경 가능성을 최소화할 수 있음 : 
+	- 많은 개발자들이 수정자 패턴(Setter)를 흔히 사용한다. 하지만 Setter를 구현한다는 것은 불필요하게 변경 가능성을 열어두는 것이다. 이는 유지보수 시에 값이 할당된 지점을 찾기 힘들게 만들며 불필요한 코드 리딩 등을 유발한다. 만약 값을 할당하는 시점이 객체의 생성뿐이라면 객체에 잘못된 값이 들어왔을 때 그 지점을 찾기 쉬우므로 유지보수성이 훨씬 높아질 것이다. 그렇기 때문에 클래스 변수는 변경 가능성을 최소화하는 것이 좋다.
+	- 변경 가능성을 최소화하는 가장 좋은 방법은 변수를 final로 선언함으로써 불변성을 확보하는 것
+
+---
+
+<br>
+
+#### c. 롬북의 `@Builder` 어노테이션 이용
+
+- 롬북의 `@Builder`를 사용하고나서 Builder 패턴을 매우 간단히 사용할 수 있다. 
+
+<br>
+- 롬북이 없을 때 코드 :
+
+```java
+
+   class Example<T> {
+   	private T foo;
+   	private final String bar;
+   	
+   	private Example(T foo, String bar) {
+   		this.foo = foo;
+   		this.bar = bar;
+   	}
+   	
+   	public static <T> ExampleBuilder<T> builder() {
+   		return new ExampleBuilder<T>();
+   	}
+   	
+   	public static class ExampleBuilder<T> {
+   		private T foo;
+   		private String bar;
+   		
+   		private ExampleBuilder() {}
+   		
+   		public ExampleBuilder foo(T foo) {
+   			this.foo = foo;
+   			return this;
+   		}
+   		
+   		public ExampleBuilder bar(String bar) {
+   			this.bar = bar;
+   			return this;
+   		}
+   		
+   		@java.lang.Override public String toString() {
+   			return "ExampleBuilder(foo = " + foo + ", bar = " + bar + ")";
+   		}
+   		
+   		public Example build() {
+   			return new Example(foo, bar);
+   		}
+   	}
+   }
+
+```
+
+<br>
+- 롬북을 사용하고 나서 코드 :
+
+```java
+
+   @Builder
+   class Example<T> {
+   	private T foo;
+   	private final String bar;
+   }
+
+```
+
+```java
+Bag bag = Bag.builder()
+		.name("name")
+        	.money(1000)
+        	.memo("memo")
+        	.build();
+```
+
+<br>
+#### d. @Builder 어노테이션 옵션
+
+- builderMethodName : 사람에게 도움이 되는 방향으로 빌더 메서드 이름을 정의
+
+<br>
+- buildMethodName : 빌더에 필드 값들을 입력하고 마지막에 객체를 생성하는 동작인 빌드 메서드의 이름을 변경할 수 있다.
+
+<br>
+- builderClassName : @Builder를 사용하면 각 필드들의 값을 셋팅하는 메서드의 반환값의 빌더 클래스의 이름이 000Builder로 자동 설정되는데 이것을 수정할 수 있다.
+
+<br>
+- toBuilder : 이 값을 true로 설정시 빌더로 만든 인스턴스에서 toBuilder() 메서드를 호출해 그 인스턴스 값을 베이스로 빌더 패턴으로 새로운 인스턴스를 생성할 수 있다.
+
+<br>
+- access() : builder 클래스의 접근제어자를 어떻게 할 것인지에 대한 설정 값
+
+```java
+Bag bag = Bag.builder()
+		.name("name") // return BagBuilder
+        	.money(1000) // return BagBuilder
+        	.memo("memo") // return BagBuilder
+        	.build();
+
+```
+
+<br>
+- 추가로 검색해서 찾아보기!
+
+
+
+<br>
+- 참고 사이트 :
+	- [Builder 참고 사이트 1](https://pamyferret.tistory.com/67)
+	- [Builder 참고 사이트 2](https://johngrib.github.io/wiki/pattern/builder/)
+
+---
+
+<br>
+
+### 4) @EqualsAndHashCode
+
+- 서로 다른 두 객체에서 특정 변수의 이름이 똑같은 경우 같은 객체로 판단을 하고 싶다면 사용한다.
+
+- 실습 코드 :
+
+```java
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = {"companyName", "industryTypeCode"}, callSuper = false))
+public class Store extends Common {
+    @NonNull
+    private String companyName;                                 // 상호명
+    
+    @NonNull
+    private String industryTypeCode;                            // 업종코드
+    }
+}
+```
+
+```java
+@RestController
+@RequestMapping(value = "/store")
+@Log4j2
+public class StoreController {
+
+    @GetMapping(value = "/test")
+    private ResponseEntity test(){        
+        Store store1 = new Store("가게 이름", "업종코드1");
+        Store store2 = new Store("가게 이름", "업종코드1");
+        Store store3 = new Store("가게 이름", "업종코드2");
+        
+        // "companyName과 industryTypeCode가 같기 때문에 true가 나옴
+        log.debug(store1.equals(store2));
+        
+        // "companyName과 industryTypeCode가 다르기 때문에 false가 나옴
+        log.debug(store1.equals(store3));
+
+        return ResponseEntity.ok().build();
+    }
+
+}
+```
+
+---
+
+<br>
+
+### 5) 추가적인 롬북의 어노테이션
+
+- @ToString
+	- @ToString 어노테이션을 활용하면 클래스의 변수들을 기반으로 ToString 메소드를 자동으로 완성시켜 준다. 출력을 원하지 않는 변수에 @ToString.Exclude 어노테이션을 붙여주면 출력을 제외할 수 있다. 
+
+<br>
+- @Data
+	- @Data 어노테이션을 활용하면 @ToString, @EqualsAndHashCode, @Getter, @Setter, @RequiredArgsConstructor를 자동완성 시켜준다. 실무에서는 너무 무겁고 객체의 안정성을 지키기 때문에 @Data의 활용을 지양한다.
+
+<br>
+- @Delegate 
+	- @Delegate 어노테이션은 한 객체의 메소드를 다른 객체로 위임
+	
+---
+
+
+<br><br> 
+### 4) @Valid와 @Validated를 이용한 유효성 검증의 동작 원리 및 사용 방법
+
+
+---
+
+<br><br>
+
+### 5) Jackson ObjectMapper 개념
+
+- `ObjectMapper objectMapper` : jackson의 ObjectMapper는 일반적으로 JSON 형태의 데이터 타입의 데이터 바인딩에 사용한다.
+
+<br>
+
+#### a. 직렬화(Serialize)와 역직렬화(Deserialize) 개념 
+
+<br>
+> 직렬화 : 객체로부터 Json 형태의 문자열을 만든다.
+<br>
+> 역직렬화 : Json 문자열로부터 객체를 만들어 낸다,
+
+
+#### b. Jackson ObjectMapper 
+
+
+
+
+
+---
+
+<br><br>
+### 6) UUID 객체 개념
 
 <br>
 - UUID 객체 : 중복을 제거하여 ID를 만들어 준다.
@@ -292,10 +584,9 @@ Order order = Order.builder().orderAmount(5).cancelAmount(4).build();
 ```
 
 ---
-
 <br><br>
 
-### 3) Enum 클래스 개념
+### 7) Enum 클래스 개념
 
 - 간단히 말하면, 제약을 걸어주어서 상수를 만들어주는 클래스이다. 보통, 데이터의 칼럼 추가 시에 사용된다. 
 - Enum 클래스는 상수를 만들어 주기 때문에 이것은 final이 붙은 상수를 제어한다. 
@@ -339,14 +630,279 @@ public class ChatMessage {
 
 <br><br>
 
-### 3) 실습 코드 :	
+### 9) 실습 코드 :	
+
+- 테스트 1 코드 
+
+<br>
+
+<details>
+<summary>ChatRoom.java</summary>
+<div markdown="1">
+
+```java
+package com.websocket.chat.model;
+
+import com.websocket.chat.service.ChatService;
+import lombok.Builder;
+import lombok.Getter;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Getter
+public class ChatRoom {
+    private String roomId;
+    private String name;
+    private Set<WebSocketSession> sessions = new HashSet<>();
+
+    @Builder    // @RequiredArgsConstructor 이것과 같은 의미같다. 생성자 대신해서 빌더를 사용한다!
+    public ChatRoom(String roomId, String name) {
+        this.roomId = roomId;
+        this.name = name;
+    }
+
+    public void handleActions(WebSocketSession session, ChatMessage chatMessage, ChatService chatService){
+        if(chatMessage.getType().equals(ChatMessage.MessageType.ENTER)){
+            sessions.add(session);
+            chatMessage.setMessage(chatMessage.getSender()+"님이 입장했습니다.");
+        }
+        sendMessage(chatMessage, chatService);
+    }
+
+    // Stream 객체 다시 공부하기! Java Stream에서 forEach는 출력문?
+    // 받는 메세지가 타입이 무엇인지 모르기 때문에 제너릭 타입으로 메세지를 받는다.
+    public <T> void sendMessage(T message, ChatService chatService){
+        sessions.parallelStream().forEach(session -> chatService.sendMessage(session, message));
+    }
+}
+
+
+
+```
+
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>ChatMessage.java</summary>
+<div markdown="1">
+
+```java
+package com.websocket.chat.model;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class ChatMessage {
+
+    // Enum 클래스 다시 공부!
+    public enum MessageType{
+        ENTER, TALK
+    }
+
+    private MessageType type;
+    private String roomId;
+    private String sender;
+    private String message;
+
+}
+
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>ChatService.java</summary>
+<div markdown="1">
+
+```java
+package com.websocket.chat.service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.websocket.chat.model.ChatRoom;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import javax.imageio.IIOException;
+import java.io.IOException;
+import java.util.*;
+
+@Slf4j
+@RequiredArgsConstructor
+@Service
+public class ChatService {
+
+    private final ObjectMapper objectMapper;
+    private Map<String, ChatRoom> chatRooms;
+
+    @PostConstruct
+    private void init(){
+        chatRooms = new LinkedHashMap<>();
+    }
+
+    public List<ChatRoom> findAllRoom(){
+        return new ArrayList<>(chatRooms.values());
+    }
+
+    public ChatRoom findRoomById(String roomId){
+        return chatRooms.get(roomId);
+    }
+
+    public ChatRoom createRoom(String name){
+
+        // UUID 공부하기! 중복을 제거하여 ID를 만들어 준다.
+        String randomId = UUID.randomUUID().toString();
+
+        ChatRoom chatRoom = ChatRoom.builder()
+                .roomId(randomId)
+                .name(name)
+                .build();
+
+        chatRooms.put(randomId,chatRoom);
+
+        return chatRoom;
+    }
+
+    // databind.ObjectMapper 다시 공부! 주의!!
+    // 받는 메세지가 타입이 무엇인지 모르기 때문에 제너릭 타입으로 메세지를 받는다.
+    public <T> void sendMessage(WebSocketSession session, T message){
+        try {
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));
+        } catch (IOException e){
+            log.error(e.getMessage(), e);
+        }
+    }
+}
+
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>ChatController.java</summary>
+<div markdown="1">
+
 	
+```java
+package com.websocket.chat.controller;
+
+import com.websocket.chat.model.ChatRoom;
+import com.websocket.chat.service.ChatService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/chat")
+public class ChatController {
+
+    private final ChatService chatService;
+
+    @PostMapping
+    public ChatRoom createRoom(@RequestParam String name){
+        return chatService.createRoom(name);
+    }
+
+    @GetMapping
+    public List<ChatRoom> findAllRoom(){
+        return chatService.findAllRoom();
+    }
+}
+
+```	
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>WebSockChatHandler.java</summary>
+<div markdown="1">
+
 	
-	
-	
-	
-	
-	
+```java
+package com.websocket.chat.handler;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.websocket.chat.model.ChatMessage;
+import com.websocket.chat.model.ChatRoom;
+import com.websocket.chat.service.ChatService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+@Slf4j         // 로깅에 필요한 경우에 쓰인다. JPA에서 자동화 때문에 DB에 접속 시, 로그가 안보여서 로그 확인 시 필요!
+@RequiredArgsConstructor     // 계층을 이어주기 위해서(DI) 생성자를 초기화 해주어야 한다.
+@Component
+public class WebSockChatHandler extends TextWebSocketHandler {
+
+    // 기본 초기 웹소켓 테스트
+//    @Override
+//    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+//        String payload = message.getPayload();
+//        log.info("payload{}", payload);
+//        TextMessage textMessage = new TextMessage("Welcome chatting server~^^");
+//        session.sendMessage(textMessage);
+//
+//    }
+
+    private final ObjectMapper objectMapper;
+    private final ChatService chatService;
+
+    // databind.ObjectMapper 다시 공부! 주의!!
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        String payload = message.getPayload();
+        log.info("payload{}", payload);
+
+        ChatMessage chatMessage = objectMapper.readValue(payload, ChatMessage.class);
+        ChatRoom room = chatService.findRoomById(chatMessage.getRoomId());
+        room.handleActions(session, chatMessage, chatService);
+    }
+
+}
+
+```	
+
+</div>
+</details>
+
+
+
+
+
+
+
+
+
+
 	
 	
 	

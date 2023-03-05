@@ -4,8 +4,7 @@ title: SpringBoot - JPA 공부
 tags: springboot JPA H2 Hibernate SLF4J RestfulAPI
 ---
 
-<br>
-# 1. 스프링 부트 개발 환경 
+# 1. Spring Boot 개발 환경 
 
 <br>
 - 인텔리제이 단축키 : 
