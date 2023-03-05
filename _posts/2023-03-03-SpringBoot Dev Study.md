@@ -630,44 +630,163 @@ public final class ImmutableClass {
 <br><br>
 # 3. 엔티티(Entity) 또는 도메인 객체(Domain Object)와 DTO를 분리해야 하는 이유
 
-
-
-
-<br>
-# 4. Spring Boot 개발 환경 
+- 원래의 Entity는 비즈니스 로직을 포함하는 도메인 엔티티와 데이터베이스 관련 처리를 위한 영속성 엔티티로 나누어 진다. 
 
 <br>
-- 인텔리제이 단축키 : 
-	- "sout" 단축키 : 인텔리제이에서 "sout"만 입력하면 Sytem.out.println() 단축키
-	- 커맨드 + 옵션 + V : 변수 뽑아내기!! 변수 생성하는 중요 단축키
-	
-### 1) HikariCP
-  
-- HikariCP라는 커넥션 풀이 스프링 2.x 버전부터는 기본이다. 스레드로서 속도가 빠르다. 커넥션 풀이라는 것이 스레드를 미리 만들어놓고 나눠줘서 네트워크 속도가 빠르다.
-
+## 1) 엔티티(Entity)와 DTO를 분리해야 하는 이유
 
 <br>
+### a. 관심사의 분리
 
-### 2) SLF4J
+- DTO(Data Transfer Object)의 핵심 관심사는 이름 그대로 데이터의 전달이다. DTO는 데이터를 담고, 다른 계층 또는 다른 컴포넌트들로 데이터를 넘겨주기 위한 자료구조(Data Structure)이다. 그러므로 어떠한 기능 및 동작도 없어야 한다.
 
-- 로깅을 통합한 인터페이스로서 로깅에 필요한 경우에 쓰인다. JPA에서 자동화 기능 때문에 DB에 접속 시, 접속이 되었는지 직접적으로 확인을 하지 못하여 SQL문에 대한 로그 확인 시 필요!
+<br>
+- 엔티티는 핵심 비지니스 로직을 담는 비지니스 도메인의 영역의 일부이다. 그러므로 엔티티 또는 도메인 객체에는 비지니스 로직이 추가될 수 있다. 엔티티 또는 도메인 객체는 다른 계층이나 컴포넌트들 사이에서 전달을 위해 사용되는 객체가 아니다.
 
-- `log.info()`처럼 사용하고 다른 종류의 log 메서드도 있다. 
+<br>
+- 결론 : 엔티티와 DTO는 엄연히 서로 다른 관심사를 가지고 있고, 그렇기 때문에 분리하는 것이 합리적이다.
+
+---
+
+<br>
+### b. Validation 로직 및 불필요한 코드 등과의 분리
+
+- JPA도 변수에 @Id, @Column 등과 같은 어노테이션들을 활용해 객체와 관계형 데이터베이스를 매핑해주는데, DTO와 엔티티를 분리하지 않는다면 엔티티의 코드가 상당히 복잡해진다. 
+
+<br>
+- 예를 들어, 만약 엔티티와 DTO를 분리하지 않으면 아래 코드와 같이 매우 복잡한 클래스가 탄생하게 된다.
+
+<br>
+- 실습 코드 :
 
 ```java
+@Entity
+@Table
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Membership {
 
-   @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        String payload = message.getPayload();
-        log.info("payload{}", payload);
+    @NotNull
+    @Size(min = 0)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
+    private Long id;
 
-        ChatMessage chatMessage = objectMapper.readValue(payload, ChatMessage.class);
-        ChatRoom room = chatService.findRoomById(chatMessage.getRoomId());
-        room.handleActions(session, chatMessage, chatService);
-    x}
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private MembershipType membershipType;
+
+    @NotBlank
+    @Column(nullable = false)
+    private String userId;
+
+    @NotNull
+    @Size(min = 0)
+    @Setter
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Integer point;
+
+    @CreationTimestamp
+    @Column(nullable = false, length = 20, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(length = 20)
+    private LocalDateTime updatedAt;
+
+}
+```
+
+- 계속 엔티티 클래스를 사용하게 되면 핵심 비지니스 도메인 코드들이 아닌 요청/응답을 위한 값, 유효성 검증을 위한 코드 등이 추가되면서 엔티티 클래스가 지나치게 비대해질 것이고,확장 및 유지보수 등에서 매우 어려움을 겪게 될 것이다.
+
+
+---
+
+<br>
+### c. API 스펙의 유지
+
+```java
+@Entity
+@Table
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Membership {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private MembershipType membershipType;
+
+    @Column(nullable = false)
+    private String userId;
+
+    @Setter
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Integer point;
+
+}
+```
+
+<br>
+- 내부 정책의 변경으로 userId를 memberId로 변경해야 하는 상황이라고 하자. 만약 우리가 DTO를 사용하지 않았다면 userId가 memberId로 바뀜에 따라 API의 스펙이 변경되고, 이로 인해 API를 사용하던 사용자들은 모두 장애를 겪게 될 것이다.
+
+<br>
+- 물론 @JsonProperty를 이용해 반환되는 값의 이름을 변경할 수 있지만, 이는 결국 Entity를 무겁게 만들어 근본적인 해결책이 될 수 없다. 스펙이 변경되어 테이블에 컬럼이 추가되는 경우도 마찬가지이다. 테이블에 새로운 컬럼이 추가되면 엔티티에 새로운 변수가 추가될 것이고, 별도로 처리를 하지 않는 이상 API 응답이 추가되어 스펙이 변경되게 된다.
+
+<br>
+- 결론 : DTO를 이용해 분리하여 독립성을 높이고 변경이 전파되는 것을 방지해야 한다. 만약 우리가 응답을 위한 DTO 클래스를 활용하고 있으면, Entity 클래스의 변수가 변경되어도 API 스펙이 변경되지 않으므로 안정성을 확보할 수 있다.
+
+
+---
+
+<br>
+### d. API 스펙의 파악이 용이
+
+- DTO를 통해 API 스펙을 어느정도 파악할 수 있다는 점이다.
+
+- DTO를 작성함으로써 어느 정도 API 문서의 요약본을 작성하는 것과 유사한 효과를 얻을 수 있다.
+
+<br>
+- 실습 코드 :
+	- 아래 코드를 통해, 꽤나 많은 API 스펙들을 얻을 수 있다. email의 값은 반드시 email 포맷이어야 하고, 최대 글자수가 100이며 pw는 비어있어서는 안되는 것 등을 파악이 가능하다.
+
+
+```java
+@Getter
+@RequiredArgsConstructor
+public class UserRequestDto {
+
+	@Email
+	@Size(max = 100)
+	private final String email;
+
+	@NotBlank
+	private final String pw;
+
+	@NotNull
+	private final UserRole userRole;
+
+	@Min(12)
+	private final int age;
+
+}
 
 ```
 
+<br>
+#### [a] 참고 사이트 :
+
+- [Entity와 DTO를 분리한 이유에 관한 참고 사이트 1](https://mangkyu.tistory.com/192)
 
 
 

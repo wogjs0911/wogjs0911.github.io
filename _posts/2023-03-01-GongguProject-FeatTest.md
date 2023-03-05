@@ -530,6 +530,71 @@ public class StoreController {
 <br><br> 
 ### 4) @Valid와 @Validated를 이용한 유효성 검증의 동작 원리 및 사용 방법
 
+#### a. @Valid
+
+- JSR-303 표준 스펙(자바 진영 스펙)으로써 빈 검증기(Bean Validator)를 이용해 객체의 제약 조건을 검증하도록 지시하는 어노테이션
+
+<br> 
+- 동작 원리** :
+	- 모든 요청은 프론트 컨트롤러인 디스패처 서블릿을 통해 컨트롤러로 전달된다. 
+	- 전달 과정에서는 컨트롤러 메소드의 객체를 만들어주는 ArgumentResolver가 동작하는데, @Valid 역시 ArgumentResolver에 의해 처리가 된다.
+	- 대표적으로 @RequestBody는 Json 메세지를 객체로 변환해주는 작업이 ArgumentResolver의 구현체인 RequestResponseBodyMethodProcessor가 처리하며, 이 내부에서 @Valid로 시작하는 어노테이션이 있을 경우에 유효성 검사를 진행한다. 
+	- (이러한 이유로 @Valid가 아니라 커스톰 어노테이션인 @ValidMangKyu여도 동작한다.) 
+	- 만약 @ModelAttribute를 사용중이라면 ModelAttributeMethodProcessor에 의해 @Valid가 처리된다.
+	- 그리고 검증에 오류가 있다면 MethodArgumentNotValidException 예외가 발생하게 되고, 디스패처 서블릿에 기본으로 등록된 예외 리졸버(Exception Resolver)인 DefaultHandlerExceptionResolver에 의해 400 BadRequest 에러가 발생한다.
+
+<br>
+- 실습 코드 :
+
+```java
+@PostMapping("/user/add") 
+public ResponseEntity<Void> addUser(@RequestBody @Valid AddUserRequest addUserRequest) {
+      ...
+}
+```
+
+- 결론 : @Valid는 기본적으로 컨트롤러에서만 동작하며 기본적으로 다른 계층에서는 검증이 되지 않는다. 다른 계층에서 파라미터를 검증하기 위해서는 @Validated와 결합되어야 한다.
+
+
+<br>
+#### b. @Validated
+
+- 입력 파라미터의 유효성 검증은 컨트롤러에서 최대한 처리하고 넘겨주는 것이 좋다. 
+- 하지만 개발을 하다보면 불가피하게 다른 곳에서 파라미터를 검증해야 할 수 있다. 
+- Spring에서는 이를 위해 AOP 기반으로 메소드의 요청을 가로채서 유효성 검증을 진행해주는 @Validated를 제공하고 있다
+
+<br>
+- 동작 과정 :
+	- 특정 ArgumnetResolver에 의해 유효성 검사가 진행되었던 @Valid와 달리, @Validated는 AOP 기반으로 메소드 요청을 인터셉터하여 처리된다. 
+	- @Validated를 클래스 레벨에 선언하면 해당 클래스에 유효성 검증을 위한 AOP의 어드바이스 또는 인터셉터(MethodValidationInterceptor)가 등록된다. 
+	- 그리고 해당 클래스의 메소드들이 호출될 때 AOP의 포인트 컷으로써 요청을 가로채서 유효성 검증을 진행한다.
+	- 이러한 이유로 @Validated를 사용하면 컨트롤러, 서비스, 레포지토리 등 계층에 무관하게 스프링 빈이라면 유효성 검증을 진행할 수 있
+
+<br>
+- 실습 코드 :
+
+```java
+@Service
+@Validated
+public class UserService {
+
+	public void addUser(@Valid AddUserRequest addUserRequest) {
+		...
+	}
+}
+```
+
+<br>
+#### c. @Validated의 그룹화 기능 
+- 동일한 클래스에 대해 제약조건이 요청에 따라 달라질 수 있다. 
+- 예를 들어, 일반 사용자의 요청과 관리자의 요청이 1개의 클래스로 처리될 때, 다른 제약 조건이 적용되어야 할 수 있는 것이다. 
+- 이때는 검증될 제약 조건이 2가지로 나누어져야 하는데, Spring은 이를 위해 제약 조건이  적용될 검증 그룹을 지정할 수 있는 기능 역시 @Validated를 통해 제공하고 있다.
+- 자세한 내용은 아래 사이트에서 찾아보기!
+
+<br>
+#### d. 참고 사이트 :
+- [@Valid와 @Validated를 이용의 참고 사이트 1](https://mangkyu.tistory.com/174)
+
 
 ---
 
@@ -538,6 +603,7 @@ public class StoreController {
 ### 5) Jackson ObjectMapper 개념
 
 - `ObjectMapper objectMapper` : jackson의 ObjectMapper는 일반적으로 JSON 형태의 데이터 타입의 데이터 바인딩에 사용한다.
+- ObjectMapper는 리플렉션을 활용해서 객체로부터 Json 형태의 문자열을 만들어내거나 Json 문자열로부터 객체를 만들어낸다.
 
 <br>
 
@@ -548,12 +614,99 @@ public class StoreController {
 <br>
 > 역직렬화 : Json 문자열로부터 객체를 만들어 낸다,
 
-
+<br>
 #### b. Jackson ObjectMapper 
 
+##### a) ObjectMapper 직렬화**
+
+- JSON 형태의 문자열을 만들어가는 방법!!
+- 해당 부분은 @ResponseBody나 @RestController 또는 ResponseEntity 등을 사용하는 경우에 처리된다**
+- ObjectMapper의 기본 설정으로는 public 필드 또는 public 형태의 getter(getX로 시작하는 메소드)만 접근이 가능하다
+- 그래서, ObjectMapper를 이용하는 경우, 직렬화를 위해 기본적으로 getter를 반드시 만들어두는 것이 좋다.
+
+<br>	
+- 실습 코드 :
+
+```java
+String jsonResult = objectMapper.writeValueAsString(myDTO());
+```
+
+<br>
+##### b) ObjectMapper를 이용한 직렬화의 주의 사항 : 
+- 아래 코드에서 클래스의 객체를 ObjectMapper로 직렬화하면 다음과 같은 json 문자열이 만들어진다. 
+- getNameWithAge 역시 getX로 시작하는 getter 메소드 규칙을 따르기 때문이다. 
+- 만약 이러한 부분을 인지하지 못한다면 잘못된 json 응답을 내려줄 수 있다.
+- 그래서, 메서드명에 주의하자! 
+
+<br>	
+- 실습 코드 :
+
+```java
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class MangKyuRequest {
+
+    private String name;
+    private Integer age;
+
+    public String getNameWithAge() {
+        return name + "(" + age + ")";
+    }
+
+}
+```
+
+---
+
+<br>
+##### c) ObjectMapper를 역직렬화**
+- JSON 형태의 문자열에서 객체를 만들어가는 방법 
+- Spring에서 @RequestBody로 json 문자열을 객체로 받아올 때 역직렬화가 처리된다.
+
+<br>
+##### d) ObjectMapper의 역직렬화의 과정
+- [1] 기본 생성자로 객체를 생성함
+- [2] 필드값을 찾아서 값을 바인딩 해줌
+
+- 가장 먼저 객체를 생성하는데, 기본 생성자가 없다면 에러를 발생시킨다. 기본 생성자로 객체를 생성한 후에는 필드값을 찾아야하는데, 기본적으로 public 필드 또는 public 형태의 getter/setter로 찾을 수 있다.
+
+<br>
+##### e) ObjectMapper를 우회적으로 역직렬화 처리하는 방법
+- ObjectMapper에 ParameterNames 모듈 추가
+- Java 컴파일의 -parameters 옵션 추가
+- 아래 사이트에서 찾아보기
 
 
 
+<br>
+- 참고 사이트 :
+	- [Jackson ObjectMapper 참고 사이트 1](https://mangkyu.tistory.com/223)
+
+---
+
+
+<br><br>
+### 5-1) DTO 클래스는 항상 다음과 같이 사용하라
+
+-  DTO에는 다음과 같은 코드를 무지성으로 붙여주는 것이다. 그러면 우리는 부담없이 DTO에 일관된 방식을 제공해줄 수 있다. 
+- 만약 @ModelAttribute 사용이 필요하다면 무지성으로 @Setter까지 넣어주면 된다.
+
+<br>
+- 실습 코드 :
+
+```java
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class MangKyuRequest {
+
+    private String name;
+    private Integer age;
+
+}
+```
 
 ---
 
