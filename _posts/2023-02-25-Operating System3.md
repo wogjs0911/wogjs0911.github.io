@@ -1337,95 +1337,132 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 - 디스크의 외부에서 보는 디스크의 단위 정보 저장 공간들
 - 주소를 가진 1차원 배열처럼 취급
 - 정보를 전송하는 최소 단위
+
+<br>
 - Sector
 - Logical block이 물리적인 디스크에 매핑된 위치
 - Sector 0은 최외곽 실린더의 첫 트랙에 있는 첫번째 섹터이다 → 약속!
 
 <br>
+
 ### 2) Disk Scheduling
 
+
 - Access time의 구성
+
 - Seek time (대부분의 시간을 차지함)
 - 헤드를 해당 실린더로 움직이는데 걸리는 시간
+
 - Rotational latency
 - 헤드가 원하는 섹터에 도달하기까지 걸리는 회전 지연시간
+
 - Transfer time (작은 시간)
 - 실제 데이터 전송 시간
+
 - Disk bandwidth
 - 단위 시간 당 전송 된 바이트 수
+
 - Disk Scheduling
 - Seek time을 최소화하는 것이 목표
 - Seek time = seek distance
 
 <br>
+
 ### 3) Disk Management
 
+
 - Physical formatting(low-levlel formatting)
+
 - 디스크를 컨트롤러가 읽고 쓸 수 있도록 섹터들로 나누는 과정
 - 각 섹터는 header + 실제 data(보통 512bytes) + trailer로 구성
 - header와 trailer는 sector number, ECC(Error-Correcting Code - 데이터를 작게 요약, 나중에 대조해서 오류를 검출하는 역할을 함) 등의 정보가 저장되며 Controller가 직접 접근 및 운영
+
+<br>
 - Partitioning
+
 - 디스크를 하나 이상의 실린더 그룹으로 나누는 과정
 - OS는 이것을 독립적 Disk로 취급(logical disk)
+
+<br>
 - Logical Formatting
+
 - 파일 시스템을 만드는 것
 - FAT, iNode, free space 등의 구조 포함
+
+<br>
 - Booting
+
 - ROM에 있는 Small Bootstrap loader의 실행
 - sector 0(boot block)을 메모리에 올려 load하여 실행
-sector 0은 Full Bootstrap Loader Program
-해당하는 운영체제(OS) 커널 파일을 디스크에서 load하여 실행
+- sector 0은 Full Bootstrap Loader Program
+- 해당하는 운영체제(OS) 커널 파일을 디스크에서 load하여 실행
 
 
 <br>
+
 ### 4) Disk Scheduling Alogrithm
 
 <br>
+
 #### a. FCFS (First Come First Served)
+
 - 비효율적임
 
 
 <br>
+
 #### b. SSTF (Shorthest Seek Time First)
+
 - 헤드의 위치에서 가까운 요청 순으로 처리
 
 - Starvation 문제가 발생할 수 있음 → 큐에 계속 가까운 거리가 들어온다면 먼 요청은 계속 처리되지 않을 수 있음
 
 <br>
+
 #### c. SCAN
+
 - 엘리베이터 스케쥴링 이라고도 부름
 
 <br>
+
 #### d. C-SCAN
+
 - 헤드가 한쪽 끝에서 다른쪽 끝으로 이동하며 가는 길목에 있는 모든 요청을 처리한다. SCAN 대비 이동거리는 좀 더 길어질 수 있지만, 균일한 대기시간을 제공할 수 있다.
 
 
  
 <br>
+
 ### 5) 기타 알고리즘
 
 <br>
+
 #### a. N-SCAN
 - SCAN의 변형 알고리즘
 - 일단 arm이 한 방향으로 움직이기 시작하면 그 시점 이후에 도착한 job은 되돌아올 때 service
 
 
 <br>
+
 #### b. LOOK and C-LOOK
 - SCAN이나 C-SCAN은 헤드가 디스크 끝에서 끝으로 이동
 - LOOK과 C-LOOK은 헤드가 진행 중이다가 그 방향에 더 이상 기다리는 요청이 없으면 헤드의 이동방향을 즉시 반대로 이동한다
 
 <br>
+
 ### 6) Disk Scheduling Alogrithm의 결정
 - SCAN, C-SCAN 및 그 응용 알고리즘은 LOOK, C-LOOK 등이 일반적으로 디스크 입출력이 많은 시스템에서 효율적인 것으로 알려져 있음
 - File의 할당 방법에 따라 디스크 요청이 영향을 받음(연속할당을 했으면, 연속된 실린더 위치에 있어서 이동거리를 줄일 수 있는 등)
 - 디스크 스케줄링 알고리즘은 필요할 경우 다른 알고리즘으로 쉽게 교체할 수 있도록 OS와 별도의 모듈로 작성되는 것이 바람직하다.
 
 <br>
+
 ### 7) Swap-Space Management
 - Disk를 사용하는 두가지 이유
 - 메모리의 volatile한(휘발성) 특성 → file system
 - 프로그램 실행을 위한 memory 공간 부족 → swap sapce(swap area)
+
+<br>
 - Swap Area
 - Virtual memory system에서는 디스크를 memory의 연장공간으로 사용
 - 파일 시스템 내부에 둘 수도 있으나 별도 partition 사용이 일반적
@@ -1434,10 +1471,13 @@ sector 0은 Full Bootstrap Loader Program
 - 따라서 block의 크기 및 저장방식이 일반 파일시스템과 다름(예를들어, 밑의 그림처럼 일반은 512바이트, 스왑에어리어는 512 킬로바이트)
 
 <br>
+
 ### 8) RAID(Redundant Array of Independent Disks)
 - 여러개의 디스크를 묶어서 사용
 
+<br>
 - 사용 목적
+
 - 디스크 처리 속도 향상
 - 여러 디스크에 block의 내용을 분산 저장
 - 병렬적으로 읽어 옴(interleaving, striping 기법)
