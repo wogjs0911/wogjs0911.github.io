@@ -1,11 +1,11 @@
 ---
 key: /2023/03/01/GongguProject-FeatTest.html
 title: Project - 채팅 기능 테스트
-tags: springboot jsp websocket HTTP mariaDB
+tags: springboot jsp websocket HTTP Lombok Builder ObjectMapper Valid Enum
 ---
 
 # 1. 채팅 기능 테스트 1 : 230301
-
+ 3
 - 내용 : WebSocket을 이용하고 Postman의 API 테스트를 통해 JSON 타입의 데이터로 전송으로 채팅이 가능하도록 테스트 
 	
 - 목표 : 스프링부트의 롬북 기능, jackson 패키지의 ObjectMapping 클래스를 통한 JSON 타입의 데이터 바인딩, HTTP 프로토콜과 WebSockek에 관한 내용 학습
@@ -308,8 +308,8 @@ Bag bag = Bag.builder()
 		.name("name")
         	.money(1000)
         	.memo("memo")
-            .letter("This is the letter")
-            .box("This is the box")
+            	.letter("This is the letter")
+            	.box("This is the box")
         	.build();
 ```
 
@@ -528,7 +528,7 @@ public class StoreController {
 
 
 <br><br> 
-### 4) @Valid와 @Validated를 이용한 유효성 검증의 동작 원리 및 사용 방법
+### 6) @Valid와 @Validated를 이용한 유효성 검증의 동작 원리 및 사용 방법
 
 #### a. @Valid
 
@@ -600,7 +600,7 @@ public class UserService {
 
 <br><br>
 
-### 5) Jackson ObjectMapper 개념
+### 7) Jackson ObjectMapper 개념
 
 - `ObjectMapper objectMapper` : jackson의 ObjectMapper는 일반적으로 JSON 형태의 데이터 타입의 데이터 바인딩에 사용한다.
 - ObjectMapper는 리플렉션을 활용해서 객체로부터 Json 형태의 문자열을 만들어내거나 Json 문자열로부터 객체를 만들어낸다.
@@ -687,7 +687,7 @@ public class MangKyuRequest {
 
 
 <br><br>
-### 5-1) DTO 클래스는 항상 다음과 같이 사용하라
+### 7-1) DTO 클래스는 항상 다음과 같이 사용하라
 
 -  DTO에는 다음과 같은 코드를 무지성으로 붙여주는 것이다. 그러면 우리는 부담없이 DTO에 일관된 방식을 제공해줄 수 있다. 
 - 만약 @ModelAttribute 사용이 필요하다면 무지성으로 @Setter까지 넣어주면 된다.
@@ -711,7 +711,7 @@ public class MangKyuRequest {
 ---
 
 <br><br>
-### 6) UUID 객체 개념
+### 8) UUID 객체 개념
 
 <br>
 - UUID 객체 : 중복을 제거하여 ID를 만들어 준다.
@@ -739,7 +739,7 @@ public class MangKyuRequest {
 ---
 <br><br>
 
-### 7) Enum 클래스 개념
+### 9) Enum 클래스 개념
 
 - 간단히 말하면, 제약을 걸어주어서 상수를 만들어주는 클래스이다. 보통, 데이터의 칼럼 추가 시에 사용된다. 
 - Enum 클래스는 상수를 만들어 주기 때문에 이것은 final이 붙은 상수를 제어한다. 
@@ -783,9 +783,9 @@ public class ChatMessage {
 
 <br><br>
 
-### 9) 실습 코드 :	
+### 10) 실습 코드
 
-- 테스트 1 코드 
+- 채팅 기능 : 테스트 1 코드 
 
 <br>
 

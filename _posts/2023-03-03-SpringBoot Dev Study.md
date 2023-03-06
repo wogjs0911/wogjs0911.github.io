@@ -707,7 +707,7 @@ public class Membership {
 ---
 
 <br>
-### c. API 스펙의 유지
+### c. API 스펙의 유지 가능 
 
 ```java
 @Entity
@@ -750,7 +750,7 @@ public class Membership {
 ---
 
 <br>
-### d. API 스펙의 파악이 용이
+### d. API 스펙의 파악이 용이하다.
 
 - DTO를 통해 API 스펙을 어느정도 파악할 수 있다는 점이다.
 
