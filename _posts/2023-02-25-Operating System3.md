@@ -256,11 +256,11 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 
 <br>
 ##### b) compaction
-	- 외부조각 문제를 해결하는 한가지 방법
-	- 사용 중인 메모리 영역을 한군데로 몰고 hole들을 한곳으로 몰아 큰 block를 만드는 것
-	- 매우 비용이 많이드는 방법임
-	- 최소한의 메모리 이동으로 compaction하는 방법(매우 복잡한 문제)
-	- Compaction은 프로세스의 주소가 실행시간에 동적으로 재배치 가능한 경우에만 수행될 수 있다.(런타임 바인딩)
+- 외부조각 문제를 해결하는 한가지 방법
+- 사용 중인 메모리 영역을 한군데로 몰고 hole들을 한곳으로 몰아 큰 block를 만드는 것
+- 매우 비용이 많이드는 방법임
+- 최소한의 메모리 이동으로 compaction하는 방법(매우 복잡한 문제)
+- Compaction은 프로세스의 주소가 실행시간에 동적으로 재배치 가능한 경우에만 수행될 수 있다.(런타임 바인딩)
 
 
 <br>
@@ -304,7 +304,8 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 - Effective Access Time
 	- Associative register lookup time = e
 	- memory cycle time = 1
-	- Hit ratio = alpha (associative register에서 찾아지는 비율)
+	- Hit ratio = alpha (associative register에서 찾아지는 비율)	
+	- Effective Access Time = `(1 + e)a + (2 + e)(1 - a)` -> `2 + e - a`
 	- alpha가 거의 1에 가까운 값이므로, 2보다 훨씬 작은 값을 얻어 속도 향상을 확인할 수 있음, miss되면 메모리에 접근을 2번 해야함
 
 <br>
@@ -316,7 +317,7 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 <br>
 - 현대의 컴퓨터는 address space가 매우 큰 프로그램 지원, 32 bit address 사용시: 2^32(= 4G)의 주소 공간
 	- page size가 4K일때 1M개의 page table entry 필요(사용되지 않는 영역을 위해서도 전부 메모리의 크기만큼 엔트리를 가지고 있어야 한다 → 배열(테이블) 구조이므로 인덱스 접근을 위해)
-	- 각 page entry가 4B시 프로세스 당 4M의 page table 필요
+	- 각 page entry의 size가 4Byte시 1K개가 있다고 가정하면, 프로세스 당 4M의 page table 필요(전체 주소 공간은는 4G이므로)
 	- 그러나, 대부분의 프로그램은 4G의 주소 공간 중 지극히 일부분만 사용하므로 page table 공간이 심하게 낭비됨
 	
 <br>
