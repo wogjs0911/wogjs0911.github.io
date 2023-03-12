@@ -1097,24 +1097,704 @@ public class WebSockChatHandler extends TextWebSocketHandler {
 - 해당 Topic으로 메세지를 발송(pub)하거나 메세지를 받는(sub)다. 
 - pub은 메세지를 공급하고 sub는 메세지를 소비한다.
 
+---
 
-<br>
+
+<br><br>
 ### 1) 개발 환경 구성 
 
 
+<br>
+
+<details>
+<summary>build.gradle</summary>
+<div markdown="1">
+
+```gradle
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.4'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.stomp'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-freemarker'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.webjars.bower:bootstrap:4.3.1'
+	implementation 'org.webjars.bower:vue:2.5.16'
+	implementation 'org.webjars.bower:axios:0.17.1'
+	implementation 'org.webjars:sockjs-client:1.1.2'
+	implementation 'org.webjars:stomp-websocket:2.3.3-1'
+	implementation 'com.google.code.gson:gson:2.8.0'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+```
+
+</div>
+</details>
+
+
+---
+
+<br><br>
+### 2) 실습 코드에서 STOMP 동작 내용 정리 :
+
+<br>
+#### a. "엔드 포인트" 개념 : 
+- 식별하는데 사용되는 연결된 주소이며 URI의 끝자락을 의미한다.
+- URI 웹소켓을 사용하려면 엔드포인트 클래스를 extends해서 onOpen(), onClose(), onError() 메서드를 등을 구현해야 한다.
+
+<br>
+#### b. STOMP를 사용 시, 장점
+- Session 관리와 발송 구현도 하지 않아도 돼서 코드가 훨씬 간단하다!
+- 핸들러의 구현도 사라지고 세션 관리 관련 구현도 사라진다.
+
+<br>
+#### c. Repository 구현
+- 현재는 채팅방 정보를 Map으로 관리하지만, 나중에 서비스에서는 DB나 다른 저장 매체에 채팅방 정보를 저장하도록 구현해야 합니다.
+- 그리고 ChatService는 ChatRoomRepository가 대체하므로 삭제
+- 그래서 추가로 DB에다가 채팅방 정보를 저장하도록 구현하면, ChatRoomRepository와 ChatService 역할이 달라져서 둘다 구현부가 필요하다!
+
+<br>
+#### d. HashMap를 방 정보에서 사용하는 이유
+- 생성자 인젝션!(해쉬맵으로!)
+- HashMap 데이터 타입으로 받는 이유는 id과 value를 각각 업무 로직에서 사용하려고 이렇게 데이터를 받는다!!
+
+<br>
+#### e. 채팅 관련 pub/sub 동작 과정
+- @MessageMapping을 통해 Websocket으로 들어오는 메시지 발행을 처리한다.
+
+<br>
+- 클라이언트에서는 prefix를 붙여서 /pub/chat/message로 발행 요청을 하면 Controller가 해당 메시지를 받아 처리한다.
+
+<br>
+- 메시지가 발행되면 /sub/chat/room/{roomId}로 메시지를 send 하는 것을 볼 수 있는데 클라이언트에서는 해당 주소를(/sub/chat/room/{roomId}) 구독(subscribe)하고 있다가 메시지가 전달되면 화면에 출력하면 된다.
+
+<br>
+- 여기서 /sub/chat/room/{roomId}는 채팅룸을 구분하는 값이므로 pub/sub에서 Topic의 역할이라고 보면 된다.
+
+<br>
+- 기존의 WebSockChatHandler가 했던 역할을 대체하므로 WebSockChatHandler는 삭제한다.
+
+
+<br>
+#### d. 구독자(subscriber) 구현
+- 서버 단에는 따로 추가할 구현이 없습니다.
+- 웹뷰에서 stomp 라이브러리를 이용해서 subscriber 주소를 바라보고 있는 코드만 작성하면 됩니다.
+
+---
+
+<br><br>
+### 3) 실습 코드 :
+
+<br>
+- 서버 구현부 :
+
+<br>
+
+<details>
+<summary>WebSocketConfig.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+
+        config.enableSimpleBroker("/sub");  // 메세지 받는 부분(브로커)
+        config.setApplicationDestinationPrefixes("/pub");    // 메세지 보내는 곳
+
+    }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+
+        registry.addEndpoint("/ws-stomp").setAllowedOriginPatterns("*")
+                .withSockJS();
+        // 엔드 포인트 : 식별하는데 사용되는 연결된 주소이며 URI의 끝자락을 의미한다.
+        // URI 웹소켓을 사용하려면 엔드포인트 클래스를 extends해서 onOpen(), onClose(), onError() 메서드를
+        // 등을 구현해야 한다.
+    }
+}
+
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>ChatRoom.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.model;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.UUID;
+
+@Getter
+@Setter
+public class ChatRoom {
+    private String roomId;
+    private String name;
+
+    // STOMP를 사용하면, Session 관리와 발송 구현도 하지 않아도 돼서 훨씬 간단하다!
+    // 핸들러도 사라지고 세션 관리도 사라진다.
+    public static ChatRoom create(String name){
+
+        ChatRoom chatRoom = new ChatRoom();
+
+        chatRoom.roomId = UUID.randomUUID().toString();
+        chatRoom.name = name;
+
+        return chatRoom;
+    }
+}
+
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>ChatMessage.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.model;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class ChatMessage {
+
+    // enum은 각 Type을 번갈아가면서 데이터를 받을 수 있다.
+    // 메시지 타입 : 입장, 채팅
+    public enum MessageType{
+        ENTER, TALK
+    }
+
+    private MessageType type;   // 메시지 타입
+    private String roomId;  // 방번호
+    private String sender;  // 메시지 보낸사람
+    private String message; // 메시지
+
+}
+
+```
+
+</div>
+</details>
+
+
+
+<br>
+
+<details>
+<summary>ChatRoomRepository.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.repo;
+
+import com.stomp.chat.model.ChatRoom;
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Repository;
+
+import java.util.*;
+
+// 중요!!
+// 채팅방 정보를 Map으로 관리하지만, 서비스에서는 DB나 다른 저장 매체에 채팅방 정보를 저장하도록 구현해야 합니다.
+// 그리고 ChatService는 ChatRoomRepository가 대체하므로 삭제
+// 나중에 추가로 DB에다가 채팅방 정보를 저장하도록 구현하면, ChatRoomRepository와 ChatService 역할이 달라져서 둘다 구현부가 필요하다!
+@Repository
+public class ChatRoomRepository {
+
+    private Map<String, ChatRoom> chatRoomMap;
+
+
+    // 생성자 인젝션!(해쉬맵으로!)
+    // 해쉬맵 데이터 타입으로 받는 이유는 id과 value를 각각 사용하려고 이렇게 데이터를 받는다!!
+    @PostConstruct
+    private void init(){
+        chatRoomMap = new LinkedHashMap<>();
+    }
+
+    // 채팅방 생성 순서 최근 순으로 반환
+    public List<ChatRoom> findAllRoom(){
+
+        // 해쉬맵 데이터를 값만 받아서 리스트 타입으로 사용한다.
+        List chatRooms = new ArrayList<>(chatRoomMap.values());
+        Collections.reverse(chatRooms);
+        return chatRooms;
+    }
+
+    public ChatRoom findRoomById(String id){
+        return chatRoomMap.get(id);
+    }
+
+    // 채팅방 생성.... put 이용 // 해쉬맵 콜렉션의 put 메서드 이용
+    public ChatRoom createChatRoom(String name){
+        ChatRoom chatRoom = ChatRoom.create(name);
+        chatRoomMap.put(chatRoom.getRoomId(), chatRoom);
+
+        return chatRoom;
+    }
+
+}
+
+```
+
+</div>
+</details>
+
+
+
+<br>
+
+<details>
+<summary>ChatController.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.controller;
+
+import com.stomp.chat.model.ChatMessage;
+import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.stereotype.Controller;
+
+// STOMP 이용 시,
+// session 관리는 안해도 되고 메세지 발송 부분만 구현해주면 된다. 관리가 따로 필요 없다!!
+@RequiredArgsConstructor
+@Controller
+public class ChatController {
+
+    private final SimpMessageSendingOperations messagingTemplate;
+
+    @MessageMapping("/chat/message")
+    public void message(ChatMessage message){
+
+        if(ChatMessage.MessageType.ENTER.equals(message.getType()))
+            message.setMessage(message.getSender() + "님이 입장하셨습니다.");
+
+        messagingTemplate.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
+    }
+
+    // @MessageMapping을 통해 Websocket으로 들어오는 메시지 발행을 처리한다.
+
+    // 클라이언트에서는 prefix를 붙여서 /pub/chat/message로 발행 요청을 하면
+    // Controller가 해당 메시지를 받아 처리한다.
+
+    // 메시지가 발행되면 /sub/chat/room/{roomId}로 메시지를 send 하는 것을 볼 수 있는데
+    // 클라이언트에서는 해당 주소를(/sub/chat/room/{roomId}) 구독(subscribe)하고 있다가
+    // 메시지가 전달되면 화면에 출력하면 된다.
+
+    // 여기서 /sub/chat/room/{roomId}는 채팅룸을 구분하는 값이므로
+    // pub/sub에서 Topic의 역할이라고 보면 된다.
+
+    // 기존의 WebSockChatHandler가 했던 역할을 대체하므로 WebSockChatHandler는 삭제한다.
+}
+
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>ChatRoomController.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.controller;
+
+// [구독자(subscriber) 구현]
+// 서버 단에는 따로 추가할 구현이 없습니다.
+// 웹뷰에서 stomp 라이브러리를 이용해서 subscriber 주소를 바라보고 있는 코드만 작성하면 됩니다.
+
+// [ChatRoomController 생성]
+// Websocket 통신 외에 채팅 화면 View 구성을 위해 필요한 Controller를 생성합니다.
+
+import com.stomp.chat.model.ChatRoom;
+import com.stomp.chat.repo.ChatRoomRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+// 레이어 : 다시 나누기!! Entity, Repository, Service, Controller, View 단
+
+@RequiredArgsConstructor
+@Controller
+@RequestMapping("/chat")
+public class ChatRoomController {
+
+    // 왜 경로로 쓸까? DI 개념?
+    private final ChatRoomRepository chatRoomRepository;
+
+    // 채팅 리스트 화면
+    @GetMapping("/room")
+    public String rooms(Model model){
+        return "/chat/room";
+    }
+
+    // 모든 채팅방 "목록" 반환 : 값으로 반환
+    @GetMapping("/rooms")
+    @ResponseBody
+    public List<ChatRoom> room(){
+        return chatRoomRepository.findAllRoom();
+    }
+
+    // 채팅방 생성
+    @PostMapping("/room")
+    @ResponseBody
+    public ChatRoom createRoom(@RequestParam String name){
+        return chatRoomRepository.createChatRoom(name);
+    }
+
+
+    // 채팅방 입장 화면
+    // @PathVariable 이것은 뭘까??
+    @GetMapping("/room/enter/{roomId}")
+    public String roomDetail(Model model, @PathVariable String roomId){
+        model.addAttribute("roomId", roomId);
+        return "/chat/roomdetail";
+    }
+
+    // 특정 채팅방 조회
+    @GetMapping("/room/{roomId}")
+    @ResponseBody
+    public ChatRoom roomInfo(@PathVariable String roomId){
+        return chatRoomRepository.findRoomById(roomId);
+
+    }
+
+
+}
+
+```
+
+</div>
+</details>
+
+<br>
+- 화면 구현부 :
+
+<br>
+
+<details>
+<summary>room.html</summary>
+<div markdown="1">
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Websocket Chat</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/webjars/bootstrap/4.3.1/dist/css/bootstrap.min.css">
+    <style>
+      [v-cloak] {
+          display: none;
+      }
+    </style>
+</head>
+<body>
+<div class="container" id="app" v-cloak>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>채팅방 리스트</h3>
+        </div>
+    </div>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <label class="input-group-text">방제목</label>
+        </div>
+        <input type="text" class="form-control" v-model="room_name" v-on:keyup.enter="createRoom">
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="button" @click="createRoom">채팅방 개설</button>
+        </div>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item list-group-item-action" v-for="item in chatrooms" v-bind:key="item.roomId" v-on:click="enterRoom(item.roomId)">
+            {{item.name}}
+        </li>
+    </ul>
+</div>
+<!-- JavaScript -->
+<script src="/webjars/vue/2.5.16/dist/vue.min.js"></script>
+<script src="/webjars/axios/0.17.1/dist/axios.min.js"></script>
+<script>
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                room_name : '',
+                chatrooms: [
+                ]
+            },
+            created() {
+                this.findAllRoom();
+            },
+            methods: {
+                findAllRoom: function() {
+                    axios.get('/chat/rooms').then(response => { this.chatrooms = response.data; });
+                },
+                createRoom: function() {
+                    if("" === this.room_name) {
+                        alert("방 제목을 입력해 주십시요.");
+                        return;
+                    } else {
+                        var params = new URLSearchParams();
+                        params.append("name",this.room_name);
+                        axios.post('/chat/room', params)
+                        .then(
+                            response => {
+                                alert(response.data.name+"방 개설에 성공하였습니다.")
+                                this.room_name = '';
+                                this.findAllRoom();
+                            }
+                        )
+                        .catch( response => { alert("채팅방 개설에 실패하였습니다."); } );
+                    }
+                },
+                enterRoom: function(roomId) {
+                    var sender = prompt('대화명을 입력해 주세요.');
+                    if(sender != "") {
+                        localStorage.setItem('wschat.sender',sender);
+                        localStorage.setItem('wschat.roomId',roomId);
+                        location.href="/chat/room/enter/"+roomId;
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>roomdetail.html</summary>
+<div markdown="1">
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Websocket ChatRoom</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/webjars/bootstrap/4.3.1/dist/css/bootstrap.min.css">
+    <style>
+      [v-cloak] {
+          display: none;
+      }
+    </style>
+</head>
+<body>
+<div class="container" id="app" v-cloak>
+    <div>
+        <h2>{{room.name}}</h2>
+    </div>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <label class="input-group-text">내용</label>
+        </div>
+        <input type="text" class="form-control" v-model="message" v-on:keypress.enter="sendMessage">
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="button" @click="sendMessage">보내기</button>
+        </div>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item" v-for="message in messages">
+            {{message.sender}} - {{message.message}}</a>
+        </li>
+    </ul>
+    <div></div>
+</div>
+<!-- JavaScript -->
+<script src="/webjars/vue/2.5.16/dist/vue.min.js"></script>
+<script src="/webjars/axios/0.17.1/dist/axios.min.js"></script>
+<script src="/webjars/sockjs-client/1.1.2/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/2.3.3-1/stomp.min.js"></script>
+<script>
+        //alert(document.title);
+        // websocket & stomp initialize
+        var sock = new SockJS("/ws-stomp");
+        var ws = Stomp.over(sock);
+        var reconnect = 0;
+        // vue.js
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                roomId: '',
+                room: {},
+                sender: '',
+                message: '',
+                messages: []
+            },
+            created() {
+                this.roomId = localStorage.getItem('wschat.roomId');
+                this.sender = localStorage.getItem('wschat.sender');
+                this.findRoom();
+            },
+            methods: {
+                findRoom: function() {
+                    axios.get('/chat/room/'+this.roomId).then(response => { this.room = response.data; });
+                },
+                sendMessage: function() {
+                    ws.send("/pub/chat/message", {}, JSON.stringify({type:'TALK', roomId:this.roomId, sender:this.sender, message:this.message}));
+                    this.message = '';
+                },
+                recvMessage: function(recv) {
+                    this.messages.unshift({"type":recv.type,"sender":recv.type=='ENTER'?'[알림]':recv.sender,"message":recv.message})
+                }
+            }
+        });
+
+        function connect() {
+            // pub/sub event
+            ws.connect({}, function(frame) {
+                ws.subscribe("/sub/chat/room/"+vm.$data.roomId, function(message) {
+                    var recv = JSON.parse(message.body);
+                    vm.recvMessage(recv);
+                });
+                ws.send("/pub/chat/message", {}, JSON.stringify({type:'ENTER', roomId:vm.$data.roomId, sender:vm.$data.sender}));
+            }, function(error) {
+                if(reconnect++ <= 5) {
+                    setTimeout(function() {
+                        console.log("connection reconnect");
+                        sock = new SockJS("/ws-stomp");
+                        ws = Stomp.over(sock);
+                        connect();
+                    },10*1000);
+                }
+            });
+        }
+        connect();
+    </script>
+</body>
+</html>
+```
+
+</div>
+</details>
+
+
+---
+
+<br><br>
+### 4) 인텔리제이에서 STOMP 개발 시, 주의 사항 :
+- build.gradle에 "webjars" 관련 다른 라이브러리도 추가해주기!
+- build.gradle에 implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' 추가
+- WebSocketConfig.java에 setAllowedOrigins를 setAllowedOriginPatterns로 변경
+- 인텔리제이 커뮤니티 버전은 ftl 확장자 사용되지 않기 때문에 room.ftl, roomdetail.ftl은 확장자를 html로 변경
+- 코드를 실행하고나서 "localhost:8080/chat/room"으로 이동해서 테스트 해보자!
+
+---
+
+<br><br>
+### 5) 추가로 할 것 :
+- vue.js 공부하기!
+- 레이어 : 다시 나누기!! Entity, Repository, Service, Controller, View 단
+
+ 
+<br>
+- [채팅 기능 참고 사이트 2](https://www.daddyprogrammer.org/post/4691/spring-websocket-chatting-server-stomp-server/)
+ 
+ 
+ 
+---
+ 
+<br><br>
+ 
+# 3. 여러 대의 채팅서버간에 메시지 공유하기
+
+- Redis DB를 이용한다. pub/sub 개념 중요!
+
+
+<br>
+
+### 1) 개념 : 
+ 
+
+
+
+<br>
+
+### 2) 실습 코드 :  
 
 
 
 
 <br>
-- [채팅 기능 참고 사이트 2](https://www.daddyprogrammer.org/post/4691/spring-websocket-chatting-server-stomp-server/)
+
+### 3) 정리 :
 
 
-
-
-
-
-
+<br>
+- [참고 사이트 3](https://www.daddyprogrammer.org/post/4731/spring-websocket-chatting-server-redis-pub-sub/)
 
 
 
