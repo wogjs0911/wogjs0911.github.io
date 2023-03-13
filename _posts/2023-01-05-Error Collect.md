@@ -1,7 +1,7 @@
 ---
 key: /2023/01/05/Error-Collect.html
 title: Error - Error 모음
-tags: java javascript spring springboot eclipse mysql oracledb servlet jsp mariaDB
+tags: java javascript spring springboot eclipse mysql oracledb servlet jsp mariaDB gradle websocket stomp
 ---
 
 # 0. Project 주의 :
@@ -431,5 +431,51 @@ http://localhost/webprj2/hello?c=10
 </html>
 ```
 
+---
 
 
+<br><br>
+# 6. Gradle 에러
+
+### 1) Gradle 라이브러리 추가 에러
+
+- 인텔리제이에서 build.gradle에 라이브러리 추가했는데 에러 발생
+
+<br>
+- 에러 :
+	- Could not find method compile() for arguments [{group=it.ozimov, name=embedded-redis, version=0.7.2}] on object of type org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.
+
+<br>
+- 해결 방법 : 
+	- compile, runtime, testCompile, testRuntime 은 Gradle 4.10 (2018.8.27) 이래로
+	deprecate 되었다.
+	- 그리고 Gradle 7.0 (2021.4.9) 부터 삭제되었다.
+	- 현재, Gradle 7.6.1 버전을 이용하고 있어서 삭제된 명령을 사용했으므로 오류가 발생했었다.
+	- 삭제된 네 명령은 각각 implementation, runtimeOnly, testImplementation, testRuntimeOnly 으로 대체되었다.
+	- 따라서, compile 을 implementation 으로 수정하여 오류를 해결했다.
+
+- 참고 레퍼런스 : 
+	- [참고한 레퍼런스 1](https://stackoverflow.com/questions/23796404/could-not-find-method-compile-for-arguments-gradle)
+	- [참고한 블로그 1](https://velog.io/@g0709-19/Gradle-Could-not-find-method-compile-%ED%95%B4%EA%B2%B0-%EB%B0%A9%EB%B2%95)
+
+	
+	
+---
+
+<br><br>
+# 7. WebSocket, STOMP 에러
+
+### 1) STOMP 채팅 서비스 에러
+
+- 인텔리제이에서 스프링 부트를 사용하면서 에러 발생.
+
+<br>
+- 문제점 : 
+	- STOMP 라이브러리를 이용하는데 채팅 서비스를 설계 후 클라이언트의 접속 url을 알지 못했다. 그리고 인텔리제이 버전 때문에 ftl 파일 확장자를 사용할 수 없었다.
+
+<br>
+- 해결법 : 
+	- 코드를 실행하고나서 `localhost:8080/chat/room`으로 이동해서 테스트 해보자!
+	- build.gradle에 implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' 추가
+	- WebSocketConfig.java에 setAllowedOrigins를 setAllowedOriginPatterns로 변경
+	- 인텔리제이 Community 버전은 ftl 확장자 사용되지 않기 때문에 room.ftl, roomdetail.ftl은 확장자를 html로 변경

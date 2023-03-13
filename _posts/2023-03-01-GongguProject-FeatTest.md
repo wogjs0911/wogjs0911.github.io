@@ -1054,9 +1054,9 @@ public class WebSockChatHandler extends TextWebSocketHandler {
 
 --- 
 
-<br><br>
-# 2. 채팅 서버를 STOMP로 이용
 
+<br><br>
+# 2. 채팅 서버를 STOMP로 이용 : 230312
 ### 0) STOMP를 사용하는 이유
 
 <br>
@@ -1206,10 +1206,130 @@ tasks.named('test') {
 - 서버 단에는 따로 추가할 구현이 없습니다.
 - 웹뷰에서 stomp 라이브러리를 이용해서 subscriber 주소를 바라보고 있는 코드만 작성하면 됩니다.
 
+
 ---
 
 <br><br>
-### 3) 실습 코드 :
+### 3) @PathVariable와 @RequestParam 정리 :
+- 보통은 로그인, 회원가입할 때, 사용자가 입력한 정보를 가지고 와서 DTO에 저장하는 내용들이다. 
+
+<br>
+#### a. Request가 들어오는 변수 타입
+
+<br>
+- 종류 : 
+	- URL 변수 (@PathVariable)
+	- Query String (@RequestParam)
+	- Body
+	- Form
+
+<br>
+#### b. @PathVariable 이란?
+- REST API에서 URI에 변수가 들어가는걸 실무에서 많이 볼 수 있다.
+
+<br>
+- 예를 들면, 
+	- 아래 URI에서 밑줄 친 부분이 @PathVariable로 처리해줄 수 있는 부분이다.
+	- `http://localhost:8080/api/user/1234`
+	- `https://music.bugs.co.kr/album/4062464`
+
+<br>
+- `@PathVariable` 실습 코드 :
+
+```java
+
+@RestController
+public class MemberController { 
+    // 기본
+    @GetMapping("/member/{name}")
+    public String findByName(@PathVariable("name") String name ) {
+        return "Name: " + name;
+    }
+    
+    // 여러 개
+    @GetMapping("/member/{id}/{name}")
+	public String findByNameAndId(@PathVariable("id") String id, @PathVariable("name") String name) {
+    	return "ID: " + id + ", name: " + name;
+    }
+    
+}
+```
+
+<br>
+#### c. @RequestParam 이란?
+- 아래 실습 코드에서 url이 전달될 때, name 파라미터(name에 담긴 value)를 받아 온다.
+- 즉, @RequestParam("실제 값")은 String으로 설정할 "변수 이름" 이런 식으로 표현합니다.
+- 이렇게 "@RequestParam"의 경우 url 뒤에 붙는 파라미터의 값을 가져올 때 사용합니다.
+
+<br> 
+- `@RequestParam` 실습 코드 :
+
+```java
+@GetMapping("getDriver")
+public String viewName( @RequestParam("name") String name, 
+			@RequestParam("name2") String name2){
+
+	//위처럼 하나 이상의 타입을 적용할 수 있습니다.
+  	//스플잉에서 지원하는 변환기에서 지원되는 모든타입을 변환가능합니다.
+	//RequesParam은 하나 이상 파라미터에서 사용 가능합니다.
+
+}
+```
+
+
+---
+
+<br><br>
+### 4) 커맨드 객체 정리 :
+
+#### a. 기존 코드인 `@RequestParam`를 사용하는 경우
+
+- 특징 : 요청한 파라미터가 어떤 것인지 명확하게 알 수 있으며, 생략하는 것이 없어서 어떤 파라미터를 요청해서 어떤 데이터가 DB와 통신하는지 알 수 있다. 
+
+<br>
+- 단점 : 하지만, 로그인이나 회원가입과 같이 많은 데이터를 동시에 요청하는 경우 코드가 지저분해지고 길어진다. 
+
+
+<br>
+- 실습 코드 : 
+
+```java
+@PostMapping(value = "/registerMember")
+public String registerMember(@RequestParam String id) {
+    memberService.registerMember(id);
+    return "redirect:/";
+}
+```
+
+<br>
+#### b. 실무처럼 `커맨드 객체` 사용하는 경우 
+- 특징 : 
+	- 다량의 데이터를 동시에 받아들일떄, 반복되는 코드를 제거하여 가독성이 높아진다. 그래서 Model 객체에 데이터를 담을 때, DTO 객체 변수 하나만 이용하면 된다. 
+	- 아래 실습 코드처럼 메서드의 매개변수로 DTO 객체를 이용하고 그 객체를 이용해 DB와 동작하는 메서드에 데이터를 사용하게 해준다.
+	
+<br>
+- 동작 과정 : 
+	- HttpServletRequest가 알아서 요청 파라미터를 컨트롤러의 매개변수로 존재하는 DTO에 바인딩시켜준다. 이때, 바인딩은 setter 메서드를 이용한다.(진짜 신기하네..)
+
+<br>
+- 주의할 점 : 
+	- 요청 파라미터의 속성값의 이름과 DTO의 객체 속성값의 이름이 같아야 한다. 그래야 자동으로 바인딩할 수 있다.
+
+<br>
+- 실습코드 :
+
+```java
+@PostMapping(value = "/registerMember")
+public String registerMember(MemberDTO memberDTO) {
+	memberService.registerMember(memberDTO);
+	return "redirect:/";
+}
+```
+
+---
+
+<br><br>
+### 5) STOMP 채팅 서비스 실습 코드 :
 
 <br>
 - 서버 구현부 :
@@ -1745,17 +1865,20 @@ public class ChatRoomController {
 ---
 
 <br><br>
-### 4) 인텔리제이에서 STOMP 개발 시, 주의 사항 :
+### 6) 인텔리제이에서 STOMP 개발 시, 주의 사항 :
 - build.gradle에 "webjars" 관련 다른 라이브러리도 추가해주기!
 - build.gradle에 implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' 추가
 - WebSocketConfig.java에 setAllowedOrigins를 setAllowedOriginPatterns로 변경
 - 인텔리제이 커뮤니티 버전은 ftl 확장자 사용되지 않기 때문에 room.ftl, roomdetail.ftl은 확장자를 html로 변경
+
+<br>
 - 코드를 실행하고나서 "localhost:8080/chat/room"으로 이동해서 테스트 해보자!
+- Gradle의 build.gradle 설정에서 라이브러리를 추가하고 gradle 업데이트를 꼭 시켜야 추가된 라이브러리가 적용된다. 
 
 ---
 
 <br><br>
-### 5) 추가로 할 것 :
+### 7) 추가로 할 것 :
 - vue.js 공부하기!
 - 레이어 : 다시 나누기!! Entity, Repository, Service, Controller, View 단
 
@@ -1769,7 +1892,7 @@ public class ChatRoomController {
  
 <br><br>
  
-# 3. 여러 대의 채팅서버간에 메시지 공유하기
+# 3. 여러 대의 채팅서버간에 메시지 공유하기 : 230312
 
 - Redis DB를 이용한다. pub/sub 개념 중요!
 
@@ -1778,7 +1901,7 @@ public class ChatRoomController {
 
 ### 1) 개념 : 
  
-
+- 여러명의 메세지를 공유하게 해주는 것이 Redis의 Topic을 통해 이러한 것이 가능하게 해준다. 
 
 
 <br>
@@ -1787,11 +1910,580 @@ public class ChatRoomController {
 
 
 
+<br>
+
+<details>
+<summary>EmbeddedRedisConfig.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.config;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import redis.embedded.RedisServer;
+
+
+// 로컬 환경일 경우 "내장 Redis"가 실행된다.
+
+@Profile("local")
+@Configuration
+public class EmbeddedRedisConfig {
+    // Redis 서버도 채팅 서버가 실행될 때, 동시에 실행되도록 설정
+
+    @Value("${spring.redis.port}")
+    private int redisPort;
+
+    private RedisServer redisServer;
+
+    // 초기에 1번만 초기화하여 서버 유지
+    @PostConstruct
+    public void redisServer(){
+        redisServer = new RedisServer(redisPort);
+        redisServer.start();
+    }
+
+    @PreDestroy
+    public void stopRedis(){
+        if(redisServer != null){
+            redisServer.stop();
+        }
+    }
+
+}
+
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>RedisConfig.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+@Configuration
+public class RedisConfig {
+
+    // Redis의 pub/sub 기능을 사용할 것이므로 MessageListener 설정도 추가!
+    @Bean
+    public RedisMessageListenerContainer redisMessageListener(RedisConnectionFactory connectionFactory){
+
+        // 팩토리 연결
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory);
+
+        return container;
+    }
+
+    // 또한, 어플리케이션에서 Redis 사용을 위해 redisTemplate 설정 추가
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory){
+
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+
+        // Redis DB 설정(팩토리 기본 설정)
+        redisTemplate.setConnectionFactory(connectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+
+        // 값 처리를 위한 추가 설정?
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+
+        return redisTemplate;
+    }
+}
+
+```
+
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>WebSocketConfig.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+
+        config.enableSimpleBroker("/sub");  // 메세지 받는 부분(브로커)
+        config.setApplicationDestinationPrefixes("/pub");    // 메세지 보내는 곳
+
+    }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+
+        registry.addEndpoint("/ws-stomp").setAllowedOrigins("*")
+                .withSockJS();
+        // 엔드 포인트 : 식별하는데 사용되는 연결된 주소이며 URI의 끝자락을 의미한다.
+        // URI 웹소켓을 사용하려면 엔드포인트 클래스를 extends해서 onOpen(), onClose(), onError() 메서드를
+        // 등을 구현해야 한다.
+    }
+}
+
+```
+
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>ChatController.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.controller;
+
+import com.stomp.chat.model.ChatMessage;
+import com.stomp.chat.pubsub.RedisPublisher;
+import com.stomp.chat.repo.ChatRoomRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.stereotype.Controller;
+
+// STOMP 이용 시,
+// session 관리는 안해도 되고 메세지 발송 부분만 구현해주면 된다. 관리가 따로 필요 없다!!
+@RequiredArgsConstructor
+@Controller
+public class ChatController {
+
+    private final RedisPublisher redisPublisher;
+    private final ChatRoomRepository chatRoomRepository;
+
+    // 클라이언트가 채팅 방에 입장 시, 대화가 가능하도록 리스너를 연동시켜주는 enterChatRoom 구성
+    // 서로 다른 서버에서 메서지를 공유하도록 Redis의 Topic으로 발행
+    @MessageMapping("/chat/message")
+    public void message(ChatMessage message){
+
+        if(ChatMessage.MessageType.ENTER.equals(message.getType())) {
+            chatRoomRepository.enterChatRoom(message.getRoomId());
+            message.setMessage(message.getSender() + "님이 입장하셨습니다.");
+        }
+
+        redisPublisher.publish(chatRoomRepository.getTopic(message.getRoomId()), message);
+
+        // messagingTemplate.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
+    }
+
+    // @MessageMapping을 통해 Websocket으로 들어오는 메시지 발행을 처리한다.
+
+    // 클라이언트에서는 prefix를 붙여서 /pub/chat/message로 발행 요청을 하면
+    // Controller가 해당 메시지를 받아 처리한다.
+
+    // 메시지가 발행되면 /sub/chat/room/{roomId}로 메시지를 send 하는 것을 볼 수 있는데
+    // 클라이언트에서는 해당 주소를(/sub/chat/room/{roomId}) 구독(subscribe)하고 있다가
+    // 메시지가 전달되면 화면에 출력하면 된다.
+
+    // 여기서 /sub/chat/room/{roomId}는 채팅룸을 구분하는 값이므로
+    // pub/sub에서 Topic의 역할이라고 보면 된다.
+
+    // 기존의 WebSockChatHandler가 했던 역할을 대체하므로 WebSockChatHandler는 삭제한다.
+}
+
+```
+
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>ChatRoomController.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.controller;
+
+// [구독자(subscriber) 구현]
+// 서버 단에는 따로 추가할 구현이 없습니다.
+// 웹뷰에서 stomp 라이브러리를 이용해서 subscriber 주소를 바라보고 있는 코드만 작성하면 됩니다.
+
+// [ChatRoomController 생성]
+// Websocket 통신 외에 채팅 화면 View 구성을 위해 필요한 Controller를 생성합니다.
+
+import com.stomp.chat.model.ChatRoom;
+import com.stomp.chat.repo.ChatRoomRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+// 레이어 : 다시 나누기!! Entity, Repository, Service, Controller, View 단
+
+@RequiredArgsConstructor
+@Controller
+@RequestMapping("/chat")
+public class ChatRoomController {
+
+    // 왜 경로로 쓸까? DI 개념?
+    private final ChatRoomRepository chatRoomRepository;
+
+    // 채팅 리스트 화면
+    @GetMapping("/room")
+    public String rooms(Model model){
+        return "/chat/room";
+    }
+
+    // 모든 채팅방 "목록" 반환 : 값으로 반환
+    @GetMapping("/rooms")
+    @ResponseBody
+    public List<ChatRoom> room(){
+        return chatRoomRepository.findAllRoom();
+    }
+
+    // 채팅방 생성
+    @PostMapping("/room")
+    @ResponseBody
+    public ChatRoom createRoom(@RequestParam String name){
+        return chatRoomRepository.createChatRoom(name);
+    }
+
+
+    // 채팅방 입장 화면
+    // @PathVariable 이것은 뭘까??
+    @GetMapping("/room/enter/{roomId}")
+    public String roomDetail(Model model, @PathVariable String roomId){
+        model.addAttribute("roomId", roomId);
+        return "/chat/roomdetail";
+    }
+
+    // 특정 채팅방 조회
+    @GetMapping("/room/{roomId}")
+    @ResponseBody
+    public ChatRoom roomInfo(@PathVariable String roomId){
+        return chatRoomRepository.findRoomById(roomId);
+
+    }
+
+
+}
+
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>RedisPublisher.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.pubsub;
+
+import com.stomp.chat.model.ChatMessage;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.stereotype.Service;
+
+
+@RequiredArgsConstructor
+@Service
+public class RedisPublisher {
+
+    // 채팅방에 입장하여 메세지를 작성하면 해당 메세지를 Redis Topic에 발생하는 기능의 서비스
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    public void publish(ChannelTopic topic, ChatMessage message){
+        redisTemplate.convertAndSend(topic.getTopic(), message);
+    }
+
+}
+
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>RedisSubscriber.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.pubsub;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stomp.chat.model.ChatMessage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@RequiredArgsConstructor
+@Service
+public class RedisSubscriber implements MessageListener {
+    // Redis에 메세지 발행이 될 때까지 기다렸다가 메세지가 발행되면 해당 메세지를 읽어 처리한다.
+    // MessagingTemplate를 통해서 채팅방의 모든 WebSokcket 클라이언트에게 메세지를 전달함.
+
+    private final ObjectMapper objectMapper;
+    private final RedisTemplate redisTemplate;
+    private final SimpMessageSendingOperations messagingTemplate;
+
+    // JSON 형태로 보내진 메세지를 모든 클라이언트들이 볼 수 있게 ChatMessage로 바꾼다.
+    @Override
+    public void onMessage(Message message, byte[] pattern) {
+        try {
+            // redis에서 발행된 데이터를 받아서 역직렬화
+            String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());
+
+            // ChatMessage 객체로 매핑
+            ChatMessage roomMessage = objectMapper.readValue(publishMessage, ChatMessage.class);
+
+            // WebSocket 구독자에게 채팅 메세지 Send
+            messagingTemplate.convertAndSend("/sub/chat/room/" + roomMessage.getRoomId(), roomMessage);
+
+
+        } catch (Exception e){
+            log.error(e.getMessage());
+        }
+    }
+}
+
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>ChatRoomRepository.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.repo;
+
+import com.stomp.chat.model.ChatRoom;
+import com.stomp.chat.pubsub.RedisSubscriber;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.stereotype.Repository;
+
+import java.nio.channels.Channel;
+import java.util.*;
+
+// 중요!!
+// 채팅방 정보를 Map으로 관리하지만, 서비스에서는 DB나 다른 저장 매체에 채팅방 정보를 저장하도록 구현해야 합니다.
+// 그리고 ChatService는 ChatRoomRepository가 대체하므로 삭제
+// 원래는 DB에다가 채팅방 정보를 저장하도록하면, ChatRoomRepository와 ChatService 역할이 달라져서 둘다 필요하다!
+
+@RequiredArgsConstructor
+@Repository
+public class ChatRoomRepository {
+    // 채팅방(Topic)에 발생되는 메세지를 처리할 리스너
+    private final RedisMessageListenerContainer redisMessageListenerContainer;
+
+    // 구독 처리 서비스(Subscriber)
+    private final RedisSubscriber redisSubscriber;
+
+    // Redis
+    private static final String CHAT_ROOMS = "CHAT_ROOM";
+    private final RedisTemplate<String, Object> redisTemplate;
+    private HashOperations<String, String, ChatRoom> opsHashChatRoom;
+
+    // 채팅방의 대화 메세지를 발행하기 위한 Redis Topic 정보, 서버별로 채팅방에 매치되는 Topic 정보를 Map에 넣어 RoomId로 찾을 수 있도록 한다.
+    private Map<String, ChannelTopic> topics;
+
+    // private Map<String, ChatRoom> chatRoomMap;
+
+
+    // 생성자 인젝션!(해쉬맵으로!)
+    // 해쉬맵 데이터 타입으로 받는 이유는 id과 value를 각각 사용하려고 이렇게 데이터를 받는다!!
+    @PostConstruct
+    private void init(){
+        opsHashChatRoom = redisTemplate.opsForHash();
+        topics = new HashMap<>();
+    }
+
+    public List<ChatRoom> findAllRoom(){
+        // 채팅방 생성 순서 최근 순으로 반환
+
+        // 해쉬맵 데이터를 값만 받아서 리스트 타입으로 사용한다.
+
+        return opsHashChatRoom.values(CHAT_ROOMS);
+    }
+
+    public ChatRoom findRoomById(String id){
+        return opsHashChatRoom.get(CHAT_ROOMS, id);
+    }
+
+    // 채팅방 생성.... put 이용 // 해쉬맵 콜렉션의 put 메서드 이용
+    // 서버간 채팅방 공유를 위해 Redis Hash에 데이터 담기
+    public ChatRoom createChatRoom(String name){
+        ChatRoom chatRoom = ChatRoom.create(name);
+
+        // chatRoomMap.put(chatRoom.getRoomId(), chatRoom);
+        opsHashChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);
+
+        return chatRoom;
+    }
+
+    // 채팅방 입장 : Redis에 Topic을 만들고 put/sub 통신을 하기 위해 리스너를 설정
+    public void enterChatRoom(String roomId) {
+        ChannelTopic topic = topics.get(roomId);
+
+        // (중요!!) 채팅방 1개당 Topic을 1:1 매칭하여 메시징 처리를 분산화시킨다.
+        // 즉, Topic 1개에 채팅방 1개씩 만들고 redis에 subscribe는 받아온 DTO의 안에 있는 id값으로 simpMessageTemplate으로 다시 전송해주는것
+        if (topic == null)
+            topic = new ChannelTopic(roomId);
+
+        redisMessageListenerContainer.addMessageListener(redisSubscriber, topic);
+        topics.put(roomId, topic);
+
+    }
+
+    public ChannelTopic getTopic(String roomId) {
+
+        return topics.get(roomId);
+    }
+}
+
+
+
+
+```
+
+</div>
+</details>
+
+<br>
+
+<details>
+<summary>ChatMessage.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.model;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class ChatMessage {
+
+    // enum은 각 Type을 번갈아가면서 데이터를 받을 수 있다.
+    // 메시지 타입 : 입장, 채팅
+    public enum MessageType{
+        ENTER, TALK
+    }
+
+    private MessageType type;   // 메시지 타입
+    private String roomId;  // 방번호
+    private String sender;  // 메시지 보낸사람
+    private String message; // 메시지
+
+}
+
+```
+
+</div>
+</details>
+
+
+<br>
+
+<details>
+<summary>ChatRoom.java</summary>
+<div markdown="1">
+
+```java
+package com.stomp.chat.model;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+@Getter
+@Setter
+public class ChatRoom implements Serializable {
+
+    // Redis에 저장되는 객체들은 Serialize가 가능해야하므로 직렬화을 참조하도록 선언하고 serialVersionUID을 설정.
+    private static final long serialVersionUID = 6494678977089006639L;
+
+    private String roomId;
+    private String name;
+
+    // STOMP를 사용하면, Session 관리와 발송 구현도 하지 않아도 돼서 훨씬 간단하다!
+    // 핸들러도 사라지고 세션 관리도 사라진다.
+    public static ChatRoom create(String name){
+
+        ChatRoom chatRoom = new ChatRoom();
+
+        chatRoom.roomId = UUID.randomUUID().toString();
+        chatRoom.name = name;
+
+        return chatRoom;
+    }
+}
+
+```
+
+</div>
+</details>
+
+
 
 <br>
 
 ### 3) 정리 :
 
+- 현재, 개발 환경의 버전이 안 맞아서 에러가 발생한다.
+- Java 8에서 실행해야 할 것 같다.
 
 <br>
 - [참고 사이트 3](https://www.daddyprogrammer.org/post/4731/spring-websocket-chatting-server-redis-pub-sub/)
