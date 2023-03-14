@@ -701,7 +701,7 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 	- 페이징 시스템인 경우 → 사용할 수 없음
 	- 페이지 폴트인 경우에만 OS가 관여함
 	- 페이지가 이미 메모리에 존재하는 경우 참조시각 등의 정보를 OS가 알 수 없음
-	- O(1)인 LRU의 list 조작조차 불가능(운영체제는 뭐가 제일 최근에 사용됐는지 알 수 없음/ 페이지 폴트가 날때만 운영체제에 CPU가 넘어가지 않기 때문에!!!)
+	- O(1)인 LRU의 list 조작조차 불가능(운영체제는 뭐가 제일 최근에 사용됐는지 알 수 없음/ 페이지 폴트가 날때만 운영체제에 CPU가 넘어가기 때문에!!!)
 
 <br>	
 - 그럼 뭘 사용해야 되나? → 아래에서 살펴본다
@@ -717,18 +717,22 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 - 페이징 교체에서 일반적으로 사용되는 알고리즘임
 
 <br>	
-- 여러 명칭으로 불림
+- 여러 명칭으로 불림 : 
 	- Second Chance Algorithm
 	- NUR(Not Used Recently) 또는 NRU(Not Recently Used) → 최근에 사용되지 않은 페이지
 
 <br>	
-- 동작 방식
+- 동작 방식 : 
 	- 페이지 폴트 발생 시 Reference bit(하드웨어가 기록하는 것)을 사용해서 교체 대상 페이지 선정(circular list)
 	- reference bit가 0인 것을 찾을 때까지 포인터를 하나씩 앞으로 이동
 	- 포인터 이동하는 중에 reference bit 1은 모두 0으로 바꿈
 	- Reference bit이 0인 것을 찾으면 그 페이지를 교체
 	한바퀴 되돌아와서도(= second chance) 0이면 그때는 replace 교체당함
 	- 자주 사용되는 페이지라면 second chance가 올때 1(시계바늘이 돌때 한번 더 참조되었으니 최근에 참조되었다는 뜻)
+
+<br>	
+- 정리 :
+	- Clock이라서 pointer는 계속 주기적으로 회전하고 기본적으로 사용되는 페이지는 이와 별개로 사용된다.(중요**)
 
 <br>	
 - Clock Algorithm의 개선
@@ -789,23 +793,25 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 
 <br>
 
-### 10) Trashing
+### 10) Thrashing
 
 - 프로세스의 원활한 수행에 필요한 최소한의 page frame 수를 할당받지 못한 경우 발생
 
-<br>	
-- 페이지 폴트 rate가 매우 높아짐
-- CPU Utilization이 낮아짐
-- OS는 MPD(Multiprogramming degree: 프로그램의 숫자)를 높여야 한다고 판단(일반적으로 MPD가 올라가면 utilization이 올라가기 때문에 이렇게 판단하게 되는 것)
-- 또 다른 프로세스가 시스템에 추가됨(higher MPD)
-- 프로세스 당 할당 된 frame의 수가 더욱 감소
-- 프로세스는 page의 swap in/ swap out으로 매우 바쁨
-- 대부분의 시간에 CPU는 한가함
-- low throughput(낮은 데이터 처리량)
+<br>
+- Thrashing 특징 :	
+	- 페이지 폴트 rate가 매우 높아짐
+	- CPU Utilization이 낮아짐
+	- OS는 MPD(Multiprogramming degree: 프로그램의 숫자)를 높여야 한다고 판단(일반적으로 MPD가 올라가면 utilization이 올라가기 때문에 이렇게 판단하게 되는 것)
+	- 또 다른 프로세스가 시스템에 추가됨(higher MPD)
+	- 프로세스 당 할당 된 frame의 수가 더욱 감소
+	- 프로세스는 page의 swap in/ swap out으로 매우 바쁨
+	- 대부분의 시간에 CPU는 한가함
+	- low throughput(낮은 데이터 처리량)
 
 <br>	
-- MPD에 따라 CPU Utilization이 지속적으로 높아지다가 trashing이 발생한 순간 급격히 감소하게 된다. 각 프로그램에 할당된 메모리가 너무 작기 때문에 swap이 빈번하게 발생해서!
-→ 이를 해결하기 위해 동시에 메모리에 올라가 있는 프로세스의 수를 조절해야함. 아래의 알고리즘이 그것을 해결하기 위한 방법이다.
+- Thrashing 정리 : 
+	- MPD에 따라 CPU Utilization이 지속적으로 높아지다가 thrashing이 발생한 순간 급격히 감소하게 된다. 각 프로그램에 할당된 메모리가 너무 작기 때문에 swap이 빈번하게 발생해서!
+	<br> → 이를 해결하기 위해 동시에 메모리에 올라가 있는 프로세스의 수를 조절해야함. 아래의 알고리즘이 그것을 해결하기 위한 방법이다.
 
 
 
@@ -818,6 +824,8 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 #### a. Locality of reference
 
 - 프로세스는 특정 시간 동안 일정 장소만을 집중적으로 참조한다.
+
+<br>
 - 집중적으로 참조되는 해당 page들의 집합을 locality set이라 함
 
 <br>
@@ -826,9 +834,13 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 
 - Locality에 기반하여 프로세스가 일정시간 동안 원활하게 수행되기 위해 한꺼번에 메모리에 올라와 있어야 하는 page들의 집합을 Working Set이라 정의함(locality set의 개념)
 
+<br>
 - Working Set 모델에서는 process의 Working Set 전체가 메모리에 올라와 있어야 수행되고 그렇지 않을 경우 모든 frame을 반납한 후 swap out(suspended)
 
-- Trashing을 방지함
+<br>
+- Thrashing을 방지함
+
+<br>
 - Multiprogramming degree(MPD)를 결정함
 
 
@@ -849,7 +861,8 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 - Working Set의 결정 2 : 
 	- Working set에 속한 page는 메모리에 유지, 속하지 않은 것은 버림 (즉, 참조된 후 Δ시간 동안 해당 page를 메모리에 유지한 후 버림)
 
-- 워킹셋이 1,2,5,6,7 이므로 5개의 공간을 줄 수 있으면 유지하고 아니면 이 프로세스를 swap out / suspended 시킴
+<br>
+- 최종 정리 : 워킹셋이 1,2,5,6,7 이므로 5개의 공간을 줄 수 있으면 유지하고 아니면 이 프로세스를 swap out / suspended 시킴
 
 
 ---
