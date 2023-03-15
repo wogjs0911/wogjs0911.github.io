@@ -288,11 +288,144 @@ public class JSPDispatcherServlet extends HttpServlet{
 - 해결 방법 : 하지만, 원래 쿠키는 모든페이지에서 심게 해야하므로 cookie.setPath("/") 설정을 해주면 이러한 고민이 사라진다.**
 
 <br><br>
-### 5) 에러 :  기본 클래스을(를) 찾거나 로드할 수 없습니다.
+### 5) JDK 에러 :  `기본 클래스을(를) 찾거나 로드할 수 없습니다.`
 
 - STS4를 잘못 종료하여 강제 종료가 되면, JDK가 손상되어서 그 JDK를 읽지 못하여 기존에 설치되었던 jdk 버전을 인식한다.
 
 - 해결 방법 : 기존에 설치되었던 JDK 17.0.5-tem을 homebrew를 통해 삭제하고 다시 재설치한다. 
+
+---
+
+<br><br>
+### 6) Front-Controller 설계 시, 에러 :
+
+#### a. @RequestParam 개념 : 
+- @RequestParam은 Entity(Member)가 필요 없어도 view에서 값을 넘겨 받을 수 있다.
+- Entity는 보통 DB에서 값을 받기 위해 그릇같은 역할로서 존재한다.  
+
+<br>
+#### b. redirect 개념 중요!!
+- @PostMapping에서 redirect하면 html form 태그의 action 속성은 필요 없다.
+- action 속성을 redirect에 의해 서버에서 처리해주기 때문이다.
+
+<br>
+- 실습 코드 :
+
+```java
+package com.modeul.web.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@Controller
+@RequestMapping("/")
+public class MemberController {
+	
+	@GetMapping("login")
+	public String login() {
+		return "login.jsp";	
+	}
+	
+	@GetMapping("signup")
+	public String signup() {
+		return "sign-up.jsp";
+	}
+	
+	
+	@PostMapping("signup")
+	public String signup(
+			@RequestParam(name="uid") String uid,
+			@RequestParam(name="password") String password,
+			@RequestParam(name="repassword") String repassword,
+			@RequestParam(name="name") String name,
+			@RequestParam(name="email") String email,
+			@RequestParam(name="reemail") String reemail) {
+			// @RequestParam은 Entity(Member)가 필요 없어도 된다. 
+		
+		 System.out.printf("uid : %s, pw: %s, rpw: %s", uid, password, repassword);
+		
+		return "redirect:login";	
+		// redirect 개념 중요!!
+		// 이렇게 redirect하면 html form 태그의 action 속성은 필요 없다.
+		// 서버에서 처리해주기 때문
+	}
+	
+
+}
+
+```
+
+```jsp
+
+<!-- ----------------------------------------------------------- -->
+    <main class="m-t-31px">
+      <!-- flex 시작 -->
+      <div class="sign-up-container">
+       
+	<!-- form 태그의 action 속성이 필요 없다. -->
+        <form method="post">
+
+          <div class="input-field-2">
+            <label for="uid" class="uid-label">
+              <span class="d-none">uid</span>
+            <input type="text" id="uid" name="uid" class="input-text-2" placeholder="아이디를 입력해주세요.">
+            </label>
+           </div>
+
+           <div class="input-field-2 m-t-1">
+            <label for="password" class="password-label">
+              <span class="d-none">pw</span>
+            <input type="text" id="password" name="password" class="input-text-2" placeholder="비밀번호를 입력해주세요.">
+            </label>
+          </div>
+
+          <div class="input-field-2 m-t-1">
+            <label for="password-confirm" class="password-confirm-label">
+              <span class="d-none">pw-confirm</span>
+            <input type="text" id="password-confirm" name="repassword" class="input-text-2" placeholder="비밀번호를 다시 입력해주세요.">
+            </label>
+          </div>
+
+          <div class="input-field-2 m-t-1">
+            <label for="name" class="name-label">
+              <span class="d-none">name</span>
+            <input type="text" id="name" name="name" class="input-text-2" placeholder="이름을 입력해주세요.">
+            </label>
+          </div>
+  
+          <div class="input-field-2 m-t-1">
+            <label for="email" class="email-label">
+              <span class="d-none">email</span>
+            <input type="text" id="email" name="email" class="input-text-2" placeholder="이메일을 입력해주세요.">
+            <input class="btn-post" id="btn-post" type="button" value="전송">
+            </label>
+           </div>
+
+           <div class="input-field-2 m-t-1">
+            <label for="email" class="email-confirm-label">
+              <span class="d-none">email-confirm</span>
+            <input type="text" id="reemail" name="reemail" class="input-text-2" placeholder="이메일 인증번호를 입력해주세요.">
+            <input class="btn-auth" id="btn-auth"type="button" value="확인">
+            </label>
+           </div>
+            
+            <div class="d-fl-jf m-t-69px">
+              <input class="btn-3" type="submit" value="가입하기">
+            </div>
+        </form>
+      </div>
+
+    </main>
+  
+</div>
+
+</body>
+</html>
+
+```
 
 
 ---
