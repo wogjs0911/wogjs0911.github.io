@@ -301,12 +301,13 @@ public class JSPDispatcherServlet extends HttpServlet{
 
 #### a. @RequestParam 개념 : 
 - @RequestParam은 Entity(Member)가 필요 없어도 view에서 값을 넘겨 받을 수 있다.
-- Entity는 보통 DB에서 값을 받기 위해 그릇같은 역할로서 존재한다.  
+- Entity는 보통 DB에서 값을 받기 위해 그릇같은 역할로서 존재한다.
 
 <br>
 #### b. redirect 개념 중요!!
 - @PostMapping에서 redirect하면 html form 태그의 action 속성은 필요 없다.
 - action 속성을 redirect에 의해 서버에서 처리해주기 때문이다.
+- redirect를 사용할 때는 "/"를 쓰지 않는다.
 
 <br>
 - 실습 코드 :
