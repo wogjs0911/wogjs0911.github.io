@@ -306,6 +306,9 @@ public class JSPDispatcherServlet extends HttpServlet{
 <br>
 #### b. redirect 개념 중요!!
 - @PostMapping에서 redirect하면 html form 태그의 action 속성은 필요 없다.
+	- html의 form 태그 action 속성이 우선 되기 때문이다. 
+
+<br>
 - action 속성을 redirect에 의해 서버에서 처리해주기 때문이다.
 - redirect를 사용할 때는 "/"를 쓰지 않는다.
 
