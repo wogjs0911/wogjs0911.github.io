@@ -1,11 +1,11 @@
 ---
-key: /2023/03/01/GongguProject-FeatTest.html
-title: Project - 채팅 기능 테스트
+key: /2023/03/01/GongguProject-ChatTest1.html
+title: Project - 채팅 기능 테스트 1
 tags: springboot jsp websocket HTTP Lombok Builder ObjectMapper Valid Enum
 ---
 
 # 1. 채팅 기능 테스트 1 : 230301
- 3
+
 - 내용 : WebSocket을 이용하고 Postman의 API 테스트를 통해 JSON 타입의 데이터로 전송으로 채팅이 가능하도록 테스트 
 	
 - 목표 : 스프링부트의 롬북 기능, jackson 패키지의 ObjectMapping 클래스를 통한 JSON 타입의 데이터 바인딩, HTTP 프로토콜과 WebSockek에 관한 내용 학습

@@ -313,6 +313,20 @@ public class JSPDispatcherServlet extends HttpServlet{
 - redirect를 사용할 때는 "/"를 쓰지 않는다.
 
 <br>
+#### c. 중요!! : `@PostMapping`가 `HttpServletRequest`를 가지고 있는지? 개념 : 
+- `@PostMapping`에 `HttpServletRequest`가 포함되는 것이 아니라 클라이언트 요청 처리 방법으로서 4대 저장소에 저장하여 처리하기 위해 추가로 써줘야 한다! + 쿠키도 있다.
+- 반대로 서버에서 보내는 것이 `Model` 객체가 있다.
+
+<br>
+#### d. DTO 정리 : 
+- 하지만 Entity는 커맨드 객체와 차이점이 있다!**
+- 커맨드 객체는 DTO 객체이며 가독성을 높여준다. 
+
+<br>
+- 중요 : 자동으로 바인딩 해주기 위해서 DTO를 사용하는 쪽의 메서드에서 요청 파라미터의 속성값(변수명)이랑 DTO 객체의 속성값(객체가 가지고 있는 변수명)이랑 일치해야 하고 setter도 가지고 있어야 한다.**
+
+
+<br>
 - 실습 코드 :
 
 ```java
