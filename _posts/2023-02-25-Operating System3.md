@@ -1058,14 +1058,14 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 
 <br>
 
-### a) 순차 접근(sequential access)
+#### a. 순차 접근(sequential access)
 
 - 카세트 테이프를 사용하는 방식처럼 접근
 - 읽거나 쓰면 offset은 자동적으로 증가
 
 <br>
 
-### 직접 접근(direct access, random access)
+#### b. 직접 접근(direct access, random access)
 
 - LP 레코드 판과 같이 접근하도록 함
 - 파일을 구성하는 레코드를 임의의 순서로 접근할 수 있음
@@ -1252,19 +1252,25 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 ### 10) Directory Implementation
 
 <br>
+
 #### a. Linear List
+
 - File name, file의 메타데이터의 list
 - 구현이 간단
 - 디렉토리 내에 파일이 있는지 찾기 위해서 선형 탐색이 필요(time - consuming)
 
 <br>
+
 #### b. Hash Table
+
+- 해시 함수에 의해서 일정한 범위로 매핑이 되어서 그 범위의 값을 이용하는 것이 `HashTable`이다.
 - linear list + hashing
 - Hash table은 file name을 이 파일의 linear list의 위치로 바꾸어줌
 - search time을 없앰
 - Collision 발생 가능
 
 <br>
+
 #### c. File의 메타데이터 보관 위치
 
 <br>
@@ -1321,8 +1327,10 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 <br>
 - read() system call과 비교
 	- read: 카피해서 해당 프로세스의 메모리 공간에 제공하게 됨
-	- m-Mapped I/O: 메모리에 접근하면 그 파일에 접근하게 됨 - 더 빠르다 / copy overhead가 없고 운영체제의 도움을 받을 필요가 없음 / 단, 공유 자원의 문제가 있을 수도 있음 - read /write 콜의 경우 copy해서 전달하기 떄문에 그런 문제가 없음
-
+	- m-Mapped I/O: 메모리에 접근하면 그 파일에 접근하게 됨(더 빠르다)
+		- copy overhead가 없고 운영체제의 도움을 받을 필요가 없음 
+		- 단, 공유 자원의 문제가 있을 수도 있음 
+		- read / write 콜의 경우 copy해서 전달하기 떄문에 그런 문제가 없음
 
 <br>
 
