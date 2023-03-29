@@ -1207,7 +1207,7 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 
 <br>
 
-#### a. Free - Space Management
+#### b. Free - Space Management
 
 - 빈 공간을 관리하는 방법
 
@@ -1311,14 +1311,14 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 ### 12) Page Cache and Buffer Cache
 
 <br>
-#### a) Page Cache
+#### a. Page Cache
 
 - 가상메모리의 페이징 시스템에서 사용하는 페이지 프레임을 캐싱의 관점에서 설명하는 용어
 - Memory-Mapped I/O를 쓰는 경우 file의 I/O에서도 page cache 사용
 
 <br>
 
-#### b) Memory-Mapped I/O
+#### b. Memory-Mapped I/O
 
 <br>
 - File의 일부를 virtual memory에 mapping 시킴
@@ -1334,7 +1334,7 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 
 <br>
 
-#### c) Buffer Cache
+#### c. Buffer Cache
 
 - 파일시스템을 통한 I/O 연산은 메모리의 특정 영역인 buffer cache 사용
 
@@ -1348,7 +1348,7 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 
 <br>
 
-#### d) Unified Buffer Cache
+#### d. Unified Buffer Cache
 
 - 최근의 OS에서는 기존의 buffer cache가 page cache에 통합됨(e.g Linux)
 
@@ -1372,7 +1372,7 @@ Runtime Binding에서의 효율이 더 좋다 → 빈 메모리 영역 아무 �
 <br>
 ### 1) Disk의 구조
 
-#### a, logical block
+#### a. logical block
 
 - 디스크의 외부에서 보는 디스크의 단위 정보 저장 공간들
 - 주소를 가진 1차원 배열처럼 취급
