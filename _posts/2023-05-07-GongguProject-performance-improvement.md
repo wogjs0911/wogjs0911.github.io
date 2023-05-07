@@ -24,3 +24,5 @@ tags: springboot websocket HTTP Lombok Builder Enum vue
 - [홈페이지 리라이팅 시, 아키텍쳐 변경 문제점](https://wonny.space/writing/work/rewriting)
 
 - [JPA N+1 문제의 해결 방법](https://jojoldu.tistory.com/165)
+
+- [도메인 운영시, 데이터가 필요한 이유](https://wonny.space/writing/work/make-data-team) 
