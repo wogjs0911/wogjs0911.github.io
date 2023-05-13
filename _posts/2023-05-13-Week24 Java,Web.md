@@ -458,6 +458,8 @@ public class Program {
 
 ```
 
+---
+
 <br>
 
 - Exam.java
@@ -556,7 +558,7 @@ public class Exam{
 
 #### d. 실습 코드 
 
-- transient 이용하기!
+- transient 개념 이용하기!
 
 <br>
 
@@ -593,6 +595,10 @@ public class Program1 {
 }
 
 ```
+
+---
+
+<br>
 
 - Exam1.java
 
