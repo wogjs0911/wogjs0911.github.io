@@ -396,6 +396,22 @@ tags: java, web
 
 <br>
 
+##### a) Protected 개념 적용 코드
+
+- 아래 코드도 추상 메서드이다.
+
+- ![이미지](/assets/images/javastudy/abstraction1.png)
+
+<br>
+
+- 아래 코드는 당연히 추상 메서드이다. 이러한 경우에 자식 메서드에서 책임을 부여하여 protected의 접근 제어자를 적용시킬 수 있다. 
+
+- ![이미지](/assets/images/javastudy/abstraction2.png)
+
+---
+
+<br>
+
 ### 21) 해시 코드
 
 - 해시의 의미 : 식별자를 의미한다.
