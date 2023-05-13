@@ -400,7 +400,104 @@ tags: java, web
 
 - 해시의 의미 : 식별자를 의미한다.
 
+<br>
 
+- Program.java
+
+```java
+package main.java.test4.obj.identified;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class Program {
+
+    public static void main(String[] args) {
+        String str1 = "hello"; // 상수형 객체는 1개만 만들어준다.
+        String str2 = "hello"; // 상수형 객체는 1개만 만들어준다. 추후에 더 이상 안 만든다.
+	   
+	   // 사용자에 의해 new String에 의해 객체가 새로 만들어진다.
+        String str3 = new String("hello"); 
+        String str4 = new String("hello"); 
+
+        System.out.println(str1 == str2);   // '=='는 객체를 비교하고 // true
+        System.out.println(str1.equals(str2));  // 'equals'는 객체의 값만 비교 // true
+        // String은 클래스 타입이라서 객체로 인식한다.
+        
+        // '=='는 객체를 비교하고 
+        System.out.println(str3 == str4);    // new String()이라서 false! 그래서, false이다.
+        
+        // 'equals'는 객체의 값만 비교
+        System.out.println(str3.equals(str4));  // true!
+
+        // String은 클래스 타입이라서 객체로 인식한다.
+
+        Exam exam1 = new Exam(1, 2, 3);
+        // Exam exam2 = new Exam(1, 2, 3);
+        Exam exam2 = new Exam(1, 2, 4);
+
+        System.out.println(exam1 == exam2); // false
+        System.out.println(exam1.equals(exam2)); // true
+        // 하지만, 사용자가 만든 Object라면 해당 Object를 만든 사용자가 equals도 직접 만들어줘서 정해준다!
+
+        // 해시코드인 식별자는 런타임시, JVM에서 정해준다.
+        // 해시 값은 식별자이다. 
+        // exam1, exam2는 hashCode 메서드가 사용자에 의해서 다시 재정의되어 만들어질 수 있다.**
+        System.out.println(exam1.hashCode());   // 112810359
+        System.out.println(exam2.hashCode());	  // 2124308362
+
+        Set<Exam> set = new HashSet<>();
+
+        set.add(exam1);
+        set.add(exam2);
+
+        // 위의 Exam 인스턴스를 객체가 다른 2개로 인식한다.
+        System.out.println(set.size()); 	// 2
+    }
+}
+
+```
+
+<br>
+
+- Exam.java
+
+```java
+package main.java.test4.obj.identified;
+
+
+public class Exam{
+
+    int kor;
+    int eng;
+    int math;
+
+    @Override
+    public boolean equals(Object obj){
+        Exam exam = (Exam) obj;
+        return (this.kor == exam.kor) &&  (this.eng == exam.eng); 
+    }
+     
+    public Exam() {
+    }
+
+
+    public Exam(int kor, int eng, int math) {
+        this.kor = kor;
+        this.eng = eng;
+        this.math = math;
+    }
+
+
+    public int total(){
+        int result = 0;
+        result = kor + eng +math;
+
+        return result;
+    }
+
+}
+```
 
 ---
 
@@ -455,7 +552,89 @@ tags: java, web
 
 - 객체를 통째로 보내준다!
 
+<br>
 
+#### d. 실습 코드 
+
+- transient 이용하기!
+
+<br>
+
+- Program1.java
+
+```java
+package main.java.test5.serialize;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+
+public class Program1 {
+
+    public static void main(String[] args) {
+
+        Exam exam = new Exam(1,2,3);
+
+        // FileOutputStream : 4바이트 짜리 데이터를 여러번 보낼 수 밖에 없다?
+        FileOutputStream fos = new FileOutputStream("res/data.txt");
+
+        // DataOutputStream : 파일의 문자열을 전송하고 싶으면 DataOutputStream으로 안 쓰면, 데이터를 바이트 단위로 보내야 한
+        // DataOutputStream dos = new DataOutputStream(""res/data.txt"");
+
+        // ObjectOutputStream :해당 객체를 모두 내보낼 것인지 정렬을 어떻게 할것인지 설정도 해줘야 한다.
+        // 그래서, 그 객체가 
+        // 그 객체를 읽기 위해서 무조건 FileInputStream으로 읽어야한다. 불편한다.
+        // 하지만, 요즘에는 JSON으로 쓰고 읽는다.
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        oos.writeObject(exam);
+        
+        fos.close();
+    }
+}
+
+```
+
+- Exam1.java
+
+```java
+package main.java.test5.serialize;
+
+import java.io.Serializable;
+
+public class Exam1 implements Serializable{
+
+    int kor;
+    int eng;
+    // int math;
+    transient math;
+
+    @Override
+    public boolean equals(Object obj){
+        Exam exam = (Exam) obj;
+        return (this.kor == exam.kor) &&  (this.eng == exam.eng); 
+    }
+     
+    public Exam() {
+    }
+
+
+    public Exam(int kor, int eng, int math) {
+        this.kor = kor;
+        this.eng = eng;
+        this.math = math;
+    }
+
+
+    public int total(){
+        int result = 0;
+        result = kor + eng +math;
+
+        return result;
+    }
+
+}
+
+```
 
 ---
 
