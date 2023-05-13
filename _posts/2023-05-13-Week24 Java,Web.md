@@ -121,7 +121,7 @@ tags: java, web
 
 - 캡슐을 만들 때, 분리형으로 만들어서 부품으로 만들어서 꽂아서 사용한다.
 
-- 쌤 답.**: 다양한 형태로 부품을 바꿔낄 수 있도록 하는 성질, 다양한 형태로 조립이 가능한 성질, 부품을 바꿔낄 수 있는 것은 인터페이스에서 사용한다.***
+- 쌤 답**: 다양한 형태로 부품을 바꿔낄 수 있도록 하는 성질, 다양한 형태로 조립이 가능한 성질, 부품을 바꿔낄 수 있는 것은 인터페이스에서 사용한다.***
 
 - 인터페이스에서 사용하는 방법은 3가지 방식이 있다. 오버로드 생성자 인젝션!, setter 인젝션!, field 인젝션! => 이것은 스프링의 결합인 @Autowired 기능이다. 엄청 편리해졌다.
 
@@ -166,9 +166,11 @@ tags: java, web
 #### b. is a 상속 
 
 - 틀을 물려받는 것. 부모의 캡슐을 나의 틀(framework)로 사용하겠다.(implement) 
-	- 중요! : 다른 캡슐을 나의 틀(framework)로 사용하겠다.(인터페이스에서 사용하는 개념****)
+	- 중요! : 다른 캡슐을 나의 틀(framework)로 사용하겠다.(인터페이스에서 사용하는 개념**)
 	- 보통 그 틀을 고쳐쓰거나 사용한다.  	
-	- 교과서 의미** : 부모의 속성을 물려받는 것
+	- 교과서 의미 : 부모의 속성을 물려받는 것**
+
+
 ---
 
 <br>
@@ -231,7 +233,7 @@ tags: java, web
 
 <br>
 
-### 13) 추상클래스 vs 인터페이스
+### 13) 추상클래스, 인터페이스
 
 #### a. 추상 클래스 : 공통 분모
 
@@ -296,9 +298,10 @@ tags: java, web
 
 <br>
 
-### 15) 배열. vs ArrayList
+### 16) 배열 vs ArrayList
 
 #### a. 배열 
+
 - 고정 길이의 저장소
 
 <br>
@@ -312,7 +315,7 @@ tags: java, web
 
 <br>
 
-### 16) Stack, LinkedList, ArrayList
+### 17) Stack vs List
 
 - 자료 구조 공부하기! 데이터 구조
 
@@ -327,7 +330,7 @@ tags: java, web
 
 <br>
 
-### 17) Tree, Queue, Graph :
+### 18) Tree, Queue, Graph :
 
 #### a. Tree
 
@@ -344,6 +347,8 @@ tags: java, web
 - 버퍼를 의미함. FIFO이다. 먼저 들어온 사람을 먼저 내보낸다.
 
 - 메서지를 보낼 때, 사용한다. 또한, 줄을 설 때, 사용한다. 
+
+
 ---
 
 <br>
@@ -359,7 +364,7 @@ tags: java, web
 
 <br>
 
-### 18) List vs LinkedList 계열 :
+### 19) List, LinkedList 계열
 
 - 콜렉션을 갖고 있고 이터러블을 물려받아서 사용한다.
 
@@ -371,7 +376,7 @@ tags: java, web
 
 <br>
 
-### 19) 접근 제어자 종류 정리 : private, protected
+### 20) 접근 제어자 종류 정리 : private, protected
 
 #### a. Private 
 
@@ -391,7 +396,7 @@ tags: java, web
 
 <br>
 
-### 20) 해시 코드
+### 21) 해시 코드
 
 - 해시의 의미 : 식별자를 의미한다.
 
@@ -401,7 +406,7 @@ tags: java, web
 
 <br>
 
-### 21) Hash Table, HashMap
+### 22) Hash Table, HashMap
 
 - 기본적으로 키와 값을 저장하는 콜렉션이다. 
 
@@ -432,13 +437,23 @@ tags: java, web
 
 <br>
 
-### 22) JAVA 직렬화 : 아래 같은 데이터 타입 처리 방법의 경우
+### 23) JAVA 직렬화 : 아래 같은 데이터 타입 처리 방법
 
-- FileOutputStream : 4바이트씩 파일의 데이터를 전송해야 한다.
+#### a. FileOutputStream 
 
-- DataOutputStream : 파일의 문자열을 전송하고 싶으면 DataOutputStream으로 안 쓰면, 데이터를 바이트 단위로 보내야 한다.(FileOutputStream와 같은 상황이다.)
+- 4바이트씩 파일의 데이터를 전송해야 한다.
 
-- ObjectOutputStream : 객체를 통째로 보내준다!
+<br>
+
+#### b. DataOutputStream 
+
+- 파일의 문자열을 전송하고 싶으면 DataOutputStream으로 안 쓰면, 데이터를 바이트 단위로 보내야 한다.(FileOutputStream와 같은 상황이다.)
+
+<br>
+
+#### c. ObjectOutputStream 
+
+- 객체를 통째로 보내준다!
 
 
 
@@ -509,9 +524,9 @@ tags: java, web
 
 <br>
 
-### 7) Rest vs Restful API 차이점 ? 
+### 7) Rest, Restful API 차이점
 
-#### a. Rest**
+#### a. REST**
 
 - Representational State?? : 문서를 찾으면 어느 장소에 있는 상태를 말해주는 “경로 지정 방법”이다. 
 
