@@ -1,7 +1,7 @@
 ---
 key: /2023/05/13/Week24-Java,Web.html
 title: Interview - Java, Web, Spring, DB
-tags: java, web
+tags: java web
 ---
 
 # 1. Java + FrameWork : 230512
