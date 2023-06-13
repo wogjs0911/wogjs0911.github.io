@@ -68,9 +68,135 @@ tags: springboot JPA H2 Hibernate SLF4J RestfulAPI
 
 
 
+# 2. Spring Boot 개발 환경 테스트
+
+- H2 DB를 사용함.
+
+- application.yml
+
+```yml
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/jpashop
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+#        show_sql: true
+        format_sql: true
+
+logging.level:
+  org.hibernate.SQL: debug
+  org.hibernate.orm.jdbc.bind: trace
+```
+
+<br>
+- 구현 코드 :
+
+- Member.java
+
+```java
+package jpabook.jpashop.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+public class Member {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String username;
+}
+
+```
+
+<br>
+- MemberRepository.java
+
+```java
+package jpabook.jpashop.repository;
 
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jpabook.jpashop.entity.Member;
+import org.springframework.stereotype.Repository;
 
 
+@Repository
+public class MemberRepository {
+    @PersistenceContext
+    EntityManager em;
+
+    public Long save(Member member){
+        em.persist(member);
+
+        return member.getId();
+    }
+
+    public Member find(Long id){
+        return em.find(Member.class, id);
+    }
+}
+
+```
+
+<br>
+- 테스트 코드 :
+	- 테스트 코드는 서버 실행  시, 처음 하이버네이트가 만들어지므로 그 때, 한번만 테스트 통과가 되고 그 후에는 기존 테이블을 지우고 다시 테스트를 해야하거나 Rollback false 설정을 제거해주면 된다.
+	- JUnit4를 사용함.
+	
+	
+```java
+package jpabook.jpashop.repository;
 
 
+import jpabook.jpashop.entity.Member;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class MemberRepositoryTest {
+
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Test
+    @Transactional
+    @Rollback(value = false)
+    public void testMember() throws Exception {
+
+        Member member = new Member();
+        member.setUsername("memberA");
+
+        Long saveId = memberRepository.save(member);
+        Member findMember = memberRepository.find(saveId);
+
+        Assertions.assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
+        Assertions.assertThat(findMember.getId()).isEqualTo(member.getId());
+    }
+}
+```
