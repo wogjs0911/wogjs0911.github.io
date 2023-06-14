@@ -65,10 +65,13 @@ tags: springboot JPA H2 Hibernate SLF4J RestfulAPI
 - assertj: 테스트 코드를 좀 더 편하게 작성하게 도와주는 라이브러리
 - spring-test: 스프링 통합 테스트 지원
 
+---
 
-
+<br><br>
 
 # 2. Spring Boot 개발 환경 테스트
+
+### 1) yml 설정 
 
 - H2 DB를 사용함.
 
@@ -95,8 +98,11 @@ logging.level:
   org.hibernate.orm.jdbc.bind: trace
 ```
 
+---
+
 <br>
-- 구현 코드 :
+
+### 2) 구현 코드 :
 
 - Member.java
 
@@ -155,10 +161,15 @@ public class MemberRepository {
 
 ```
 
+---
+
 <br>
-- 테스트 코드 :
-	- 테스트 코드는 서버 실행  시, 처음 하이버네이트가 만들어지므로 그 때, 한번만 테스트 통과가 되고 그 후에는 기존 테이블을 지우고 다시 테스트를 해야하거나 Rollback false 설정을 제거해주면 된다.
-	- JUnit4를 사용함.
+
+### 3) 테스트 코드 :
+
+- 테스트 코드는 서버 실행  시, 처음 하이버네이트가 만들어지므로 그 때, 한번만 테스트 통과가 되고 그 후에는 기존 테이블을 지우고 다시 테스트를 해야하거나 Rollback false 설정을 제거해주면 된다.
+
+- JUnit4를 사용함.
 	
 	
 ```java
@@ -200,3 +211,530 @@ public class MemberRepositoryTest {
     }
 }
 ```
+
+---
+
+<br><br>
+
+# 3. 엔티티 개발
+
+### 1) 주의점 : 
+
+#### a. 도메인 모델 개발 방법 : 
+
+- Setter는 닫아두기!(Getter는 열어두기!)
+
+- 외래키가 있는 곳을 연관관계의 주인으로 정해라! 
+
+<br><br>
+
+#### b. @ManyToMany, @XToMany 처리 방법(LAZY, N+1) :
+
+- @ManyToMany는 관계로서 사용하지 말 것. 다대일로 풀어낼 것.
+
+- 그리고 왠만해서는 LAZY 사용하기!(즉시 로딩인 EAGER는 예측이 어렵고 N+1 문제가 자주 발생한다!)
+
+- 연관된 Entity를 함께 DB에서 조회해야 하려면, fetch join 또는 엔티티 그래프를 사용한다.
+
+- @XToOne은 기본적으로 즉시로딩이라서 무조건 추가로 LAZY 설정을 해줘야 한다.
+
+
+<br><br>
+
+#### c. mappedBy 처리 방법: 
+
+- JPA 관계에서 parent라면, child 부분에 mappedBy를 parent로 매핑하여 관계를 처리해준다.
+
+- mappedBy는 매핑되는 상대를 의미한다. 
+
+<br><br>
+
+#### d. 다대다 매핑 처리 방법: 
+
+- 계층 관계랑 같은 건가?
+
+- 다대다 매핑은 중간 테이블에 칼럼을 추가할 수도 없어서
+
+- 중간 엔티티인 CategoryItem을 만들어서 다대일과 일대다로 풀어낸다.
+
+
+<br><br>
+
+#### e. Inheritance, DiscriminatorColumn
+
+
+##### a) Inheritance(strategy=InheritanceType.XXX)
+
+- 객체는 상속을 지원하므로 모델링과 구현이 똑같지만, DB는 상속을 지원하지 않으므로 논리 모델을 물리 모델로 구현할 방법이 필요하다.
+
+- @Inheritance(strategy=InheritanceType.XXX)의 stategy를 설정해주면 된다.
+
+- default 전략은 SINGLE_TABLE(단일 테이블 전략)이다.
+
+<br>
+- InheritanceType 종류
+	- JOINED
+	- SINGLE_TABLE
+	- TABLE_PER_CLASS
+
+<br>
+
+##### b) @DiscriminatorColumn
+
+- 부모 클래스에 선언한다. 하위 클래스를 구분하는 용도의 컬럼이다. 관례는 default = DTYPE
+
+<br>
+
+##### c) @DiscriminatorValue("XXX")
+
+- 하위 클래스에 선언한다. 엔티티를 저장할 때 슈퍼타입의 구분 컬럼에 저장할 값을 지정한다.
+
+- 어노테이션을 선언하지 않을 경우 기본값으로 클래스 이름이 들어간다.
+
+---
+
+<br><br>
+
+
+### 2) 실습 코드 : 
+
+<br>
+
+- Member.java
+
+```java
+package jpabook.jpashop.domain;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter @Setter
+public class Member {
+
+    // Setter는 닫아두기!
+    // 외래키가 있는 곳을 연관관계의 주인으로 정해라!
+    @Id
+    @GeneratedValue
+    private Long id;
+    private String name;
+
+    @Embedded
+    private Address Address;
+
+    @OneToMany(mappedBy = "member")
+    private List<Order> orders = new ArrayList<>();
+}
+
+```
+
+---
+
+<br>
+
+- Order.java
+
+```java
+package jpabook.jpashop.domain;
+
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "orders")
+@Getter @Setter
+public class Order {
+
+    @Id @GeneratedValue
+    @Column(name="member_id")
+    private Long id;
+
+    // @ManyToMany는 관계로서 사용하지 말 것. 다대1로 풀어낼 것.
+    // 그리고 왠만해서는 LAZY 사용하기!(즉시 로딩인 EAGER는 예측이 어렵고 N+1 문제가 자주 발생한다!)
+    // 연관된 Entity를 함께 DB에서 조회해야 하려면, fetch join 또는 엔티티 그래프를 사용한다.
+    // @XToOne은 기본적으로 즉시로딩이라서 무조건 추가로 LAZY 설정을 해줘야 한다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;  // 주문 회원
+
+    // mappedBy 중요!(관계에서 매핑되는 부분)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    // OneToOne 주의하기!!
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;  // 배송정보
+
+    private LocalDateTime orderDate; // 주문시간
+
+    // enum 클래스 이용!(상태 이용 시, 사용)
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status; // 주문 상태[ORDER, CANCEL]
+
+    // == 연관관계 메서드 == //
+    public void setMember(Member member) {
+        this.member = member;
+        member.getOrders().add(this);
+    }
+
+    public void addOrderItem(OrderItem orderItem){
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+
+    public void setDelivery(Delivery delivery){
+        this.delivery = delivery;
+        delivery.setOrder(this);
+    }
+
+
+}
+
+```
+
+---
+
+<br>
+
+- OrderItem.java
+
+```java
+package jpabook.jpashop.domain;
+
+import jakarta.persistence.*;
+import jpabook.jpashop.domain.item.Item;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Table(name = "order_item")
+@Getter @Setter
+public class OrderItem {
+
+    // 여러 엔티티가 묶여 있으면 '_'로 계층 별로 칼럼명 매핑!
+    @Id
+    @GeneratedValue
+    @Column(name = "order_item_id")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private Item item;  // 주문 상품
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;    // 주문
+
+    private int orderPrice; // 주문 가격
+    private int count; // 주문 수량
+}
+
+```
+
+
+
+---
+
+<br>
+
+- OrderStatus.java
+
+```java
+package jpabook.jpashop.domain;
+
+public enum OrderStatus {
+    ORDER, CANCEL
+}
+
+```
+
+
+---
+
+<br>
+
+- Delivery.java
+
+```java
+package jpabook.jpashop.domain;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter @Setter
+public class Delivery {
+
+    @Id
+    @GeneratedValue
+    @Column(name = "delivery_id")
+    private Long id;
+
+    @OneToOne(mappedBy = "delivery", fetch = FetchType.LAZY)
+    private Order order;
+
+    @Embedded
+    private Address address;
+
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus status;  // ENUM [READY(준비), COMP(배송)]
+}
+
+```
+
+---
+
+<br>
+
+- DeliveryStatus.java
+
+```java
+package jpabook.jpashop.domain;
+
+public enum DeliveryStatus {
+    READY, COMP
+}
+
+```
+
+---
+
+<br>
+
+- Address.java
+
+```java
+package jpabook.jpashop.domain;
+
+import jakarta.persistence.Embeddable;
+import lombok.Getter;
+
+@Embeddable
+@Getter
+public class Address {
+
+    private String city;
+    private String street;
+    private String zipcode;
+
+    protected Address(){
+
+    }
+
+    public Address(String city, String street, String zipcode) {
+        this.city = city;
+        this.street = street;
+        this.zipcode = zipcode;
+    }
+}
+
+```
+
+---
+
+<br>
+
+- Category.java
+
+```java
+package jpabook.jpashop.domain;
+
+import jakarta.persistence.*;
+import jpabook.jpashop.domain.item.Item;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+public class Category {
+
+    @Id
+    @GeneratedValue
+    @Column(name = "category_id")
+    private Long id;
+
+    private String name;
+
+    // 여기 다시 듣기!! ==> 어렵다!
+    // 계층 관계랑 같은 건가?
+    // * 다대다 매핑은 중간 테이블에 칼럼을 추가할 수도 없어서
+    // 중간 엔티티인 CategoryItem을 만들어서 다대일과 일대다로 풀어낸다.
+    @ManyToMany
+    @JoinTable(name = "category_item",
+            joinColumns = @JoinColumn(name="category_id"),
+            inverseJoinColumns = @JoinColumn(name = "item_id"))
+    private List<Item> items = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+
+    // parent, child 를 매핑해준다.
+    // mappedBy는 매핑되는 상대를 의미한다.
+    @OneToMany(mappedBy = "parent")
+    private List<Category> child = new ArrayList<>();
+
+    // == 연관관계 메서드 == //
+    public void addChildCategory(Category child){
+        this.child.add(child);
+        child.setParent(this);
+    }
+}
+
+```
+
+---
+
+<br><br>
+
+- Item.java
+
+```java
+package jpabook.jpashop.domain.item;
+
+import jakarta.persistence.*;
+
+import jpabook.jpashop.domain.Category;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+// Inheritance, DiscriminatorColumn 추가로 공부하기
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "dtype")
+@Getter @Setter
+public abstract class Item {
+
+    @Id @GeneratedValue
+    @Column(name = "item_id")
+    private Long id;
+
+    private String name;
+    private int price;
+    private int stockQuantity;
+
+    @ManyToMany(mappedBy = "items")
+    private List<Category> categories = new ArrayList<Category>();
+}
+
+```
+
+---
+
+<br>
+
+<details>
+<summary>Item 모음</summary>
+<div markdown="1">
+
+
+- Book.java
+
+
+```java
+package jpabook.jpashop.domain.item;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@DiscriminatorValue("B")
+@Getter @Setter
+public class Book extends Item{
+    private String author;
+    private String isbn;
+}
+
+```
+
+---
+
+<br>
+
+- Album.java
+
+
+```java
+package jpabook.jpashop.domain.item;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@DiscriminatorValue("A")
+@Getter @Setter
+public class Album extends Item {
+    private String artist;
+    private String etc;
+}
+
+```
+
+---
+
+<br>
+
+- Movie.java
+
+```java
+
+package jpabook.jpashop.domain.item;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@DiscriminatorValue("M")
+@Getter @Setter
+public class Movie extends Item {
+    private String director;
+    private String actor;
+}
+
+```
+
+
+</div>
+</details>
+
+---
+
+<br><br>
+
+
+# 4. 상품 도메인 개발 
+
+
+---
+
+<br><br>
+
+
+# 5. 주문 도메인 개발
+
