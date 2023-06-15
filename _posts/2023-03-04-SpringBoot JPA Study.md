@@ -357,7 +357,7 @@ import java.util.List;
 public class Order {
 
     @Id @GeneratedValue
-    @Column(name="member_id")
+    @Column(name="order_id")
     private Long id;
 
     // @ManyToMany는 관계로서 사용하지 말 것. 다대1로 풀어낼 것.
@@ -582,7 +582,7 @@ public class Category {
             inverseJoinColumns = @JoinColumn(name = "item_id"))
     private List<Item> items = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Category parent;
 
@@ -723,18 +723,350 @@ public class Movie extends Item {
 </div>
 </details>
 
----
-
-<br><br>
-
-
-# 4. 상품 도메인 개발 
-
 
 ---
 
 <br><br>
 
 
-# 5. 주문 도메인 개발
+# 4. 회원 도메인 개발 
+
+### 1) JPA ORM 개념 정리
+
+#### a. EntityManager
+
+- JPA는 스레드가 하나 생성될 때 마다(매 요청마다) EntityManagerFactory에서 EntityManager를 생성한다.
+
+- EntityManager는 내부적으로 DB 커넥션 풀을 사용해서 DB에 붙는다.
+
+- EntityManager가 영속성 컨텍스트를 통해서 DB에 저장된 엔티티를 불러온다.
+
+---
+
+<br>
+
+#### b. EntityManager.persist(entity)
+
+- 이전에 persist()로 db에 객체를 저장하는 것이라고 배웠지만,
+
+- 실제로는 DB에 저장하는 것이 아니라, 영속성 컨텍스트를 통해서 엔티티를 영속화 한다는 뜻이다.
+
+- 정확히 말하면 persist() 시점에는 영속성 컨텍스트에 저장한다. DB 저장은 이후이다.
+
+---
+
+<br>
+
+#### c. 영속성 컨텍스트
+
+- 영속성 컨텍스트는 논리적인 개념이다. 눈에 보이지 않는다.
+
+- 엔티티 매니저를 통해서 영속성 컨텍스트에 접근한다.
+
+---
+
+<br>
+
+#### d. 엔티티의 생명주기
+
+#### a) 비영속(new/transient)
+
+- 영속성 컨텍스트와 전혀 관계가 없는 상태
+
+#### b) 영속(managed)
+
+- 영속성 컨텍스트에 저장된 상태
+
+- 엔티티가 영속성 컨텍스트에 의해 관리된다.
+
+- 이때 DB에 저장 되지 않는다. 영속 상태가 된다고 DB에 쿼리가 날라가지 않는다.
+
+- 트랜잭션의 커밋 시점에 영속성 컨텍스트에 있는 정보들이 DB에 쿼리로 날라간다.
+
+
+#### c) 준영속(detached)
+
+- 영속성 컨텍스트에 저장되었다가 분리된 상태
+
+#### d) 삭제(removed)
+
+- 삭제된 상태. DB에서도 날린다.
+
+---
+
+<br>
+
+#### e. flush
+
+- 트랜잭션 내부에서 persist()가 일어날 때, 엔티티들을 1차 캐시에 저장하고, 논리적으로 쓰기 지연 SQL 저장소 라는 곳에 INSERT 쿼리들을 생성해서 쌓아 놓는다.
+
+- DB에 바로 넣지 않고 기다린다.
+
+- 즉, commit()하는 시점에 DB에 동시에 쿼리들을 쫙 보낸다.(쿼리를 보내는 방식은 동시 or 하나씩 옵션에 따라)
+
+- 이렇게 쌓여있는 쿼리들을 DB에 보내는 동작이 flush() 이다.
+
+- flush()는 1차캐시를 지우지는 않는다. 쿼리들을 DB에 날려서 DB와 싱크를 맞추는 역할을 한다.
+
+- 실제로 쿼리를 보내고 나서, commit()한다.
+
+- 트랜잭션을 커밋하게 되면, flush() 와 commit() 두가지 일을 하게 되는 것이다.
+
+---
+
+<br><br>
+
+### 2) 실습 코드 : 
+
+
+- MemberRepository.java
+
+```java
+package jpabook.jpashop.repository;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jpabook.jpashop.domain.Member;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public class MemberRepository {
+
+    // 1. JPA는 스레드가 하나 생성될 때 마다(매 요청마다) EntityManagerFactory에서 EntityManager를 생성한다.
+    // EntityManager는 내부적으로 DB 커넥션 풀을 사용해서 DB에 붙는다.
+    // EntityManager가 영속성 컨텍스트를 통해서 DB에 저장된 엔티티를 불러온다.
+
+//    2. EntityManager.persist(entity);
+//    이전에 persist()로 db에 객체를 저장하는 것이라고 배웠지만,
+//    실제로는 DB에 저장하는 것이 아니라, 영속성 컨텍스트를 통해서 엔티티를 영속화 한다는 뜻이다.
+//    정확히 말하면 persist() 시점에는 영속성 컨텍스트에 저장한다. DB 저장은 이후이다.
+
+    @PersistenceContext
+    private EntityManager em;
+
+    public void save(Member member){
+        em.persist(member);
+    }
+
+    public Member findOne(Long id){
+        return em.find(Member.class, id);
+    }
+
+    public List<Member> findAll(){
+        return em.createQuery("select a from Member m", Member.class)
+                .getResultList();
+    }
+
+    public List<Member> findByName(String name){
+        return em.createQuery("select m from Member m where m.name = :name", Member.class)
+                .setParameter("name",name)
+                .getResultList();
+    }
+
+
+}
+
+```
+
+
+<br>
+
+- MemberService.java
+
+```java
+
+package jpabook.jpashop.service;
+
+
+import jpabook.jpashop.domain.Member;
+import jpabook.jpashop.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+// readOnly : 데이터 변경이 없는 경우, 서비스 단에서 사용!(읽기 전용일 경우, 약간 성능 향상)
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class MemberService {
+
+    // 필드 주입보다는 생성자 주입을 사용할 것!(불변성 보장!)
+//    @Autowired
+//    MemberRepository memberRepository;
+
+    private final MemberRepository memberRepository;
+
+//    public MemberService(MemberRepository memberRepository) {
+//        this.memberRepository = memberRepository;
+//    }
+
+    /**
+     * 회원가입
+     */
+    @Transactional
+    public Long join(Member member){
+
+        validateDuplicateMember(member);    // 중복 회원 검증
+        memberRepository.save(member);
+        return member.getId();
+    }
+
+    /**
+     * 전체 회원 조회
+     */
+    public List<Member> findMembers(){
+        return memberRepository.findAll();
+    }
+
+    public Member findOne(Long memberId){
+        return memberRepository.findOne(memberId);
+    }
+
+    /**
+     * 중복 회원 검증(private)
+     */
+    private void validateDuplicateMember(Member member) {
+        List<Member> findMembers = memberRepository.findByName(member.getName());
+        if(!findMembers.isEmpty()){
+            throw new IllegalStateException("이미 존재하는 회원입니다.");
+        }
+    }
+}
+
+```
+
+---
+
+<br>
+
+- Test 코드 :
+
+<br>
+
+- MemberServiceTest.java
+
+```java
+package jpabook.jpashop.test.service;
+
+import jpabook.jpashop.domain.Member;
+import jpabook.jpashop.repository.MemberRepository;
+import jpabook.jpashop.service.MemberService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class MemberServiceTest {
+
+    @Autowired
+    MemberService memberService;
+
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Test
+    @Transactional
+    public void 회원가입() throws Exception{
+
+        // Given(조건)
+        Member member = new Member();
+        member.setName("kim");
+
+        // When(상황)
+        Long saveId = memberService.join(member);
+
+        // THen(결과)
+        assertEquals(member, memberRepository.findOne(saveId));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void 중복_회원_예외() throws Exception{
+
+        // Given
+        Member member1 = new Member();
+        member1.setName("kim");
+
+        Member member2 = new Member();
+        member2.setName("kim");
+
+        // When
+        memberService.join(member1);
+        memberService.join(member2);    // 여기서 에러 발생해야 한다.
+
+        // Then
+        fail("예외가 발생해야 한다.");
+    }
+}
+
+```
+
+---
+
+<br><br>
+
+### 3) Test yml 설정 변경 
+
+- 추가로 Test 패키지 안에 yml 설정을 변경하여 메모리 DB로만으로도 테스트 가능하다.
+
+- test/resources/application.yml
+
+<br>
+
+- application.yml
+
+```yml
+
+spring:
+##  datasource:
+##    url: jdbc:h2:tcp://localhost/~/jpashop
+##    username: sa
+##    password:
+##    driver-class-name: org.h2.Driver
+#
+##  jpa:
+##    hibernate:
+##      ddl-auto: create
+##    properties:
+##      hibernate:
+##        show_sql: true
+##        format_sql: true
+#
+logging.level:
+  org.hibernate.SQL: debug
+##  org.hibernate.orm.jdbc.bind: trace
+```
+
+
+---
+
+<br><br>
+
+
+# 5. 상품 도메인 개발 
+
+
+---
+
+<br><br>
+
+
+# 6. 주문 도메인 개발
+
+
+<br><br>
+
+
 
