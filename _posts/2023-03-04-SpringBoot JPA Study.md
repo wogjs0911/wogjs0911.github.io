@@ -1019,7 +1019,7 @@ public class MemberServiceTest {
 
 ### 3) Test yml 설정 변경 
 
-- 추가로 Test 패키지 안에 yml 설정을 변경하여 메모리 DB로만으로도 테스트 가능하다.
+- 추가로 Test 패키지 안에 yml 파일을 추가하여 메모리 DB로만으로도 테스트 가능하다.
 
 - test/resources/application.yml
 
@@ -1049,13 +1049,196 @@ logging.level:
 ##  org.hibernate.orm.jdbc.bind: trace
 ```
 
+<br>
+
+- 참고 : [참고 블로그 글](https://ict-nroo.tistory.com/130)
 
 ---
 
 <br><br>
 
-
 # 5. 상품 도메인 개발 
+
+### 1) JPA의 엔티티 개념 정리 : 
+
+- JPA에서는 객체 지향형이라서 Entity에도 역할(책임)을 부여한다.
+
+- 이제는 거의 핵심 로직은 entity에 담는 것인가?
+
+- 다음 장에서 설명!
+
+---
+
+<br><br>
+
+### 2) 실습 코드 :
+
+- Item.java
+
+```java
+package jpabook.jpashop.domain.item;
+
+import jakarta.persistence.*;
+
+import jpabook.jpashop.domain.Category;
+import jpabook.jpashop.exception.NotEnoughStockException;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+// Inheritance, DiscriminatorColumn 추가로 공부하기
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "dtype")
+@Getter @Setter
+public abstract class Item {
+
+    @Id @GeneratedValue
+    @Column(name = "item_id")
+    private Long id;
+
+    private String name;
+    private int price;
+    private int stockQuantity;
+
+    @ManyToMany(mappedBy = "items")
+    private List<Category> categories = new ArrayList<Category>();
+
+    // ==== ******** 비즈니스 로직 추가 ******* ==== //
+    // JPA에서는 객체 지향형이라서 Entity에도 역할(책임)을 부여한다.
+    // 이제는 거의 핵심 로직은 entity에 담는 것인가?
+    public void addStock(int quantity){
+        this.stockQuantity += quantity;
+    }
+
+    public void removeStock(int quantity){
+        int restStock = this.stockQuantity - quantity;
+
+        if(restStock < 0){
+            throw new NotEnoughStockException("need more stock");
+        }
+        this.stockQuantity = restStock;
+    }
+
+}
+
+```
+
+---
+
+<br>
+- NotEnoughStockException.java
+
+```java
+package jpabook.jpashop.exception;
+
+public class NotEnoughStockException extends RuntimeException {
+
+    public NotEnoughStockException() {
+    }
+
+    public NotEnoughStockException(String message) {
+        super(message);
+    }
+
+    public NotEnoughStockException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public NotEnoughStockException(Throwable cause) {
+        super(cause);
+    }
+
+}
+
+```
+
+---
+
+<br>
+
+- ItemRepository.java
+
+
+```java
+package jpabook.jpashop.repository;
+
+import jakarta.persistence.EntityManager;
+import jpabook.jpashop.domain.item.Item;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+@RequiredArgsConstructor
+public class ItemRepository {
+
+    private final EntityManager em;
+
+    public void save(Item item){
+        if(item.getId() == null){
+            em.persist(item);
+        }
+        else{
+            em.merge(item);
+        }
+    }
+
+    public Item findOne(Long id){
+        return em.find(Item.class, id);
+    }
+
+    public List<Item> findAll(){
+        return em.createQuery("select i from Item i", Item.class).getResultList();
+    }
+}
+
+```
+
+
+---
+
+<br>
+
+- ItemService.java
+
+
+```java
+package jpabook.jpashop.service;
+
+import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.repository.ItemRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class ItemService {
+
+    private final ItemRepository itemRepository;
+
+    @Transactional
+    public void saveItem(Item item){
+        itemRepository.save(item);
+    }
+
+    public List<Item> findItems(){
+        return itemRepository.findAll();
+    }
+
+    public Item findOne(Long itemId){
+        return itemRepository.findOne(itemId);
+    }
+}
+
+```
 
 
 ---
@@ -1065,8 +1248,344 @@ logging.level:
 
 # 6. 주문 도메인 개발
 
+### 1) 도메인 모델 패턴 정리 : 
+
+- 아래 코드처럼 주문과 주문 취소의 메서드에서 '비즈니스 로직의 대부분'이 '엔티티'에 있다.
+
+- 즉, 서비스 계층은 단순히 엔티티에 필요한 요청을 위임하는 역할만 하게 된다.
+
+- 정리하면, 엔티티가 비즈니스 로직을 가지고 객체 지향의 특성을 적극 활용하는 것이 '`도메인 모델 패턴`'이라고 부른다!
+
+- 이와 반대로 서비스 계층에서 대부분의 비즈니스 로직을 가지고 있던 이전 프로그래밍 방법론을 '`트랜잭션 스크립트 패턴`'이라고 한다!
+
+- 그래서, JPA와 사상이 비슷한 디자인 패턴이다. 
+
+---
 
 <br><br>
+
+### 2) 실습 코드 :
+
+<br>
+
+- Order.java
+
+
+```java
+package jpabook.jpashop.domain;
+
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.aspectj.weaver.ast.Or;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "orders")
+@Getter @Setter
+public class Order {
+
+    @Id @GeneratedValue
+    @Column(name="order_id")
+    private Long id;
+
+    // @ManyToMany는 관계로서 사용하지 말 것. 다대1로 풀어낼 것.
+    // 그리고 왠만해서는 LAZY 사용하기!(즉시 로딩인 EAGER는 예측이 어렵고 N+1 문제가 자주 발생한다!)
+    // 연관된 Entity를 함께 DB에서 조회해야 하려면, fetch join 또는 엔티티 그래프를 사용한다.
+    // @XToOne은 기본적으로 즉시로딩이라서 무조건 추가로 LAZY 설정을 해줘야 한다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;  // 주문 회원
+
+    // mappedBy 중요!(관계에서 매핑되는 부분)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    // OneToOne 주의하기!!
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;  // 배송정보
+
+    private LocalDateTime orderDate; // 주문시간
+
+    // enum 클래스 이용!(상태 이용 시, 사용)
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status; // 주문 상태[ORDER, CANCEL]
+
+    // == 연관관계 메서드 == //
+    public void setMember(Member member) {
+        this.member = member;
+        member.getOrders().add(this);
+    }
+
+    public void addOrderItem(OrderItem orderItem){
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+
+    public void setDelivery(Delivery delivery){
+        this.delivery = delivery;
+        delivery.setOrder(this);
+    }
+
+    // ===== 생성 메서드 ====== //
+    // OrderItem... orderItems는 주문 아이템이 여러개일 수도 있어서
+    // 여러 entity가 복합된 주문(Order) 결과를 뽑아낸다.
+    // 실제 주문 엔티티!!
+    public static Order createUser(Member member, Delivery delivery, OrderItem... orderItems){
+        Order order = new Order();
+
+        order.setMember(member);
+
+        order.setDelivery(delivery);
+
+        for(OrderItem orderItem : orderItems){
+            order.addOrderItem(orderItem);
+        }
+
+        order.setStatus(OrderStatus.ORDER);
+
+        order.setOrderDate(LocalDateTime.now());
+
+        return order;
+    }
+
+
+    // ========== 비즈니스 로직 ============ //
+    // ** 주문 취소 ** //
+    public void cancel(){
+        if(delivery.getStatus() == DeliveryStatus.COMP){
+            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다.");
+        }
+
+        this.setStatus(OrderStatus.CANCEL);
+
+        for(OrderItem orderItem : orderItems){
+            orderItem.cancel();
+        }
+
+    }
+
+    // ==== 조회 로직 ==== //
+    // *** 전체 주문 가격 조회 *** //
+    public int getTotalPrice(){
+        int totalPrice = 0;
+
+        for(OrderItem orderItem : orderItems){
+            totalPrice += orderItem.getTotalPrice();
+        }
+
+        return totalPrice;
+    }
+}
+
+```
+
+
+---
+
+<br>
+
+- OrderItem.java
+
+
+```java
+package jpabook.jpashop.domain;
+
+import jakarta.persistence.*;
+import jpabook.jpashop.domain.item.Item;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Table(name = "order_item")
+@Getter @Setter
+public class OrderItem {
+
+    // 여러 엔티티가 묶여 있으면 '_'로 계층 별로 칼럼명 매핑!
+    @Id
+    @GeneratedValue
+    @Column(name = "order_item_id")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private Item item;  // 주문 상품
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;    // 주문
+
+    private int orderPrice; // 주문 가격
+    private int count; // 주문 수량
+
+    // ===== 생성 메서드 ======= //
+    // 주문 1개에 관한 정보(주문 1개의 아이템 엔티티)
+    // 1개 주문시, 그 아이템의 개수는 1개 줄어야 한다. 진짜 엔티티 관련 로직이 여기에 다 들어가네
+    public static OrderItem createOrderItem(Item item, int orderPrice, int count){
+        OrderItem orderItem = new OrderItem();
+
+        orderItem.setItem(item);
+        orderItem.setOrderPrice(orderPrice);
+        orderItem.setCount(count);
+        item.removeStock(count);
+
+        return orderItem;
+    }
+
+    // ====== 비즈니스 로직 ====== //
+    // ***** 주문 취소 *****
+    public void cancel(){
+        getItem().addStock(count);
+    }
+
+    // ==== 조회 로직 ==== //
+    // *** 주문 상품의 전체 가격 조회 *** //
+    public int getTotalPrice(){
+        return getOrderPrice() * getCount();
+    }
+}
+
+```
+
+
+---
+
+<br>
+
+- OrderRepository.java
+
+
+```java
+package jpabook.jpashop.repository;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jpabook.jpashop.domain.Order;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+@Repository
+@RequiredArgsConstructor
+public class OrderRepository {
+
+    private final EntityManager em;
+
+    public void save(Order order){
+        em.persist(order);
+    }
+
+    public Order findOne(Long id){
+        return em.find(Order.class, id);
+    }
+
+// 검색은 나중에!
+//    public List<Order> findAll(OrderSearch orderSearch);
+}
+
+```
+
+
+---
+
+<br>
+
+- OrderService.java
+
+
+```java
+package jpabook.jpashop.service;
+
+import jpabook.jpashop.domain.*;
+import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.repository.ItemRepository;
+import jpabook.jpashop.repository.MemberRepository;
+import jpabook.jpashop.repository.OrderRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class OrderService {
+
+    private final MemberRepository memberRepository;
+    private final ItemRepository itemRepository;
+    private final OrderRepository orderRepository;
+
+    // ****** 주문 ******
+    // 중요!! : 주문과 주문 취소 메서드는 비즈니스 로직의 대부분이 엔티티에 있다.
+    // 즉, JPA에서 서비스 계층은 단순히 엔티티에 필요한 요청을 위임하는 역할만 하게 된다.
+    // 정리하면, 엔티티가 비즈니스 로직을 가지고 객체 지향의 특성을 적극 활용하는 것이 "도메인 모델 패턴"이다!
+    // 이와 반대로 서비스 계층에서 대부분의 비즈니스 로직을 가지고 있던 이전 프로그래밍 방법론을 '트랜잭션 스크립트 패턴'이라고 한다!
+    @Transactional
+    public Long order(Long memberId, Long itemId, int count){
+
+        // ** 엔티티 조회! **
+        Member member = memberRepository.findOne(memberId);
+        Item item = itemRepository.findOne(itemId);
+
+        // ** 배송 정보 생성 **
+        Delivery delivery = new Delivery();
+        delivery.setAddress(member.getAddress());
+        delivery.setStatus(DeliveryStatus.READY);
+
+        // 주문상품 생성
+        OrderItem orderItem = OrderItem.createOrderItem(item, item.getPrice(), count);
+
+        // 주문 생성
+        Order order = Order.createUser(member, delivery, orderItem);
+
+        // 주문 저장
+        orderRepository.save(order);
+        return order.getId();
+    }
+
+    // *** 주문 취소 ***
+    @Transactional
+    public void cancelOrder(Long orderId){
+        Order order = orderRepository.findOne(orderId);
+        order.cancel(); // 주문 취소
+    }
+
+    // *** 주문 검색 ***
+
+/*    public List<Order> findOrders(OrderSearch orderSearch){
+        return orderRepository.findAll(orderSearch);
+    }*/
+
+
+}
+
+```
+
+
+--- 
+
+
+# 7. 주문 관련 테스트 코드
+
+### 1) 개념 정리  :
+
+
+---
+
+<br><br>
+
+### 2) 실습 코드 :
+
+
+
+
+<br><br>
+
 
 
 
