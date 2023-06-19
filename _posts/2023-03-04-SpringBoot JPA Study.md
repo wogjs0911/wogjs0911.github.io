@@ -1577,14 +1577,255 @@ public class OrderService {
 ### 1) 개념 정리  :
 
 
+
 ---
 
 <br><br>
 
-### 2) 실습 코드 :
+### 2) 실습 코드 1 :
+
+- 주문 관련 테스트 코드
+
+- OrderServiceTest.java
+
+
+```java
+package jpabook.jpashop.test.service;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jpabook.jpashop.domain.Address;
+import jpabook.jpashop.domain.Member;
+import jpabook.jpashop.domain.Order;
+import jpabook.jpashop.domain.OrderStatus;
+import jpabook.jpashop.domain.item.Book;
+import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.exception.NotEnoughStockException;
+import jpabook.jpashop.repository.OrderRepository;
+import jpabook.jpashop.service.OrderService;
+import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@Transactional
+public class OrderServiceTest {
+
+    @PersistenceContext
+    EntityManager em;
+
+    @Autowired
+    OrderService orderService;
+
+    @Autowired
+    OrderRepository orderRepository;
+
+    @Test
+    public void 상품주문() throws Exception {
+
+        // Given
+        Member member = createMember();
+        Item item = createBook("시골 JPA", 10000, 10);
+        int orderCount = 2;
+
+        // When
+        Long orderId = orderService.order(member.getId(), item.getId(), orderCount);
+
+        // Then
+        Order getOrder = orderRepository.findOne(orderId);
+
+        assertEquals("상품 주문시 상태는 ORDER", OrderStatus.ORDER, getOrder.getStatus());
+        assertEquals("주문한 상품 종류 수가 정확해야 한다.",1,getOrder.getOrderItems().size());
+        assertEquals("주문 가격은 가격 * 수량이다", 10000 * 2, getOrder.getTotalPrice());
+        assertEquals("상품 주문시 상태는 ORDER",8,item.getStockQuantity());
+    }
+
+    @Test(expected = NotEnoughStockException.class)
+    public void 상품주문_재고수량초과() throws Exception{
+
+        // Given
+        Member member = createMember();
+        Item item = createBook("시골 JPA", 10000, 10);
+
+        int orderCount = 11;    // 재고보다 많은 수량
+
+        // When
+        orderService.order(member.getId(), item.getId(), orderCount);
+
+        // Then
+        // 기존 수량 10개보다 많이 주문해서 에러가 발생한다.
+        fail("재고 수량 부족 예외가 발생해야 한다.");
+    }
+
+    @Test
+    public void 주문취소(){
+        // Given
+        Member member = createMember();
+        Item item = createBook("시골 JPA", 10000, 10); // 이름, 가격, 재고
+        int orderCount = 2;
+
+        Long orderId = orderService.order(member.getId(), item.getId(), orderCount);
+
+        // When
+        orderService.cancelOrder(orderId);
+
+        // Then
+        Order getOrder = orderRepository.findOne(orderId);
+
+        assertEquals("주문 취소시, 상태는 CANCEL이다.", OrderStatus.CANCEL, getOrder.getStatus());
+        assertEquals("주문이 취소된 상품은 그만큼 재고가 증가해야 한다.", 10, item.getStockQuantity());
+
+    }
+
+    private Member createMember() {
+        Member member = new Member();
+        member.setName("회원1");
+        member.setAddress(new Address("서울", "강가", "123-123"));
+        em.persist(member);
+        return member;
+    }
+
+    private Item createBook(String name, int price, int stockQuantity) {
+        Book book = new Book();
+        book.setName(name);
+        book.setStockQuantity(stockQuantity);
+        book.setPrice(price);
+        em.persist(book);
+        return book;
+    }
 
 
 
+
+
+}
+
+```
+
+---
+
+<br><br>
+
+### 3) 실습 코드 2 :
+
+- 검색 기능 추가 
+
+- JPQL? or Criteria? or QueryDSL?  
+
+---
+
+
+<br><br>
+
+- OrderSearch.java
+
+
+```java
+package jpabook.jpashop.domain;
+
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class OrderSearch {
+    private String memberName;  // 회원 이름
+    private OrderStatus orderStatus; // 주문 상태(ORDER, CANCEL)
+
+    // Getter, Setter
+
+}
+
+
+```
+
+<br>
+
+- OrderRepository.java
+
+
+```java
+package jpabook.jpashop.repository;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jpabook.jpashop.domain.Order;
+import jpabook.jpashop.domain.OrderSearch;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
+
+@Repository
+@RequiredArgsConstructor
+public class OrderRepository {
+
+
+    private final EntityManager em;
+
+    public void save(Order order){
+        em.persist(order);
+    }
+
+    public Order findOne(Long id){
+        return em.find(Order.class, id);
+    }
+
+    public List<Order> findAll(OrderSearch orderSearch){
+        // .. 검색 로직 필요 : 검색 조건에 동적으로 쿼리를 생성해서 주문 엔티티를 조회!
+        // 방법 1 : JPQL 쿼리로 진행 -> 동적 쿼리를 문자로 생성하기가 어렵고 실수로 인한 버그 발생률이 높다.
+        // 방법 2 : JPA Criteria로 처리 -> JPA 표준 스펙이지만 실무에서 사용하기 매우 복잡하다! 그래서 Querydsl을 사용한다.
+
+    }
+
+    public List<Order> findAllByString(OrderSearch orderSearch) {
+        // 1. language = JPAQL
+        String jpql = "select o From Order o join o.member m";
+
+        boolean isFirstCondition = true;
+        //주문 상태 검색
+        if (orderSearch.getOrderStatus() != null) {
+            if (isFirstCondition) {
+                jpql += " where";
+                isFirstCondition = false;
+            } else {
+                jpql += " and";
+            }
+            jpql += " o.status = :status";
+        }
+        //회원 이름 검색
+            if (StringUtils.hasText(orderSearch.getMemberName())) {
+                if (isFirstCondition) {
+                    jpql += " where";
+                    isFirstCondition = false;
+                } else {
+                    jpql += " and";
+                }
+                jpql += " m.name like :name";
+            }
+        TypedQuery<Order> query = em.createQuery(jpql, Order.class) .setMaxResults(1000); //최대 1000건
+          if (orderSearch.getOrderStatus() != null) {
+            query = query.setParameter("status", orderSearch.getOrderStatus());
+        }
+          if (StringUtils.hasText(orderSearch.getMemberName())) {
+            query = query.setParameter("name", orderSearch.getMemberName());
+        }
+          return query.getResultList();
+    }
+}
+
+```
 
 <br><br>
 
