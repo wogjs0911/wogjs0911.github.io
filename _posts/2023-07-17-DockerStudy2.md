@@ -63,7 +63,10 @@ CMD [ "node", "server.js"]
 
 #### b. 노드 애플리케이션 실습용 코드 
 
+- server.js
+
 ```javascript
+
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -134,11 +137,13 @@ app.listen(80);
 
 <br>
 - 수정 후 명령어 : 우리 로컬 머신의 어떤 포트가 이 내부의 도커 특정 포트에 액세스 할 수 있는지 설정해 주기 :
-	- docker run -p 3000:80 8bc8ad4953b6e96ff7db03b3d30e5975c6a89a99826f1e238a44f9e125b3958e
+	- docker run -p 3000:80 8bc8ad4953b6
 	- 80은 내부 도커 컨테이너 노출 포트이다. 3000은 우리 로컬 머신의 어떤 포트이다. 
 
 <br>
 - 정리하면, 로컬 포트 3000에 publish되었기 때문에 작동하게 됩니다.
+	- docker run -p 3000:80 8bc8ad4953b6
+	- 'http://localhost:3000' 에 접속하기!
 
 <br><br>
 
