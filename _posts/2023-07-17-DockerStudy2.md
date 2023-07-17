@@ -139,6 +139,25 @@ app.listen(80);
 
 <br>
 - 정리하면, 로컬 포트 3000에 publish되었기 때문에 작동하게 됩니다.
+
+<br><br>
+
+#### c. 생성된 도커 이미지 실행 중지시키는 방법 :
+
+- docker stop jovial_wozniak
+	- docker name으로 stop 시키기 
+	
+<br><br>
+
+#### d. 기타 명령어 :
+
+- 터미널에서 도커 실행을 강제로 중지 시키고 싶을 때 : ctrl + c 2번 
+
+- docker ps -a : 전체 컨테이너 목록 조회 
+
+- docker ps -a : 현재 실행중인 컨테이너 조회 
+
+	
 	
 ---
 
