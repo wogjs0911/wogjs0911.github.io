@@ -27,7 +27,7 @@ CMD [ "node", "server.js"]
 
 #### a. Dockerfile 설명
 
-- FROM : 컨테이너의 이미지 불러오기
+- FROM : 컨테이너에 이미지 불러오기
 
 <br>
 - WORKDIR : 작업 디렉토리 설정 
@@ -160,7 +160,7 @@ app.listen(80);
 
 - docker ps -a : 전체 컨테이너 목록 조회 
 
-- docker ps -a : 현재 실행중인 컨테이너 조회 
+- docker ps : 현재 실행중인 컨테이너 조회 
 
 	
 	
