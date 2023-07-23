@@ -168,9 +168,187 @@ app.listen(80);
 
 <br><br>
 
-### 3) 
-	
+### 3) 레이어 개념** 
+
+#### a. 이미지란? 
+
+- 이미지는 읽기/쓰기 액세스 권한이 있는 인스턴스를 설정하는 컨테이너의 '청사진'이다. 
+
+<br>
+
+#### b. 레이어란? 
+
+- 이미지의 모든 명령은 캐시 가능한 레이어를 생성합니다. 레이어는 이미지 재구축 및 공유를 돕습니다. 즉, 캐시처럼 저장해놓고 사용한다. 
 	
 
 
+<br>
+
+#### c. 레이어 사용방법(최적화 과정)
+
+- npm install을 다시 실행 시킬 필요가 없어서 소스코드를 복사하기 전에 npm install 레이어가 오게 된다.
+
+- 그렇기 때문에 소스코드 복사 명령 앞의 이러한 레이어가 무효화되지 않는다. 
+
+
+```docker
+FROM node
+
+WORKDIR /app
+
+COPY package.json /app
+
+RUN npm install
+
+COPY . /app
+
+EXPOSE 80
+
+CMD [ "node", "server.js"]
+
+```
+
+<br>
+- 다시 실행하면, npm install은 캐시화 되어있기 때문에 도커가 package.json파일이 변경되지 않았음을 확인했기 때문에 즉, npm istall 이전 단계가 변경되지 않았다. 그래서 재실행 시, npm install을 다시 실행할 필요가 없어서 속도가 향상된다.
+
+<br>
+- 그래서, npm install 명령어 이후로만 동작한다. 이러한 과정들은 최적화 과정의 일부분이다. 레이어 기반 아키텍처를 이해하는 것이다.
+
+
+---
+
+<br><br>
+
+### 4) 컨테이너 중지 & 재시작
+
+<br>
+
+#### a. docker 'run' vs docker 'start'
+
+- docker run ~~ 
+	- docker run은 터미널을 차단한다. 
+
+- docker start 컨테이너이름
+	- docker start은 터미널을 차단하지 않고 컨테이너를 백업해둔다.
+
+<br><br>
+
+#### b. Attached 모드 vs Detached 모드
+
+- Attached : 터미널을 차단하고 실행(컨테이너는 foreground에서 실행)
+	- docker run에서 디폴트 모드
+	- 그 컨테이너의 출력결과를 터미널을 볼 수 있으며 수신한다는 의미이다. 
+
+	
+```docker
+
+docker run -p 8000:80 2ddf2ede7d6c
+
+```
+
+---
+
+<br>
+- Detached : 터미널을 차단하지 않고 실행(컨테이너는 background에서 실행)
+	- docker start에서 디폴트 모드
+	- 터미널에서는 출력 결과를 볼 수 없다.
+		- docker run에 '-d'를 붙이면, Detached 모드로 동작
+		
+```docker
+
+docker run -p 8000:80 -d 2ddf2ede7d6c
+
+```
+
+---
+
+<br>
+<br><br>
+
+#### c. Stop(컨테이너)
+
+
+- Stop : 컨테이너 중지시키기
+	- 컨테이너를 중지시키고 다시 docker run으로 실행시키면, 기존의 컨테이너가 다시 실행된다. 기존의 컨테이너가 없다면, 컨테이너가 새로 만들어진다.
+
+```docker
+docker stop eloquent_brown
+```
+
+<br><br>
+
+#### d. Logs(로그 보기)
+
+- Logs : Attached 모드처럼 컨테이너 출력 결과를 확인할 수 있다. 
+
+<br>
+
+- a) 기존의 로그 출력 결과를 다시 볼 수 있다.
+
+```docker
+
+docker logs eloquent_brown
+
+```
+
+<br>
+
+---
+
+- b) 기존의 로그 출력 결과와 향후 로그 출력 결과를 다시 볼 수 있다.
+	- '-f'가 follow이다.
+
+```docker
+
+docker logs -f eloquent_brown
+
+```
+
+<br>
+
+---
+
+- c) start로 시작해도 Attached 모드로 실행할 수 도 있다. 자유로운 것 같다. 
+	- '-a'를 붙이면, Attached로 동작
+
+```docker
+
+docker start -a eloquent_brown
+
+```
+
+
+<br><br>
+
+#### d. 인터렉티브 모드**
+
+- 도커는 웹서버나 노드에서만 사용할 수 있는 것이 아니다. 필요에 따라 컨테이너와 상호 작용할 때도 사용된다.
+
+```docker
+
+docker start -a -i heuristic_haslett
+
+```
+
+<br>
+- 기존의 Detached 모드와는 다른 의미이다. 더 공부해봐야 알 것 같다. 
+	- '-i' : 인터렉티브 모드이다. 컨테이너에 무언가를 입력할 수 있다.
+	- '-t' : pseudo(의사) TTY가 할당된다. 터미널을 생성한다는 것을 의미한다.
+
+
+---
+
+<br><br>
+
+### 5)  이미지 삭제 및 공유
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
