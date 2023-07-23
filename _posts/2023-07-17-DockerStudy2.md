@@ -4,7 +4,7 @@ title: Docker - Docker Study2
 tags: docker
 ---
 
-# 1. Docker 
+# 1. Docker 기본 개념
 
 ### 1) 기본 Dockerfile 설정
 
@@ -51,7 +51,7 @@ CMD [ "node", "server.js"]
 
 <br>
 - CMD : 컨테이너 실행시키기
-	- CMD [ "node", "server.js"]가 아니라 CMD node server.js로 실행하면, 이 이미지가 빌드될 때마다 실행되기 때문에 이러한 방식은 문제가 많아서 꼭 컨테이너가 실행되고 나서 노드 서버를 실행되도록 하자!
+	- 'CMD [ "node", "server.js"]'가 아니라 'CMD node server.js'로 명령어를 실행하면, 이 이미지가 빌드될 때마다 실행되기 때문에 이러한 방식은 문제가 많아서 꼭 컨테이너가 실행되고 나서 노드 서버를 실행되도록 하자!
 	- 그래서 배열 안에 담는다. 즉, 이미지는 컨테이너의 템플릿이어야 한다. 이미지를 실행하는 것이 아니라 이미지를 기반으로 컨테이너를 실행시키는 것이다. 
 	- 따라서, CMD는 이미지가 생성될 때, 실행되지 않고 이미지를 기반으로 컨테이너가 시작될 때, 실행된다는 것이다. 
 	- 정리하면, CMD를 통해서 컨테이너가 실행되고 나서 노드 서버를 실행되도록 하자!
@@ -209,7 +209,7 @@ CMD [ "node", "server.js"]
 ```
 
 <br>
-- 다시 실행하면, npm install은 캐시화 되어있기 때문에 도커가 package.json파일이 변경되지 않았음을 확인했기 때문에 즉, npm istall 이전 단계가 변경되지 않았다. 그래서 재실행 시, npm install을 다시 실행할 필요가 없어서 속도가 향상된다.
+- 한번 실행하고나서 다시 위의 명령어를 실행하면, npm install은 캐시화 되어있기 때문에 도커가 package.json파일이 변경되지 않았음을 확인했기 때문에 즉, npm istall 이전 단계가 변경되지 않았다. 그래서 재실행 시, npm install을 다시 실행할 필요가 없어서 속도가 향상된다.
 
 <br>
 - 그래서, npm install 명령어 이후로만 동작한다. 이러한 과정들은 최적화 과정의 일부분이다. 레이어 기반 아키텍처를 이해하는 것이다.
@@ -228,7 +228,8 @@ CMD [ "node", "server.js"]
 - docker run ~~ 
 	- docker run은 터미널을 차단한다. 
 
-- docker start 컨테이너이름
+<br>
+- docker start 컨테이너이름 or 컨테이너ID
 	- docker start은 터미널을 차단하지 않고 컨테이너를 백업해둔다.
 
 <br><br>
@@ -260,9 +261,7 @@ docker run -p 8000:80 -d 2ddf2ede7d6c
 
 ```
 
----
 
-<br>
 <br><br>
 
 #### c. Stop(컨테이너)
@@ -275,7 +274,7 @@ docker run -p 8000:80 -d 2ddf2ede7d6c
 docker stop eloquent_brown
 ```
 
-<br><br>
+<br><br><br>
 
 #### d. Logs(로그 보기)
 
@@ -295,7 +294,7 @@ docker logs eloquent_brown
 
 ---
 
-- b) 기존의 로그 출력 결과와 향후 로그 출력 결과를 다시 볼 수 있다.
+- b) 기존의 로그 출력 결과와 '향후' 로그 출력 결과를 다시 볼 수 있다.
 	- '-f'가 follow이다.
 
 ```docker
@@ -325,9 +324,7 @@ docker start -a eloquent_brown
 - 도커는 웹서버나 노드에서만 사용할 수 있는 것이 아니다. 필요에 따라 컨테이너와 상호 작용할 때도 사용된다.
 
 ```docker
-
 docker start -a -i heuristic_haslett
-
 ```
 
 <br>
@@ -335,12 +332,220 @@ docker start -a -i heuristic_haslett
 	- '-i' : 인터렉티브 모드이다. 컨테이너에 무언가를 입력할 수 있다.
 	- '-t' : pseudo(의사) TTY가 할당된다. 터미널을 생성한다는 것을 의미한다.
 
+<br>
+- `docker start -a -i heuristic_haslett`라는 명령어를 이렇게 입력하면, 최솟값과 최댓값을 입력하여 그사이의 임의의 값을 확인할 수 있다. 
 
 ---
 
 <br><br>
 
-### 5)  이미지 삭제 및 공유
+### 5) 이미지 삭제 및 분석, 컨테이너 중지 시, 자동 삭제
+
+#### a. 이미지 삭제하는 방법
+	
+- 전체 이미지 조회 : 
+	- docker images 
+
+<br>
+- 이미지 제거하기 :
+	- docker rmi 이미지ID
+	
+<br>
+- 현재 실행되지 않고 있는 이미지 제거하기 :
+	- docker image prune
+
+<br>
+- 이미지 여러 개 한 번에 제거하기 :
+	- docker rmi 이미지ID1 이미지ID2 이미지ID3
+
+---
+
+<br>
+
+#### b. 주의 사항** : 
+
+- 이미지를 삭제하기 위해서는 해당 이미지를 담고 있는 컨테이너를 중지시키고 삭제시켜야 한다.
+
+---
+
+<br>
+
+#### c. 중지된 컨테이너 자동으로 삭제하는 방법
+
+- 도커에서 자주 쓰이는 방법이다. 하지만, 데이터도 같이 삭제되기 때문에 나중에는 볼륨이라느 개념을 이용한다.
+	- '--rm' 이용하기
+
+```docker
+
+docker run -p 3000:80 -d --rm 2ddf2ede7d6c
+
+```
+
+---
+
+<br>
+
+#### d. 이미지 검사하기(조사 및 분석)
+
+
+```docker
+
+docker image inspect 2ddf2ede7d6c
+
+```
+
+- 위의 명령어를 이용하면 이미지를 분석할 수 있다. 
+	- a) 이미지가 생성된 시간 확인 가능
+	- b) 컨테이너에 대한 구성 표시 가능
+		- 노출될 포트, 자동으로 설정되는 일부 환경 변수, 사용중인 도커 버전, EntryPoint, 해당 이미지가 구축된 OS 환경, 다른 레이어들
+
+<br>
+- 자주 사용하지는 않지만 이미지와 컨테이너의 작동 과정을 살펴보거나 이미지ID 등을 까먹었을 때는 유용하게 이용된다. 
+
+
+---
+
+<br><br>
+
+### 7) 컨테이너에/컨테이너로 파일 복사하기
+
+#### a. 로컬 폴더(로컬 호스트 머신의)의 파일을 컨테이너로 복사하기
+  
+- docker cp dummy/. boring_vaughan:/test
+	- 명령어 정리 : `docker cp '로컬폴더 경로' '컨테이너이름':'복사하려는 컨테이너 내부의 경로'`
+
+<br>
+
+#### b. 컨테이너의 파일을 로컬 폴더의 파일로 복사하기  
+
+- docker cp boring_vaughan:/test dummy
+
+<br>
+- 파일을 구체적 대상으로 삼고 싶을 때, 
+	- docker cp boring_vaughan:/test/test.txt dummy 
+
+<br>
+
+#### c. 사용 용도  
+
+- 지금은 자주 사용하지 않지만 웹 서비스에서 변경하려는 웹 서버의 구성파일에서 이용한다.
+- 컨테이너 내부에서 로컬 호스트 시스템으로 파일과 폴더를 복사할 때, 사용한다. 
+
+
+---
+
+<br><br>
+
+### 8) 컨테이너와 이미지에 이름 지정 & 태그 지정하기
+
+#### a. 컨테이너에 이름 지정하기!
+
+- docker run -p 3000:80 -d --rm --name goalsapp 2ddf2ede7d6c 
+	- '--name 원하는이름' 명령어 추가하기
+
+
+<br>
+#### b. 이미지에 태그 지정하기!
+	- docker build -t goals:latest . 
+	- '-t 이미지Name:태그이름'으로 명령어가 동작한다. 
+
+---
+
+<br>
+
+#### c. 그 이미지를 기반으로 컨테이너(앱)을 실행시키는 방법 
+
+- docker run -p 3000:80 --rm --name goalsapp goals:lastest
+
+---
+
+<br><br>
+
+### 9) 이미지 공유하기 + DockerHub
+
+#### a. 컨테이너 공유법(이미지를 공유하는 방법)
+
+- 컨테이너를 공유한다는 의미가 이미지를 공유하는 방법이다.
+
+- 이미지가 있는 모든 사람은 그 이미지를 기반으로 컨테이너를 만들 수 있기 때문이다.
+
+- 나중에 배포를 위해 공유하는 경우, 지금처럼 raw Dockerfile이 아니라 완성된 이미지를 공유하게 된다. 
+
+---
+
+<br><br>
+
+#### b. DockerHub 이용하여 이미지 push하기
+
+- push하기 위해서 DockerHub 사용자의 인증이 필요하다.
+
+- 1) DockerHub에 아이디를 만들고 저장소 만들기
+	- 예시) 아이디 : academind
+	- 저장소 이름: node-hello-world
+
+<br>
+- 2) 기존 로컬 호스트 머신에서 기존에 존재하는 이미지를 복제하기
+	- docker tag node-demo/latest academind/node-hello-world
+		- node-demo/latest는 기존의 이미지 이름 + 이미지 태그 이름
+		- academind/node-hello-world는 새로운 이미지 이름 
+
+<br>
+- 3) DockerHub로 이미지를 push하기
+	- docker push academind/node-hello-world
+
+<br>
+- 4) 인증** : DockerHub로 이미지를 push하기 위한 인증하기
+	- docker login
+		- 해당 명령어를 통해 인증하여 권한을 부여 받고 이미지를 push하기
+		
+<br>
+- 5) 특징** : 
+	- 전체 이미지를 push하면 용량이 크기 때문에 DockerHub에 이미지로부터 없는 추가정보만 푸쉬한다. 
+
+---
+
+<br><br>
+ 
+#### c. 공유 이미지 가져오기(pull) & 사용하기(DockerHub)
+
+- pull 하기 위해서는 인증이 필요없다. logout 상태여도 가능하다.
+
+<br>
+
+##### a) 명령어 : docker pull academind/node-hello-world
+
+- 기존의 github 이용하던 것과 같다. 
+
+<br>
+
+##### b) 주의점**
+
+- 1) docker run을 실행하면 로컬 시스템에서 먼저 이미지를 찾고 없다면 DockerHub에서 찾게 된다.
+
+- 2) 하지만, 로컬의 이미지가 최신 버전의 이미지가 아니라면 docker run을 실행하기 전에 docker pull로 최신 이미지를 받아야한다.
+
+- 3) 이렇게 하지 않으면 구버전의 이미지로서 앱을 실행시킬 수 있다.
+
+
+
+
+---
+
+<br><br>	
+	
+# 3. 데이터 관리 및 볼륨으로 작업하기
+
+
+
+---
+
+<br><br>	
+	
+# 4. 다른 컨테이너와 통신
+
+
+
+
 	
 	
 	
