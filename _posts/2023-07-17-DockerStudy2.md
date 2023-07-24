@@ -549,6 +549,11 @@ docker image inspect 2ddf2ede7d6c
 <br>
 - 우리는 컨테이너에 데이터를 저장하지만, '볼륨'의 도움을 받게 된다. 즉, 도커의 핵심 개념이다. 
 
+
+---
+
+<br><br>	
+
 ### 2) 예시 코드 
 
 #### a. 디렉토리 구조 
@@ -594,6 +599,10 @@ EXPOSE 80
 CMD [ "node", "server.js" ]
 
 ```
+
+
+
+<br><br>	
 
 ##### a) 도커 내부의 파일 시스템 이해하기 
 
@@ -947,22 +956,76 @@ docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "
 
 ### 7) 바인드 마운트의 새로운 문제점 해결
 
+#### a. 문제점 
+
+- 마운트를 컨테이너에 바인딩하면, 'app' 폴더의 모든 것을 로컬 폴더로 덮어 쓰기 때문이다. 
+
+<br>
+- 이 로컬 폴더에는 이 앱에 필요한 모든 종속성이 있는 'node_modules' 폴더가 없습니다. 이것이 오류가 발생한 이유이다.
+
+<br>
+- 로컬 폴더에서는 'npm install'을 실행하지 않고 도커에서만 실행하기 때문에 server.js는 Express 패키지, Express 종속성 코드을 필요로 한다. 하지만, npm install은 로컬 폴더에서 실행하지 않기 때문에 Express 코드는 에러가 발생하게 되는 것이다. 
+
+<br>
+- 로컬 폴더를 'app' 폴더에 마운트하기 때문에 이미지와 컨테이너를 설정할 때, Dockerfile에서 수행한 모든 작업을 덮어 쓴다. 즉, '/app'이라는 로컬 폴더로 덮어쓰게 된다.(아래 명령어에서 확인하기!)
+
+
 ```docker
+docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "파일명을 제거한 절대경로:/app" feedback-node:volumes
+```
+
+---
+
+<br><br>
+
+#### b. 해결 방법**
+
+- 도커가 여기 로컬 호스트 폴더를 덮어쓰지 않는다. 대신 여기 로컬 호스트 폴더와 그 안에 있는 콘텐츠가 도커 컨테이너에 있는 내용을 덮어쓰게 된다. 
+
+<br>
+- 하지만, 이 때문에 node_modules 등이 제거되었다. 그래서, 이를 해결하기 위해서는 도커에게 알려줘야 한다. 즉, 내부 파일 시스템에 특정 부분이 있다는 것을 알려줘야한다. 
+
+<br>
+- 결론** : 도커 컨테이너에 익명 볼륨을 추가하는 것이다. 익명의 볼륨이 도움이 될 수 있는 사용 사례이다.
+
+<br>
+
+```docker
+// 예시
 docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "파일명을 제거한 절대경로:/app" -v /app을 포함한 특정 폴더 경로  feedback-node:volumes
 ```
 
-<br>
-- 이 폴더, 그 폴더에 있는 모든 것들을 '/app' 폴더에 바인딩하는 것이기 때문이다. 
-	- 특정 폴더를 지정해줘야 하는 듯 싶다.
+---
+
+<br><br>
+
+- 주의** : 콜론 앞에 로컬 머신 경로가 붙으면, '바인드 마운트'가 된다. 하지만, 콜론 앞에 경로가 아닌 것이 붙으면 볼륨 이름으로 취급되어 '명명된 볼륨'이 된다. 
+
+
+```docker
+docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "/Users/maximilianschwarzmuller/development/teaching/udemy/docker-complete:/app" -v /app/node_modules  feedback-node:volumes
+// Dockerfile에도 직접 사용할 수 있지만, 이미지를 재빌드 해야해서 명령어로 한번에 처리하자!
+```
 
 <br>
-- 이 바운드 마운트는 실제로 'node_modules' 폴더를 전달하지 않는다. 그래서 이 'node_modules' 폴더는 존재하지 않는 'node_modules' 폴더를 덮어쓰는 것이다.
+##### 중요!** : 
 
 <br>
-- 간단히 정리하자면, 'npm install'을 사용하여 이미지 생성 중에 생성된  'node_modules' 폴더는 살아남아 실제로 여전히 바인딩 마운트와 함께 공존하게 된다. 'node_modules'는 일종의 예외처리 된다.
+- 이 폴더, 그 폴더에 있는 모든 것들을 '/app' 폴더에 바인딩하는 것이기 때문에 문제가 발생할 것이다.
+	- 도커는 항상 컨테이너에 설정하는 모든 볼륨을 평가한다. 
+	- 충돌이 있는 경우 '/app'이라는 경로보다는 더 긴 폴더 경로를 신뢰하기 때문에  `-v /app/node_modules`라는 경로를 우선하여 작성하자! 
 
 <br>
-- 이렇게 하면, 소스코드가 변경되어도 이미지를 재빌드하지않아도 변경사항이 반영된다.** 
+- 이 바운드 마운트는 실제로 'node_modules' 폴더를 전달하지 않는다. 그래서 이 'node_modules' 폴더는 존재하지 않는 'node_modules' 폴더를 덮어쓰는 것이다. 'npm install'을 실행하면 'node_modules' 폴더가 디폴트로 저장된다.
+
+<br>
+- 간단히 정리하자면, 'npm install'을 사용하여 이미지 생성 중에 생성된 'node_modules' 폴더는 살아남아 실제로 여전히 바인딩 마운트와 함께 공존하게 된다. 'node_modules'는 일종의 예외처리 된다.
+
+<br>
+- 바인드 마운트를 추가했기 때문에 소스코드를 수정하면 바로 적용된다. 이러한 모습은 익명 볼륨을 추가하는 경우에만 작동한다. 'node_modules' 폴더가 바인드 마운트 폴더의 내용물로 덮여쓰여지지 않기 때문이다. 
+
+<br>
+- 최종** : 이렇게 하면, 소스코드가 변경되어도 이미지를 재빌드하지 않아도 변경사항이 반영된다.** 
 
 
 ---
