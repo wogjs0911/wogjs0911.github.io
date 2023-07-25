@@ -786,6 +786,62 @@ await fs.unlink(tempFilePath);
 ```
 
 
+<br><br>
+
+- server.js : 실습 Express 코드
+
+```javascript
+const fs = require('fs').promises;
+const exists = require('fs').exists;
+const path = require('path');
+
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const app = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(express.static('public'));
+app.use('/feedback', express.static('feedback'));
+
+app.get('/', (req, res) => {
+  const filePath = path.join(__dirname, 'pages', 'feedback.html');
+  res.sendFile(filePath);
+});
+
+app.get('/exists', (req, res) => {
+  const filePath = path.join(__dirname, 'pages', 'exists.html');
+  res.sendFile(filePath);
+});
+
+app.post('/create', async (req, res) => {
+  const title = req.body.title;
+  const content = req.body.text;
+
+  const adjTitle = title.toLowerCase();
+
+  const tempFilePath = path.join(__dirname, 'temp', adjTitle + '.txt');
+  const finalFilePath = path.join(__dirname, 'feedback', adjTitle + '.txt');
+
+  console.log('TEST!!!!!');
+
+  await fs.writeFile(tempFilePath, content);
+  exists(finalFilePath, async (exists) => {
+    if (exists) {
+      res.redirect('/exists');
+    } else {
+      await fs.copyFile(tempFilePath, finalFilePath);
+      await fs.unlink(tempFilePath);
+      res.redirect('/');
+    }
+  });
+});
+
+app.listen(80);
+
+```
+
 
 <br><br>
 
@@ -954,7 +1010,7 @@ docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "
 
 <br><br>
 
-### 7) 바인드 마운트의 새로운 문제점 해결
+### 7) 바인드 마운트의 새로운 문제점 해결(어렵다)
 
 #### a. 문제점 
 
@@ -991,8 +1047,10 @@ docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "
 <br>
 
 ```docker
+
 // 예시
 docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "파일명을 제거한 절대경로:/app" -v /app을 포함한 특정 폴더 경로  feedback-node:volumes
+
 ```
 
 ---
@@ -1026,6 +1084,326 @@ docker run -d -p 3000:80 --rm --name feedback-app -v feedback:/app/feedback -v "
 
 <br>
 - 최종** : 이렇게 하면, 소스코드가 변경되어도 이미지를 재빌드하지 않아도 변경사항이 반영된다.** 
+	- 로컬 머신에서 npm install이 동작하는 것이 아니라 도커 내부에서 npm install이 동작하여 node_modules 폴더가 없는 에러인 Express 패키지 에러가 발생한다. 
+
+---
+
+<br><br>
+
+#### c. Express 실습 코드** : 
+
+
+```javascript
+const fs = require('fs').promises;
+const exists = require('fs').exists;
+const path = require('path');
+
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const app = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(express.static('public'));
+app.use('/feedback', express.static('feedback'));
+
+app.get('/', (req, res) => {
+  const filePath = path.join(__dirname, 'pages', 'feedback.html');
+  res.sendFile(filePath);
+});
+
+app.get('/exists', (req, res) => {
+  const filePath = path.join(__dirname, 'pages', 'exists.html');
+  res.sendFile(filePath);
+});
+
+app.post('/create', async (req, res) => {
+  const title = req.body.title;
+  const content = req.body.text;
+
+  const adjTitle = title.toLowerCase();
+
+  const tempFilePath = path.join(__dirname, 'temp', adjTitle + '.txt');
+  const finalFilePath = path.join(__dirname, 'feedback', adjTitle + '.txt');
+
+  console.log('TEST!!!!!');
+
+  await fs.writeFile(tempFilePath, content);
+  exists(finalFilePath, async (exists) => {
+    if (exists) {
+      res.redirect('/exists');
+    } else {
+      await fs.copyFile(tempFilePath, finalFilePath);
+      await fs.unlink(tempFilePath);
+      res.redirect('/');
+    }
+  });
+});
+
+app.listen(80);
+
+```
+
+
+---
+
+<br><br>
+
+### 7) Nodemon 개념
+
+- Nodemon은 NODEJS 개발 환경에서 소스코드를 수정하면, 자동으로 서버를 재시작해주게 하는 종속성 패키지 라이브러리이다. 
+	- springboot의 devtools와 같은 느낌. 
+
+<br>
+- 하지만, WSL2를 이용하는 경우에는 리눅스의 파일 시스템을 이용하는 것이므로 사용자가 직접 파일을 저장해야 한다. 라이브러러를 통한 서버 재시작 이용 불가능.
+
+---
+
+<br><br>
+
+### 8) 볼륨 관리하기 
+
+#### a) 읽기 전용의 볼륨 살펴보기 : 
+
+- 앞의 전체 프로젝트 폴더를 바인드 마운트로 바인딩한다는 점이다.
+
+- 볼륨을 생성 시, Dockerfile에서 볼륨 생성의 코드를 제거하고 'docker run' 명령어로 추가시킬 수 있다. 보통은 Dockerfile에서 자동으로 생성한다. 
+
+<br>
+- 명명된 볼륨은 읽기 전용이 아니다. 
+
+
+<br>
+
+
+#### b) 볼륨 관리하기 
+
+- 현재 활성화 중인 볼륨의 목록 조회하기 : `docker volume ls` 
+	- 바인드 마운트는 이 목록에서 확인할 수 없다. 
+	- 바인드 마운트는 도커에 의해 관리되는 볼륨이 아니기 때문이다. 
+	- 바인드 마운트는 우리가 알고 있는 로컬 폴더를 컨테이너 내부의 폴더에 바인딩한다. 도커가 관리하지 않는다. 호스트 머신의 알려진 폴더이다. 
+
+<br><br>
+
+- 자체적인 볼륨을 생성하기 : `docker volume create feedback-files`
+	- docker volume create "볼륨명정하기"
+
+<br><br>
+
+- 볼륨 속성 조사하기 : `docker volume inspect feedback`	
+	- Mountpoint : 여기서 도커 내부에서 생성된 볼륨 경로를 확인할 수 있다. 하지만, 이 경로는 볼륨이 만들어질때마다 경로가 달라져서 사용자는 도커 내부의 생성된 볼륨 경로 찾기가 매우 어렵다.
+	- Options : 볼륨이 읽기 전용이라면 Options 속성에서 확인할 수 있다.
+
+
+<br><br>
+
+- 자체적인 볼륨 삭제하기 : `docker volume rm feedback`
+	- 볼륨을 삭제하기 위해서는 컨테이너부터 중지시켜야 한다.
+
+
+
+
+---
+
+<br><br>
+
+### 9) COPY 개념 정리**
+
+- 바인드 마운트로 전체 폴더를 볼륨으로 사용하는데, 여전히 Dockerfile에서 COPY 명령어를 사용하는 이유는 ? 
+	- COPY 명령어를 통해 이미지에 스냅샷으로 동작하게 하는데 이는 명령어로도 가능하다. 
+	- 그래서, 실제로 COPY 명령어를 빼더라도 개발하는데 문제는 없다. 하지만, 서버 상에서 실제 서비스를 운영할 때, 문제가 발생할 수 도 있다.
+
+<br>
+- 'docker run' 명령은 개발 중에 사용하는 명령어이다.
+
+<br>
+- 개발 중에 이 바인드 마운트를 사용하여, 코드의 변경 사항을 실행 중인 컨테이너를 즉시 반영합니다. 
+
+<br>
+- 개발을 마친 뒤에는 실제로 이 컨테이너를 가져와 서버에 넣게 된다.
+
+<br>
+- 하지만, 실행하는데에 있어서 우리는 서버에서 그것을 실행하기를 원하지만, 이 명령어로 실행하기를 원하지는 않는다.
+
+<br>
+- 우리는 바인드 마운트로 실행하지 않을 것이다. 데이터가 유지되도록 다른 볼륨을 사용할 수 있지만, 이 바인드 마운트는 사용하지 않을 것이다.  
+
+<br>
+- 컨테이너가 서버상의 제품 상태로 실행 중이라면, 실행되는 동안 실시간으로 업데이트 되는 연결되는 소스 코드가 없기 때문이다. 
+
+<br>
+- 즉, 프로덕션 환경, 실제로 제품을 사용하는 환경에서는 항상 코드의 스냅샷을 갖고 싶어 한다. 그것이 Dockerfile의 여기에 COPY 명령을 유지하는 이유이다.
+
+<br>
+- 결론** : 정리하면, 코드의 스냅샷을 지닌 이미지는 프로덕션 환경에서 컨테이너를 가동하는데 사용할 수있습니다.	
+	- 개발 중에 바인드 마운트를 원한다면, 명령어로도 가능하다. 하지만, 프로덕션용 스냅샷 컨테이너를 생성하는 옵션은 무조건 필요하며, 이는 컨테이너 배포 시, 매우 중요한 개념이다.
+
+---
+
+<br><br>
+
+### 10) dockerignore 개념 정리 
+
+- 이미지가 오래되었을 수도 있어서 'npm install'에서 node_modules 폴더가 생기는 것을 막아 주는 역할을 해준다. 
+
+<br>
+- gitignore과 같은 역할을 해준다. '.dockerignore'이다. 
+
+<br>
+- 보통은 'Dockerfile', '.git'을 목록으로 추가한다. 
+
+---
+
+<br><br>
+
+### 11) 환경변수(.env), 빌드 인수(ARG) 정리
+
+#### a. 환경변수를 Dockerfile에서 이용하기
+
+- 유연하게 명령어를 작성하거나 Dockerfile을 작성하고자 할 때, 환경 변수를 이용한다. 
+
+<br><br>
+- Dockerfile의 일부분 
+
+```docker 
+ENV PORT 80
+EXPOSE $PORT
+
+# $도 이용하여 환경 변수 ENV PORT를 이용한다. 
+```
+
+
+<br><br>
+- DockerFile 전체 
+
+```docker
+FROM node:14
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+ENV PORT 80
+
+EXPOSE $PORT
+
+VOLUME [ "/app/feedback" ]
+
+CMD [ "node", "server.js" ]
+
+```
+
+<br><br>
+- 이제는 명령어에서도 환경변수가 포트번호인데 하드코딩된 환경변수를 인식하지 않고 'docker run' 명령어에서 환경변수로 명시화해줘야 한다. 
+
+```docker
+docker run -d --rm -p 3000:8000 --env PORT=8000 --name feedback-app -v feedback:/app/feedback -v "/Users/maximilianschwarzmuller/development/teaching/udemy/docker-complete:/app" -v /app/node_modules  feedback-node:volumes
+// Dockerfile에도 직접 사용할 수 있지만, 이미지를 재빌드 해야해서 명령어로 한번에 처리하자!
+```
+
+
+---
+
+<br>
+#### b. 환경변수를 .env 파일에서 이용하는 방법
+
+- '.env' 파일을 따로 만들어서 관리하기도 한다. 
+	- 직접 명령어를 사용하기 보다는 파일에서 변경할 수 있다는 장점이 있다. 
+
+
+<br>
+- 포트 번호 80이 아니라 8000을 열었다. 
+
+```docker
+docker run -d --rm -p 3000:8000 --env-file ./.env --name feedback-app -v feedback:/app/feedback -v "/Users/maximilianschwarzmuller/development/teaching/udemy/docker-complete:/app" -v /app/node_modules  feedback-node:volumes
+// Dockerfile에도 직접 사용할 수 있지만, 이미지를 재빌드 해야해서 명령어로 한번에 처리하자!
+```
+
+<br>
+- .env 파일 :
+
+```env
+PORT=8000
+```
+
+---
+
+<br>
+#### c. 환경변수를 사용할 때, 주의사항 
+
+- 환경 변수 및 보안에 대한 한 가지 중요한 참고사항:
+	- 환경 변수에 저장하는 데이터의 종류에 따라, 보안 데이터를 Dockerfile에 직접 포함하고 싶지 않을 수도 있다.
+
+<br>
+- 그 대신 런타임에만 사용되는 별도의 환경 변수 파일로 이동시킨다. (즉, Docker run으로 컨테이너를 실행할 때).
+
+<br>
+- 별도의 파일을 사용하는 경우, 'docker run'을 실행할 때 그 파일을 가리키므로, 그 값은 이미지의 일부분이 아닙니다. 하지만 소스 컨트롤을 사용하는 경우, 별도의 파일을 소스 컨트롤 저장소의 일부분으로 커밋하지 않도록 조심해야 한다.
+
+---
+
+<br><br>
+
+#### b. 빌드 인수(ARG)
+
+- ARG는 컨테이너가 '시작'될 때, '실행되는 런타임 명령'이다. 
+
+<br>
+- 환경 변수의 디폴트 값을 사용함으로써 이미지를 빌드할 때, 특정 값을 잠글 수 있고 Dockerfile을 매번 변경하지 않고도 유연한 방식으로 다른 이미지를 빌드할 수 있다는 것이 장점이다.
+
+```docker
+FROM node:14
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+ARG DEFAULT_PORT=80
+
+ENV PORT $DEFAULT_PORT
+
+EXPOSE $PORT
+
+VOLUME [ "/app/feedback" ]
+
+CMD [ "node", "server.js" ]
+
+```
+
+<br>
+- 정리** : 동일한 Dockerfile 1개로 서로 다른 두 개의 이미지를 만드는데 그 어떠한 코드도 변경하지 않았다. 하지만, 다른 포트 번호를 사용하게 된다.
+
+```docker
+docker build -t feedback-node:dev --build-arg DEFAULT_PORT=8000.
+```
+
+<br><br>
+
+##### a) 주의 사항
+
+- ARG와 ENV 명령을 어디에 배치할 것인가 주의해야 한다.
+
+<br>
+- Dockerfile의 초반에 배치하면 안된다. npm install 이전에 동작하고 후속 동작에도 동작하기 때문이다. 
+
+<br>
+- Dockerfile의 시작 부분에 바로 배치하지 않고자 한다. 이 명령은 모든 명령과 마찬가지로 Dockerfile에 레이어를 추가하기 때문이다. 
+
+```docker
+ ARG DEFAULT_PORT=80
+ ENV PORT $DEFAULT_PORT
+```
+
+
 
 
 ---
