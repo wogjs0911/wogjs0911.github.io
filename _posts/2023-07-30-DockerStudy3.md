@@ -423,7 +423,7 @@ Dockerfile
 	
 # 2. Docker Compose : 다중 컨테이너
 
-### 0) Docker Compose 실행 
+### 0) Docker Compose 설치
 
 - 1) VScode에서 Docker 플러그인 설치
 

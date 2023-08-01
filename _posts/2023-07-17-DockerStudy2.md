@@ -6,6 +6,76 @@ tags: docker Dockerfile image layer volume binding-mount env arg docker-network
 
 # 1. Docker 기본 개념
 
+<br>
+
+### 0) 기본 개념 
+
+<br>
+- a. 가상화 기술?
+	- 가상 머신 vs 컨테이너 기술 
+	
+<br>
+- b. 개념 정리 : 컨테이너 기반 기술의 오픈소스 플랫폼
+
+
+<br>
+- c. 가상머신에서 게스트 OS는 하이퍼 바이저로 자원 할당받음
+	- 컨테이너는 게스트 OS를 대신하고, 컨테이너 엔진으로 자원 할당 받음
+	- 가상 머신은 매우 속도가 느리고 컨테이너인 도커는 속도가 빠르다.
+
+<br>
+- d. 게스트 OS는 호스트 OS와 비교적으로 상대적인 개념이다.
+	- Windows 위에 VMware로 Linux를 만드는 경우, Windows는 호스트 OS이고 Vmware는 게스트 OS이다.
+
+<br>
+- e. 정리** : 
+	- 컨테이너 기반 가상화 도구
+	- 애플리케이션을 컨테이너라는 단위로 격리하여 실행하고 배포하는 기술
+	- 애플리케이션을 빠르게 개발하고, 효율적으로 배포, 관리할 수 있음
+
+<br>
+- f. 기본 명령어 : 
+	- 아래 명령어를 실행하면, 로컬 호스트 머신의 8888 포트에 접속하여 컨테이너 내부의 80포트에 통신을 대기하고 요청이 되면, 컨테이너 내부 80포트의 소스코드가 서빙 되는 것
+	- 볼륨 마운트에 의해서 수정 시, 실시간으로 수정된다. 
+	- 명령어 마지막에 실행할 컨테이너의 이미지를 적어준다. 
+	- 결론** : `localhost:8888`에 접속하기 
+
+```docker
+docker run -p 8888:80 -v /Users/jh/temp/dockerstudy/wantedchallenge_docker/docker-pro-2308/lecture/1st:/usr/local/apache2/htdocs httpd
+```
+
+<br><br>
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>챌린지 - 백엔드</title>
+</head>
+<body>Docker Pro Wanted!!! 수정</body>
+</html>
+```
+
+<br><br>
+
+- 실습 1. dockerhub의 기본 도커 이미지로 컨테이너 만들고 외부에서 그 컨테이너 접속하여 dockerfile의 COPY에 의한 
+경로에 의해서 내부 조작하기
+	- 컨테이너는 방금 만들어져서 컨테이너 내부에는 vim이 없어서 cat으로 실행
+
+<br>
+
+- 실습 2 . dockerfile에 의한 커스텀된 이미지 빌드하고 이것에 의한 컨테이너 생성하고 포트 변경하여 실행하기
+
+<br>
+
+- 숙제 3. 도커 이미지 콘테스트 
+
+---
+
+<br><br>
+
+
 ### 1) 기본 Dockerfile 설정
 
 ```docker
