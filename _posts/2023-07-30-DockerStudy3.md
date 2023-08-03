@@ -665,6 +665,119 @@ docker-compose down
 
 
 
+
+---
+
+<br><br>
+
+### 4) Docker Compose 실습** 
+
+<br>
+
+- yml 파일을 compose up하면 애플리케이션 테스트를 위한 모든 인프라가 가볍게 구성된다.
+
+<br>
+
+#### a. 실습 1 
+
+- docker-compose.yml
+
+```yml
+version: "3.0"
+
+services:
+  db:
+    image: mysql:latest
+    volumes:
+      - ./db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: docker_pro
+      MYSQL_PASSWORD: docker_pro_pass
+  
+  app:
+    depends_on: 
+      - db
+    image: wordpress:latest
+    volumes:
+      - ./app_data:/var/www/html
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: docker_pro
+      WORDPRESS_DB_PASSWORD: docker_pro_pass 
+
+```
+
+<br>
+
+- docker CLI
+
+```docker
+docker compose up --build
+```
+
+
+
+---
+
+<br><br>
+
+#### b. 실습 2 
+
+- local-infra.yml
+
+```yml
+version: '3.0'
+
+services:
+  mariadb10:
+    image: mariadb:10
+    ports:
+     - "3310:3306/tcp"
+    environment:
+      - MYSQL_ROOT_PASSWORD=my_db_passward
+      - MYSQL_USER=docker_pro
+      - MYSQL_PASSWORD=docker_pro_pass
+      - MYSQL_DATABASE=docker_pro
+  redis:
+    image: redis
+    command: redis-server --port 6379
+    restart: always
+    ports:
+      - 6379:6379
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - rabbitmq_go_net
+
+networks:
+  rabbitmq_go_net:
+    driver: bridge
+
+```
+
+<br>
+
+- docker CLI
+
+```docker
+docker compose -f local-infra.yml up --build
+```
+
+
 ---
 
 <br><br>
