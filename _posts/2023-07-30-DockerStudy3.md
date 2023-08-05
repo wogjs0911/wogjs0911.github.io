@@ -678,6 +678,23 @@ docker-compose down
 
 <br>
 
+- restart : 도커 컨테이너가 죽으면, 다시 실행하게 설정할지 말지에 관해 설정 가능 
+
+<br>
+
+- yml 구성 시, 띄어쓰기 주의(줄바꾸고 나서는 2칸, ':' 뒤에는 1칸)
+
+<br>
+
+- 각 이미지별 환경변수는 docker 공식 홈페이지에서 확인할 것(Environment 탭에서)
+
+<br>
+
+- 특이하게도 rabbitmq 이미지의 경우는 별도의 네트워크가 필요하고 이것 역시 docker 공식 홈페이지 참고하기!
+
+
+<br><br>
+
 #### a. 실습 1 
 
 - docker-compose.yml
