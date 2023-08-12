@@ -822,7 +822,7 @@ docker compose -f local-infra.yml up --build
 - 이미지를 받아오는 저장소 -> `ECR`
 	- 도커는 너무 공개적이라서 private하게 ECR에 저장할 수 있다. 
      
-----
+--- 
 
 <br>
 
@@ -853,27 +853,30 @@ docker compose -f local-infra.yml up --build
 
 ---
 
-<br><br>
+<br>
 
 #### b. 사용법
 
-- 1. yaml 파일과 package.json 파일을 만들어서 커밋 체인지를 진행한다.
+- 1) yaml 파일과 package.json 파일을 만들어서 커밋 체인지를 진행한다.
 
 <br>
-- 2. yaml 파일은 해당 경로인 path에 해당 package.json 파일을 직접 만들어서 진행한다.
+- 2) yaml 파일은 해당 경로인 path에 해당 package.json 파일을 직접 만들어서 진행한다.
 
 <br>
-- 3. 이 깃 액션이 동작할 때, 시크릿 코드를 읽어서 실행한다. 
+- 3) AWS key와 같이 비밀키는 GitHub 설정 탭에서 추가로 설정한다.
 
 <br>
-- 4. 이러한 것은 러너가 알아서 동작하게 된다.
+- 4) 러너가 Git Actions을 동작하려고 할 때, `3)`에서 설정했던 시크릿 코드를 읽어서 AWS ECS를 실행하여 CI/CD를 하게된다. 
 
 <br>
-- 5. 이러한 과정은 ELB처럼 Task Definitions가 우리가 만든 이미지를 바라보도록 설정해주는 과정이다. 
+- 4) 이러한 Git Actions 설정들에 의해서 코드의 빌드, 테스트, 배포등은 러너가 알아서 동작한다.
+
+<br>
+- 5) 이러한 과정은 ELB처럼 Task Definitions가 우리가 만든 이미지를 바라보도록 설정해서 서비스를 동작하도록 하는 과정이다. 
 
 ---
 
-<br><br>
+<br>
 
 #### c. 추가 질문
 
