@@ -1874,3 +1874,19 @@ public class OrderRepository {
 
 
 
+
+---
+
+<br><br>
+
+### 4) QueryDSL :
+
+
+
+
+
+
+
+
+
+
