@@ -30,7 +30,7 @@ tags: springboot JPA queryDSL
 
 <br>
 - 5) 중요** : 
-	- H2를 이용하여 테스트 진행 시, ` Error creating bean with name 'entityManagerFactory' defined in class path resource ` 에러가 발생하면, H2 SQL 편집기에서 `drop all objects;` 명령어를 실행하기! 
+	- H2를 이용하여 테스트 진행 시, `Error creating bean with name 'entityManagerFactory' defined in class path resource` 에러가 발생하면, H2 SQL 편집기에서 `drop all objects;` 명령어를 실행하기! 
 		- h2 데이터베이스에서 `drop all objects` 명령어를 입력하면 저장되어있던 테이블이 싹 다 날라가게 된다.
 		- h2 데이터베이스도 Intellij Build 와 동일하게 증분 빌드를 하는 과정에서 삭제 된 데이터(테이블)에 대해서는 관리를 하지 않는 것처럼 보였다.
 		- 이러한 이슈는 일대다 읽기 전용 테이블이 생성되었다가 해당 연관관계를 삭제하더라도 테이블이 계속해서 h2 데이터베이스에 남아있을 때에도 동일하게 적용되었다.
@@ -42,7 +42,7 @@ tags: springboot JPA queryDSL
 # 2. queryDSL 개발 환경 테스트
 
 - buiild.gradle 설정
-	- SpringBoot 3.0 버전 이상에서 Querydsl 사용는 방법 : Querydsl 추가 설정 부분 주의!
+	- SpringBoot 3.0 버전 이상에서 Querydsl 사용하는 방법 : Querydsl 추가 설정 부분 주의!
 
 ```
 plugins {
@@ -283,7 +283,7 @@ public class QHello extends EntityPathBase<Hello> {
 <br>
 
 - application.yml
-	- 중요** : H2를 이용하여 테스트 진행 시, ` Error creating bean with name 'entityManagerFactory' defined in class path resource ` 에러가 발생하면, H2 SQL 편집기에서 `drop all objects;` 명령어를 실행하기! 
+	- 중요** : H2를 이용하여 테스트 진행 시, `Error creating bean with name 'entityManagerFactory' defined in class path resource` 에러가 발생하면, H2 SQL 편집기에서 `drop all objects;` 명령어를 실행하기! 
 		- h2 데이터베이스에서 `drop all objects` 명령어를 입력하면 저장되어있던 테이블이 싹 다 날라가게 된다.
 			- h2 데이터베이스도 Intellij Build 와 동일하게 증분 빌드를 하는 과정에서 삭제 된 데이터(테이블)에 대해서는 관리를 하지 않는 것처럼 보였습니다.
 			- 이러한 이슈는 일대다 읽기 전용 테이블이 생성되었다가 해당 연관관계를 삭제하더라도 테이블이 계속해서 h2 데이터베이스에 남아있을 때에도 동일하게 적용되었습니다!
@@ -338,10 +338,12 @@ logging.level:
 
 <br><br>
 
-# 3. queryDSL 도메인 모델 테스트
+# 3. JPA 도메인 모델 테스트
 
 
 ### 1) 설계 방식 
+
+- 이번에는 `queryDSL` 테스트가 아니라 `JPA Native query`로 도메인 모델 테스트 진행하고 이를 기반으로 추후 queryDSL를 이용할 예정
 
 - `@NoArgsConstructor(access = AccessLevel.PROTECTED)` : 기본 생성자 막고 싶은데, JPA 스팩상 PROTECTED로 열어두어야 함.
 	- 중요 : JPA는 엔티티 객체를 생성할 때, 기본 생성자를 이용해서 만들고 있다. 그리고 엔티티 객체를 외부에서 만들고 있기 때문에, private 접근제어자는 사용할 수 없다. 또한 default 접근 제어자는 해당 클래스와 같은 패키지에서만 사용할 수 있기 때문에 일반적으로 protected 생성자를 사용하는 것을 권장하고 있는 것이다.
@@ -457,6 +459,8 @@ public class Team {
 <br><br>
 
 - MemberTest.java
+	- 이번에는 `queryDSL` 테스트가 아니라 `JPA Native query`로 도메인 모델 테스트 진행하고 이를 기반으로 추후 queryDSL를 이용할 예정
+
 
 
 ```java
@@ -520,7 +524,7 @@ public class MemberTest {
 ```
 
 <br>
-- 결과
+- 테스트 결과 :
 
 ```java
 member = Member(id=1, username=member1, age=10)
@@ -540,7 +544,116 @@ member = Member(id=4, username=member4, age=40)
 # 4. queryDSL 기본 문법 정리
 
 
+### 1) JPQL vs Querydsl
 
+- 중요** : JPQL는 문자(실행(런타임) 시점에서 오류 발견), Querydsl: 코드(컴파일 시점에서 오류 발견)
+
+- `QMember m = new QMember("m");` : 이렇게하면, 별칭 가능
+
+- Querydsl은 기본적으로 JPQL 빌더 개념이다. 
+
+---
+
+<br><br>
+
+#### a. 실습 코드 : 
+
+
+<br>
+- `No result found for query` 에러와 `findMember is null` 에러 해결 방법 :
+	- @Before(JUnit 4)나 @BeforeEach(JUnit 5)를 이용 시, JUnit 테스트 버전 주의!
+	- @Before(JUnit 4)나 @BeforeEach(JUnit 5)는 테스트 전에 실행해야하는 것을 미리 실행시켜준다. 
+
+<br>
+- 나는 아래 테스트 코드를 하나씩 실행해야 되더라!
+
+<br>
+
+```java
+package com.study.querydsl;
+
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.entity.Member;
+import com.study.querydsl.entity.QMember;
+import com.study.querydsl.entity.Team;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@Transactional
+@Commit
+public class QuerydslBasicTest {
+
+    @PersistenceContext
+    EntityManager em;
+
+    // JUnit5에서는 @BeforeEach를 이용
+    @Before	// JUnit4에서 이렇게 이용함
+    public void before(){
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+
+        em.persist(teamA);
+        em.persist(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamA);
+        Member member3 = new Member("member3", 30, teamB);
+        Member member4 = new Member("member4", 40, teamB);
+
+        em.persist(member1);
+        em.persist(member2);
+        em.persist(member3);
+        em.persist(member4);
+    }
+
+    @Test
+    public void startJPQL(){
+        // member1를 찾아라.
+        String qlString =
+                "select m from Member m where m.username = :username";
+
+        Member findMember = em.createQuery(qlString, Member.class)
+                .setParameter("username","member1")
+                .getSingleResult();
+
+        assertEquals(findMember.getUsername(), "member1");  // JUnit4
+//         assertThat(findMember.getUsername()).isEqualTo("member1"); // JUnit5
+    }
+
+
+    // JPQL: 문자(실행 시점 오류), Querydsl: 코드(컴파일 시점 오류)
+    @Test
+    public void startQuerydsl(){
+        // member1을 찾아라
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QMember m = new QMember("m");   // 이렇게하면, 별칭 가능
+
+        Member findMember = queryFactory
+                .select(m)
+                .from(m)
+                .where(m.username.eq("member1")) // 파라미터 바인딩 처리
+                .fetchOne();
+
+        assertEquals(findMember.getUsername(), "member1");  // JUnit4
+//        assertThat(findMember.getUsername()).isEqualTo("member1");  // JUnit5
+    }	
+
+}
+
+```
 
 
 
