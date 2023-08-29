@@ -44,7 +44,7 @@ tags: springboot JPA queryDSL
 - buiild.gradle 설정
 	- SpringBoot 3.0 버전 이상에서 Querydsl 사용하는 방법 : Querydsl 추가 설정 부분 주의!
 
-```
+```gradle
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.1.2'
@@ -235,7 +235,7 @@ public class Hello {
 <br>
 
 - QHello.java
-	- gradle 탭에서 `Tasks/other/compileJava`을 클릭하면, Hello가 QHello롤 생성하여 queryDSL이 제대로 동작하는지 확인할 수 있다.
+	- gradle 탭에서 `Tasks/other/compileJava`을 클릭하면, Hello에서 QHello를 생성하여 queryDSL이 제대로 동작하는지 확인할 수 있다.
 
 ```java
 package com.study.querydsl.entity;
@@ -546,11 +546,13 @@ member = Member(id=4, username=member4, age=40)
 
 ### 1) JPQL vs Querydsl
 
-- 중요** : JPQL는 문자(실행(런타임) 시점에서 오류 발견), Querydsl: 코드(컴파일 시점에서 오류 발견)
+- 중요** : JPQL는 문자(실행(런타임) 시점에서 오류 발견)에서 오류, Querydsl는 코드(컴파일 시점에서 오류 발견)에서 오류
+	- 또한, JPQL은 파라미터 바인딩을 직접하고 Querydsl은 파라미터 바인딩을 자동 처리해준다.
 
 - `QMember m = new QMember("m");` : 이렇게하면, 별칭 가능
+	- 원래는 `QMember member = QMember.member;`로 이용했었다.
 
-- Querydsl은 기본적으로 JPQL 빌더 개념이다. 
+- Querydsl은 기본적으로 JPQL 빌더 개념이다. 그래서 코드가 직관적이다.
 
 ---
 
@@ -560,7 +562,7 @@ member = Member(id=4, username=member4, age=40)
 
 
 <br>
-- `No result found for query` 에러와 `findMember is null` 에러 해결 방법 :
+- `No result found for query` 에러와 `findMember is null` 에러 해결 방법** :
 	- @Before(JUnit 4)나 @BeforeEach(JUnit 5)를 이용 시, JUnit 테스트 버전 주의!
 	- @Before(JUnit 4)나 @BeforeEach(JUnit 5)는 테스트 전에 실행해야하는 것을 미리 실행시켜준다. 
 
@@ -654,6 +656,227 @@ public class QuerydslBasicTest {
 }
 
 ```
+
+---
+
+<br><br>
+
+#### b. JPAQueryFactory를 필드로 : 
+
+- JPAQueryFactory를 필드로 제공하면 동시성 문제는 어떻게 될까? 동시성 문제는 JPAQueryFactory를
+생성할 때 제공하는 EntityManager(em)에 달려있다. 스프링 프레임워크는 여러 쓰레드에서 동시에 같은
+EntityManager에 접근해도, 트랜잭션 마다 별도의 영속성 컨텍스트를 제공하기 때문에, 동시성 문제는 걱
+정하지 않아도 된다.
+
+<br>
+
+##### a) 변경된 테스트 코드 : 
+
+- 필드에서 작성하고 @Before에서 생성해서 사용한다. 
+
+```java
+package com.study.querydsl;
+
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.entity.Member;
+import com.study.querydsl.entity.QMember;
+import com.study.querydsl.entity.Team;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@Transactional
+@Commit
+public class QuerydslBasicTest {
+
+    @PersistenceContext
+    EntityManager em;
+
+    JPAQueryFactory queryFactory;
+
+    // @BeforeEach // JUnit5
+    @Before // JUnit4
+    public void before(){
+        queryFactory = new JPAQueryFactory(em);
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+
+        em.persist(teamA);
+        em.persist(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamA);
+        Member member3 = new Member("member3", 30, teamB);
+        Member member4 = new Member("member4", 40, teamB);
+
+        em.persist(member1);
+        em.persist(member2);
+        em.persist(member3);
+        em.persist(member4);
+    }
+
+
+    @Test
+    public void startQuerydsl2(){
+        // member1을 찾아라
+
+        QMember m = new QMember("m");   // 이렇게하면, 별칭 가능
+
+        Member findMember = queryFactory
+                .select(m)
+                .from(m)
+                .where(m.username.eq("member1")) // 파라미터 바인딩 처리
+                .fetchOne();
+
+        assertEquals(findMember.getUsername(), "member1"); // JUnit4
+//        assertThat(findMember.getUsername()).isEqualTo("member1"); // JUnit5
+    }
+
+}
+
+
+```
+
+
+---
+
+<br><br>
+
+### 2) 기본 Q-Type 활용
+
+
+#### a. 실습 코드 
+
+```java
+QMember qMember = new QMember("m");  // 별칭 이용 가능
+QMember qMember = QMember.member;  // 기본 인스턴스로 편하게 이용 가능 
+```
+
+---
+
+<br><br>
+
+### 3) 기본 인스턴스를 static import와 함께 사용 가능
+
+- 훨씬 더 사용이 간단해진다.
+	- 같은 테이블을 조인해야 하는 경우가 아니면 기본 인스턴스를 사용하자
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+@Test
+public void startQuerydsl3() {
+	// member1을 찾아라.
+	Member findMember = queryFactory
+		.select(member)
+		.from(member)
+		.where(member.username.eq("member1"))
+		.fetchOne();
+		
+	assertThat(findMember.getUsername()).isEqualTo("member1");
+}
+```
+
+<br>
+
+#### a. 실행되는 JPQL을 볼 수 있는 방법
+
+- application.yml에 다음 설정을 추가하면, 쿼리 실행 시, 실행되는 JPQL을 볼 수 있다.
+
+```yml
+spring.jpa.properties.hibernate.use_sql_comments: true
+```
+
+
+---
+
+<br><br>
+
+### 4) 검색 조건 쿼리
+
+- 기본 검색 쿼리는 .and(), .or() 쿼리로 진행하기
+
+- select(), from()은 selectFrom()으로 하나로 합칠 수 도 있다.
+
+
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+@Test
+public void startQuerydsl3() {
+	// member1을 찾아라.
+	Member findMember = queryFactory
+		.select(member)
+		.from(member)
+		.where(member.username.eq("member1"))
+			.and(member.age.eq(10))
+		.fetchOne();
+		
+	assertThat(findMember.getUsername()).isEqualTo("member1");
+}
+```
+
+<br>
+
+#### a. JPQL이 제공하는 모든 검색 조건 제공
+
+- eq, ne : '=', '!='로 해석
+
+<br>
+- isNotNull() : isNotNull을 의미한다.
+
+<br>
+- in, notIn, between : 값이 포함되는지 범위로 표현
+
+<br>
+- goe, gt, loe, lt : 부등호 범위 표시 가능
+
+<br>
+- like, contains, startswith : like 	조회
+
+
+<br>
+
+#### b. AND 조건을 파라미터로 처리 가능**
+
+- 이 경우에 null값을 무시해서, 메서드 추출 시, 동적 쿼리를 간편히 만들 수 있다.  
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+@Test
+public void startQuerydsl3() {
+	// member1을 찾아라.
+	Member findMember = queryFactory
+		.select(member)
+		.from(member)
+		.where(member.username.eq("member1")),
+			member.age.eq(10))
+		.fetch();
+		
+	assertThat(findMember.size()).isEqualTo(1);
+}
+```
+
+
+
+
+
+
 
 
 
