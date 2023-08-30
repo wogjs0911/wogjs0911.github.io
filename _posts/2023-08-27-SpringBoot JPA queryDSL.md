@@ -544,7 +544,7 @@ member = Member(id=4, username=member4, age=40)
 # 4. queryDSL 기본 문법 정리
 
 
-### 1) JPQL vs Querydsl
+### 1) JPQL vs Querydsl**
 
 - 중요** : JPQL는 문자(실행(런타임) 시점에서 오류 발견)에서 오류, Querydsl는 코드(컴파일 시점에서 오류 발견)에서 오류
 	- 또한, JPQL은 파라미터 바인딩을 직접하고 Querydsl은 파라미터 바인딩을 자동 처리해준다.
@@ -834,19 +834,19 @@ public void startQuerydsl3() {
 
 #### a. JPQL이 제공하는 모든 검색 조건 제공
 
-- eq, ne : '=', '!='로 해석
+- `eq()`, `ne()` : '=', '!='로 해석
 
 <br>
-- isNotNull() : isNotNull을 의미한다.
+- `isNotNull()` : isNotNull을 의미한다.
 
 <br>
-- in, notIn, between : 값이 포함되는지 범위로 표현
+- `in()`, `notIn()`, `between()` : 값이 포함되는지 범위로 표현
 
 <br>
-- goe, gt, loe, lt : 부등호 범위 표시 가능
+- `goe()`, `gt()`, `loe()`, `lt()` : 부등호 범위 표시 가능
 
 <br>
-- like, contains, startswith : like 	조회
+- `like()`, `contains()`, `startswith() : like 조회
 
 
 <br>
@@ -873,12 +873,696 @@ public void startQuerydsl3() {
 ```
 
 
+---
+
+<br><br>
+
+### 5) querydsl 결과 조회 방식** 
+
+- `fetch()` : 리스트 조회**
+
+<br>
+- `fetchOne()` : 단건 조회** 
+
+<br>
+- `fetchFirst()` : limit(1).fetchOne()
+
+<br>
+- `fetchResults()` : 페이징 정보 포함, total count 쿼리 추가 실행
+
+<br>
+- `fetchCount()` : count 쿼리로 변경하여 count 수 조회**
+ 
 
 
 
 
 
+---
+
+<br><br>
+
+### 6) querydsl 정렬 방식 
+
+- desc(), asc()를 이용하기
+
+- 회원 이름이 없으면, 마지막에 출력(nullsLast()) vs nullsFirst()
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+@Test
+public void startQuerydsl3() {
+	// member1을 찾아라.
+	Member findMember = queryFactory
+		.select(member)
+		.from(member)
+		.where(member.age.eq(100))
+			.orderBy(member.age.desc(), member.username.asc().nullsLast())
+		.fetch();
+		
+	assertThat(findMember.size()).isEqualTo(1);
+}
+```
 
 
 
 
+---
+
+<br><br>
+
+### 7) 페이징
+
+- MySQL처럼 offset과 limit을 이용하기
+
+
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+@Test
+public void paging1() {
+	List<Member> result = queryFactory
+		.selectFrom(member)
+		.orderBy(member.username.desc())
+		.offset(1) // 0부터 시작(zero index)
+		.limit(2) // 최대 2건 조회
+		.fetch();
+}
+```
+
+
+<>
+
+#### a. 전체 조회 수를 페이징** 
+
+- fetchResults 이용하기
+- count 쿼리에 조인이 필요없는 성능 최적화가 필요하다면, count 전용 쿼리를 별도로 작성해야 한다.
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+@Test
+public void paging2() {
+	QueryResults<Member> queryResults = queryFactory
+		.selectFrom(member)
+		.orderBy(member.username.desc())
+		.offset(1)
+		.limit(2)
+		.fetchResults();
+
+	assertThat(queryResults.getTotal()).isEqualTo(4);
+	assertThat(queryResults.getLimit()).isEqualTo(2);
+	assertThat(queryResults.getOffset()).isEqualTo(1);
+	assertThat(queryResults.getResults().size()).isEqualTo(2);
+}
+```
+ 
+
+
+
+---
+
+<br><br>
+
+### 8) 집합 함수
+
+
+#### a. COUNT, SUM, AVG, MAX, MIN 이용
+
+- 결과 집합은 Tuple에서 값을 꺼낸다. 
+
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+@Test
+public void aggregation() throws Exception {
+	List<Tuple> result = queryFactory
+		.select(member.count(),
+			member.age.sum(),
+			member.age.avg(),
+			member.age.max(),
+			member.age.min()) 
+		.from(member)
+		.fetch();
+
+	Tuple tuple = result.get(0);
+	assertThat(tuple.get(member.count())).isEqualTo(4);
+	assertThat(tuple.get(member.age.sum())).isEqualTo(100);
+	assertThat(tuple.get(member.age.avg())).isEqualTo(25);
+	assertThat(tuple.get(member.age.max())).isEqualTo(40);
+	assertThat(tuple.get(member.age.min())).isEqualTo(10);
+}
+```
+
+<br><br>
+#### b. GroupBy 사용
+
+- having : 그룹화된 결과를 제한하기
+
+```java
+.groupBy(item.price)
+.having(item.price.gt(1000))
+```
+
+
+
+---
+
+<br><br>
+
+### 9) 기본 조인 
+
+- 사용 방법 : 
+	- `join(조인 대상, 별칭으로 사용할 Q타입)`
+	
+<br>	
+- join(), innerjoin(), leftjoin(), rightjoin()
+
+<br>	
+
+```java
+
+	QMember member = QMember.member; 
+	QTeam team = QTeam.team;
+	
+	List<Member> result = queryFactory
+		.selectFrom(member)
+		.join(member.team, team)
+		.where(team.name.eq("teamA"))
+		.fetch();
+```
+
+
+
+---
+
+<br><br>
+
+### 10) 세타 조인
+
+- 연관관계가 없는 필드로 조인
+	- 예시) 회원의 이름이 팀 이름과 같은 회원 조회을 조회할 수 있다.
+
+<br>
+- from 절에 여러 엔티티를 선택해서 세타 조인을 할 수 있다. 
+
+<br>
+- 세타 조인은 외부 조인 불가능하지만, 조인 on을 사용하면 외부 조인 가능하다. 
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+	em.persist(new Member("teamA"));
+	em.persist(new Member("teamB"));
+	 
+	List<Member> result = queryFactory
+		.select(member)
+		.from(member, team)
+		.where(member.username.eq(team.name))
+		.fetch();
+```
+
+
+
+---
+
+<br><br>
+
+### 11) 조인 - on절
+
+#### a. 조인 대상 필터링
+
+<br>
+- 연관관계 없는 엔티티 외부 조인
+
+<br>
+- on절을 기존의 SQL과 달리 조인 대상 필터링만 하면 되기 때문에 훨씬 더 간단해졌다.
+	- inner join을 사용하면, where 절에서 필터링 하는 것과 기능이 동일하다. 따라서, on 절을 활용한 조인 대상 필터링을 사용할 때, inner join이면 익숙한 where 절로 해결하고, 정말 외부조인이 필요한 경우에만 이 기능을 사용하자.
+
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+// 회원과 팀을 조인하면서, 팀 이름이 'teamA'인 팀만 조인, 회원은 모두 조회
+	List<Tuple> result = queryFactory
+		.select(member, team)
+		.from(member)
+		.leftJoin(member.team, team).on(team.name.eq("teamA"))
+		.fetch();
+	
+	for (Tuple tuple : result) {
+		System.out.println("tuple = " + tuple);
+	}
+```
+
+<br><br>
+
+#### b. 연관관계 없는 엔티티 외부 조인
+
+- 실습 코드 :
+	- 하이버네이트 5.1부터 on 을 사용해서 서로 관계가 없는 필드로 외부 조인하는 기능이 추가
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+// 회원과 팀을 조인하면서, 팀 이름이 'teamA'인 팀만 조인, 회원은 모두 조회
+	List<Tuple> result = queryFactory
+		.select(member, team)
+		.from(member)
+		.leftJoin(team).on(member.username.eq(team.name))
+		.fetch();
+	
+	for (Tuple tuple : result) {
+		System.out.println("tuple = " + tuple);
+	}
+```
+
+
+<br>
+
+- leftJoin() 부분에 일반 조인과 다르게 엔티티 하나만 들어간다
+
+
+```
+일반조인: leftJoin(member.team, team)
+on조인: from(member).leftJoin(team).on(xxx)
+```
+
+
+---
+
+<br><br>
+
+### 12) 조인 - 페치 조인**
+
+- 성능 최적화에 사용하는 방법이며 자세한 내용은 기본편이나 활용2 강의 확인하기
+
+#### a. 페치 조인 미적용
+
+- `지연로딩`으로 Member, Team SQL 쿼리 각각 실행
+	- getPersistenceUnitUtil 찾아보기!!
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+	@PersistenceUnit
+	EntityManagerFactory emf;
+
+	@Test
+	public void fetchJoinNo() throws Exception {
+		em.flush();
+		em.clear();
+		
+		Member findMember = queryFactory
+			.selectFrom(member)
+			.where(member.username.eq("member1"))
+			.fetchOne();
+		
+		boolean loaded =
+			emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+		
+		assertThat(loaded).as("페치 조인 미적용").isFalse();
+	}
+```
+
+<br><br>
+
+#### b. 페치 조인 적용
+
+- `즉시로딩`으로 Member, Team SQL 쿼리 조인으로 한번에 조회
+	- `.join(member.team, team).fetchJoin()`
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+	@Test
+	public void fetchJoinNo() throws Exception {
+		em.flush();
+		em.clear();
+		
+		Member findMember = queryFactory
+			.selectFrom(member)
+			.join(member.team, team).fetchJoin()
+			.where(member.username.eq("member1"))
+			.fetchOne();
+		
+		boolean loaded =
+			emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+		
+		assertThat(loaded).as("페치 조인 미적용").isFalse();
+	}
+```
+
+
+
+---
+
+<br><br>
+
+### 13) 서브 쿼리**
+
+#### a. JPAExpressions 사용!
+
+- `eq`, `goe`, `in`, `select` 절에 이용 가능
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+
+QMember memberSub = new QMember("memberSub");
+
+List<Member> result = queryFactory
+	.selectFrom(member)
+	.where(member.age.eq(
+		JPAExpressions
+			.select(memberSub.age.max())
+			.from(memberSub)
+	))
+	.fetch();
+```
+
+<br>
+
+#### b. static import 활용
+
+```java
+import static com.study.querydsl.entity.QMember.*;
+import static com.querydsl.jpa.JPAExpressions.select;
+
+
+List<Member> result = queryFactory
+	.selectFrom(member)
+	.where(member.age.eq(
+			select(memberSub.age.max())
+				.from(memberSub)
+	))
+	.fetch();
+```
+
+<br>
+
+#### c. from 절의 서브쿼리 한계**
+
+
+##### a) JPA JPQL 서브쿼리의 한계점으로 from 절의 서브쿼리(인라인 뷰)는 지원하지 않는다. 당연히 Querydsl도 지원하지 않는다.
+
+<br>
+
+##### b) from 절의 서브쿼리 해결방안**
+
+- 서브쿼리를 join으로 변경한다.(하지만, 가능한 상황도 있고, 불가능한 상황도 있다.)
+
+- 애플리케이션에서 쿼리를 2번 분리해서 실행한다.
+
+- nativeSQL을 사용
+
+---
+
+<br><br>
+
+### 14) Case 문
+
+- `CaseBuilder` : 
+	- select, 조건절(where), order by에서 사용 가능
+
+#### a. 예시 1
+
+```java
+List<String> result = queryFactory
+	.select(new CaseBuilder()
+		.when(member.age.between(0, 20)).then("0~20살")
+		.when(member.age.between(21, 30)).then("21~30살")
+		.otherwise("기타"))
+	.from(member)
+	.fetch();
+```
+
+<br>
+
+#### b. 예시 2
+
+```java
+NumberExpression<Integer> rankPath = new CaseBuilder()
+	.when(member.age.between(0, 20)).then(2)
+	.when(member.age.between(21, 30)).then(1)
+	.otherwise(3);
+
+List<Tuple> result = queryFactory
+	.select(member.username, member.age, rankPath)
+	.from(member)
+	.orderBy(rankPath.desc())
+	.fetch();
+
+for (Tuple tuple : result) {
+	String username = tuple.get(member.username);
+	Integer age = tuple.get(member.age);
+	Integer rank = tuple.get(rankPath);
+	System.out.println("username = " + username + " age = " + age + " rank = " + rank);
+}
+```
+
+```
+username = member4 age = 40 rank = 3
+username = member1 age = 10 rank = 2
+username = member2 age = 20 rank = 2
+username = member3 age = 30 rank = 1
+```
+
+
+---
+
+<br><br>
+
+### 15) 상수, 문자 더하기
+
+#### a. 상수 더하기 : `Expressions.constant(xxx)`
+
+```java
+Tuple result = queryFactory
+ .select(member.username, Expressions.constant("A"))
+ .from(member)
+ .fetchFirst();
+```
+
+- 최적화가 가능하면 SQL에 constant 값을 넘기지 않는다. 상수를 더하는 것 처럼 최적화가 어려우면 SQL에 constant 값을 넘긴다.
+
+<br>
+
+#### b. 문자 더하기 : `concat`
+
+
+```java
+String result = queryFactory
+	.select(member.username.concat("_").concat(member.age.stringValue()))
+	.from(member)
+	.where(member.username.eq("member1"))
+	.fetchOne();
+```
+
+- member.age.stringValue() 부분이 중요한데, 문자가 아닌 다른 타입들은 stringValue() 로 문
+자로 변환할 수 있다. 
+	- 이 방법은 ENUM을 처리할 때도 자주 사용한다.**
+	
+	
+---
+
+<br><br>
+
+# 5. 중급 문법 정리
+
+### 1) 프로젝션과 결과 반환 - 기본
+
+- 프로젝션: select 대상 지정
+	- 프로젝션 대상이 하나면 타입을 명확하게 지정할 수 있음
+	- 프로젝션 대상이 둘 이상이면 튜플이나 DTO로 조회
+
+---
+
+<br><br>
+
+### 2) 프로젝션과 결과 반환 - DTO 조회
+
+
+```java
+package study.querydsl.dto;
+import lombok.Data;
+@Data
+public class MemberDto {
+ private String username;
+ private int age;
+ public MemberDto() {
+ }
+ public MemberDto(String username, int age) {
+ this.username = username;
+ this.age = age;
+ }
+}
+```
+
+
+---
+
+<br><br>
+
+### 3) Querydsl 빈 생성(Bean population)**
+
+
+#### a. 결과를 DTO 반환할 때, 사용**
+
+- 프로퍼티 접근
+
+- 필드 직접 접근
+	- Projections에 field 사용하기
+
+
+- 생성자 사용
+	- Projections에 constructor 사용하기
+
+```java
+List<MemberDto> result = queryFactory
+	.select(Projections.constructor(MemberDto.class,
+		member.username,
+		member.age))
+	.from(member)
+	.fetch();
+}
+```
+
+---
+
+<br><br>
+
+### 4) 프로젝션과 결과 반환 - `@QueryProjection`**
+
+- 컴파일러로 타입을 체크할 수 있으므로 가장 안전한 방법이다. 다만 DTO에 QueryDSL 어노테이션을 유지해야 하는 점과 DTO까지 Q 파일을 생성해야 하는 단점이 있다.
+	- 그래서, @QueryProjection은 종속적으로 결합된다. 그래서, 문제가 많다.
+
+
+
+
+---
+
+<br><br>
+
+### 5) 동적 쿼리 - BooleanBuilder 사용**
+ 
+
+#### a. 동적 쿼리를 해결하는 두가지 방식
+
+- BooleanBuilder
+
+- Where 다중 파라미터 사용
+
+```java
+@Test
+public void 동적쿼리_BooleanBuilder() throws Exception {
+	String usernameParam = "member1";
+	Integer ageParam = 10;
+	
+	List<Member> result = searchMember1(usernameParam, ageParam);
+	Assertions.assertThat(result.size()).isEqualTo(1);
+}
+
+private List<Member> searchMember1(String usernameCond, Integer ageCond) {
+	BooleanBuilder builder = new BooleanBuilder();
+	
+	if (usernameCond != null) {
+		builder.and(member.username.eq(usernameCond));
+	}
+	
+	if (ageCond != null) {
+		builder.and(member.age.eq(ageCond));
+	}
+	
+	return queryFactory
+		.selectFrom(member)
+		.where(builder)
+		.fetch();
+	}
+```
+
+
+---
+
+<br><br>
+
+### 6) 동적 쿼리 - Where 다중 파라미터 사용**
+
+#### a. Where 다중 파라미터 사용
+
+- where 조건에 null 값은 무시된다.
+
+- 메서드를 다른 쿼리에서도 재활용 할 수 있다.
+
+- 쿼리 자체의 가독성이 높아진다
+
+
+```java
+
+@Test
+public void 동적쿼리_WhereParam() throws Exception {
+	String usernameParam = "member1";
+	Integer ageParam = 10;
+	List<Member> result = searchMember2(usernameParam, ageParam);
+	Assertions.assertThat(result.size()).isEqualTo(1);
+}
+
+private List<Member> searchMember2(String usernameCond, Integer ageCond) {
+	return queryFactory
+		.selectFrom(member)
+		.where(usernameEq(usernameCond), ageEq(ageCond))
+		.fetch();	
+}
+
+private BooleanExpression usernameEq(String usernameCond) {
+	return usernameCond != null ? member.username.eq(usernameCond) : null;
+}
+
+private BooleanExpression ageEq(Integer ageCond) {
+	return ageCond != null ? member.age.eq(ageCond) : null;
+}
+
+```
+
+<br>
+
+#### b. 조합 가능**
+
+- null 체크는 주의해서 처리해야함!
+
+```java
+private BooleanExpression allEq(String usernameCond, Integer ageCond) {
+	return usernameEq(usernameCond).and(ageEq(ageCond));
+}
+```
+
+
+---
+
+<br><br>
+
+### 7) 수정, 삭제 벌크 연산
+
+- delete(), update()를 이용하기
+
+- JPQL 배치와 마찬가지로, 영속성 컨텍스트에 있는 엔티티를 무시하고 실행되기 때문에 배치 쿼리를
+실행하고 나면 영속성 컨텍스트를 초기화 하는 것이 안전하다.**
+
+
+---
+
+<br><br>
+
+### 8) SQL function 호출하기
+
+- SQL function은 JPA와 같이 Dialect(방언)에 등록된 내용만 호출할 수 있다
+	- {0}, {1}, {2}는 replace할 변수의 갯수
+
+```java
+String result = queryFactory
+	.select(Expressions.stringTemplate("function('replace', {0}, {1}, {2})", member.username, "member", "M"))
+	.from(member)
+	.fetchFirst();
+```
