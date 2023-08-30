@@ -1374,9 +1374,13 @@ String result = queryFactory
 
 ### 1) 프로젝션과 결과 반환 - 기본
 
-- 프로젝션: select 대상 지정
-	- 프로젝션 대상이 하나면 타입을 명확하게 지정할 수 있음
-	- 프로젝션 대상이 둘 이상이면 튜플이나 DTO로 조회
+#### a. 프로젝션 개념 : 
+
+- select 대상 지정
+
+- 프로젝션 대상이 하나면 타입을 명확하게 지정할 수 있음
+
+- 프로젝션 대상이 둘 이상이면 튜플이나 DTO로 조회
 
 ---
 
@@ -1384,23 +1388,40 @@ String result = queryFactory
 
 ### 2) 프로젝션과 결과 반환 - DTO 조회
 
+#### a. DTO 준비
 
 ```java
-package study.querydsl.dto;
+package com.study.querydsl.dto;
 import lombok.Data;
-@Data
-public class MemberDto {
- private String username;
- private int age;
- public MemberDto() {
- }
- public MemberDto(String username, int age) {
- this.username = username;
- this.age = age;
- }
+
+	@Data
+	public class MemberDto {
+		private String username;
+		private int age;
+
+	public MemberDto() {
+
+	}
+
+	public MemberDto(String username, int age) {
+		this.username = username;
+		this.age = age;
+	}
 }
 ```
 
+<br>
+
+#### b. 먼저, JPA Native query 이용하여 조회 
+
+- 먼저, 이렇게 Native query로 조회하고 이를 queryDSL 동적 쿼리로 변경하기
+
+```java
+List<MemberDto> result = em.createQuery(
+	"select new study.querydsl.dto.MemberDto(m.username, m.age) " +
+		"from Member m", MemberDto.class)
+	.getResultList();
+```
 
 ---
 
@@ -1408,17 +1429,69 @@ public class MemberDto {
 
 ### 3) Querydsl 빈 생성(Bean population)**
 
+- 결과를 DTO 반환할 때, 사용**
 
-#### a. 결과를 DTO 반환할 때, 사용**
+<br>
 
-- 프로퍼티 접근
+#### a. 프로퍼티 접근 : setter
 
-- 필드 직접 접근
-	- Projections에 field 사용하기
+```java
+List<MemberDto> result = queryFactory
+	.select(Projections.bean(MemberDto.class,
+		member.username,
+		member.age))
+	.from(member)
+	.fetch();
+```
 
+<br>
 
-- 생성자 사용
-	- Projections에 constructor 사용하기
+#### b. 필드 직접 접근
+
+- Projections에 field 사용하기
+
+##### a) 속성명 직접 사용하기
+
+```java
+List<MemberDto> result = queryFactory
+	.select(Projections.fields(MemberDto.class,
+		member.username,
+		member.age))
+	.from(member)
+	.fetch();
+```
+
+<br>
+
+##### b) DTO 속성에 별칭을 사용하는 경우
+
+```java
+@Data
+public class UserDto {
+	private String name;
+	private int age;
+}
+```
+
+```java
+List<UserDto> fetch = queryFactory
+	.select(Projections.fields(UserDto.class,
+		member.username.as("name"),
+	ExpressionUtils.as(
+	JPAExpressions
+		.select(memberSub.age.max())
+		.from(memberSub), "age")
+		)
+	).from(member)
+	.fetch();
+```
+
+<br>
+
+#### c. 생성자 사용**
+
+- Projections에 constructor 사용하기
+	- 이것을 많이 사용한다.
 
 ```java
 List<MemberDto> result = queryFactory
@@ -1492,9 +1565,11 @@ private List<Member> searchMember1(String usernameCond, Integer ageCond) {
 
 #### a. Where 다중 파라미터 사용
 
+- 조건마다 메서드 생성하기!**
+
 - where 조건에 null 값은 무시된다.
 
-- 메서드를 다른 쿼리에서도 재활용 할 수 있다.
+- 메서드를 다른 쿼리에서도 재활용할 수 있다.
 
 - 쿼리 자체의 가독성이 높아진다
 
@@ -1561,8 +1636,46 @@ private BooleanExpression allEq(String usernameCond, Integer ageCond) {
 	- {0}, {1}, {2}는 replace할 변수의 갯수
 
 ```java
+
 String result = queryFactory
 	.select(Expressions.stringTemplate("function('replace', {0}, {1}, {2})", member.username, "member", "M"))
 	.from(member)
 	.fetchFirst();
 ```
+
+
+---
+
+# 6. 실무 활용 - 순수 JPA와 Querydsl
+
+### 1) 순수 JPA 리포지토리와 Querydsl
+
+
+---
+
+<br><br>
+
+### 2) 동적쿼리 Builder 적용
+
+
+---
+
+<br><br>
+
+### 3) 동적쿼리 Where 적용
+
+
+---
+
+<br><br>
+
+### 4) 조회 API 컨트롤러 개발
+
+
+
+
+
+
+
+
+
