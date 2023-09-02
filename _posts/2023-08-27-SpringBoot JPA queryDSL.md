@@ -1651,7 +1651,14 @@ String result = queryFactory
 
 # 6. 실무 활용 - 순수 JPA와 Querydsl
 
-### 1) 순수 JPA 리포지토리와 Querydsl
+### 1) 순수 JPA 리포지토리와 Querydsl**
+
+- H2에서 테스트 코드 실행 전, 매번 `drop all objects` 실행하기
+	- 기존 테이블을 지우지 못해서 에러가 발생한다.
+
+<br>
+
+#### a. 순수 JPA 방식
  
 - 순수 JPA는 JPA Native query를 이용하고, Spring Data JPA는 JPA에서 Spring에 기본으로 제공해주는 메서드를 이용할 수 있다. 
 	- Spring Data JPA가 훨씬 간편하지만, 메서드가 제한적이다.(findAll 같은 것)
@@ -1663,6 +1670,7 @@ String result = queryFactory
 - 실습 코드 : 
 
 - MemberJpaRepository.java
+	- JPAQueryFactory를 new로 생성(mybatis에서도 Factory 관련 비슷한 내용이 있었다.)
 
 ```java
 package com.study.querydsl.repository;
@@ -1682,9 +1690,11 @@ public class MemberJpaRepository {
     private final JPAQueryFactory queryFactory;
 
     // EntityManager, JPAQueryFactory를 이렇게도 생성해서 사용 가능!!
-    public MemberJpaRepository(EntityManager em, JPAQueryFactory queryFactory) {
+//    public MemberJpaRepository(EntityManager em, JPAQueryFactory queryFactory) {
+    public MemberJpaRepository(EntityManager em) {
         this.em = em;
-        this.queryFactory = queryFactory;
+//        this.queryFactory = queryFactory;
+        this.queryFactory = new JPAQueryFactory(em);
     }
 
     public void save(Member member){
@@ -1724,17 +1734,15 @@ package com.study.querydsl.repository;
 
 import com.study.querydsl.entity.Member;
 import jakarta.persistence.EntityManager;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @Transactional
@@ -1763,9 +1771,191 @@ public class MemberJpaRepositoryTest {
 
 }
 
+
 ```
 
+---
 
+<br>
+
+##### a) 빈등록 방식 vs 내부에서 생성**
+
+- QuerydslApplication.java이나 config 파일에 설정하기
+
+```java
+package com.study.querydsl;
+
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+public class QuerydslApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(QuerydslApplication.class, args);
+	}
+
+    @Bean
+    JPAQueryFactory jpaQueryFactory(EntityManager em){
+        return new JPAQueryFactory(em);
+    }
+
+}
+
+```
+
+<br>
+
+- MemberJpaRepository.java
+
+```java
+@Repository
+public class MemberJpaRepository {
+
+    private final EntityManager em;
+    private final JPAQueryFactory queryFactory;
+
+    // EntityManager, JPAQueryFactory를 이렇게도 생성해서 사용 가능!!
+    public MemberJpaRepository(EntityManager em, JPAQueryFactory queryFactory) {
+        this.em = em;
+        this.queryFactory = queryFactory;
+    }
+}
+```
+
+---
+
+<br>
+
+- 원래 MemberJpaRepository.java 코드!!
+	- 이것은 테스트 코드짤 때, 더 편하다. 위의 방식대로면 항상 외부에서 JPAQueryFactory를 주입받아야 하기 때문이다. 
+
+```java
+
+@Repository
+public class MemberJpaRepository {
+
+    private final EntityManager em;
+    private final JPAQueryFactory queryFactory;
+
+    // EntityManager, JPAQueryFactory를 이렇게도 생성해서 사용 가능!!
+    public MemberJpaRepository(EntityManager em) {
+        this.em = em;
+        this.queryFactory = new JPAQueryFactory(em);
+    }
+}
+```
+
+----
+
+<br><br>
+
+#### b. querydsl 방식
+
+- MemberJpaRepository.java
+
+```java
+package com.study.querydsl.repository;
+
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.entity.Member;
+import jakarta.persistence.EntityManager;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import static com.study.querydsl.entity.QMember.member;
+
+@Repository
+public class MemberJpaRepository {
+
+    private final EntityManager em;
+    private final JPAQueryFactory queryFactory;
+
+    // EntityManager, JPAQueryFactory를 이렇게도 생성해서 사용 가능!!
+    public MemberJpaRepository(EntityManager em) {
+        this.em = em;
+        this.queryFactory = new JPAQueryFactory(em);
+    }
+
+    public void save(Member member){
+        em.persist(member);
+    }
+
+    // 객체 null 방지를 위해 Optional 사용 : Optional.ofNullable로 반환
+    public Optional<Member> findById(Long id){
+        Member findMember = em.find(Member.class, id);
+        return Optional.ofNullable(findMember);
+    }
+
+    // querydsl 중요!: 확실히 더 편하다
+    public List<Member> findAll_Querydsl(){
+        return queryFactory
+                .selectFrom(member).fetch();
+    }
+
+    public List<Member> findByUsername_Querydsl(String username){
+        return queryFactory
+                .selectFrom(member)
+                .where(member.username.eq(username))
+                .fetch();
+    }
+
+}
+
+```
+
+<br>
+
+- MemberJpaRepositoryTest.java
+
+```java
+package com.study.querydsl.repository;
+
+import com.study.querydsl.entity.Member;
+import jakarta.persistence.EntityManager;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest
+@Transactional
+public class MemberJpaRepositoryTest {
+
+    @Autowired
+    EntityManager entityManager;
+    @Autowired
+    MemberJpaRepository memberJpaRepository;
+
+    @Test
+    public void basicQueryTest(){
+        Member member = new Member("member1", 10);
+        memberJpaRepository.save(member);
+
+        // 원래는 get()으로 받으면 안되지만 임시 테스트라서 이렇게 테스트 진행
+        Member findMember = memberJpaRepository.findById(member.getId()).get();
+        assertThat(findMember).isEqualTo(member);
+
+        List<Member> result1 = memberJpaRepository.findAll_Querydsl();
+        assertThat(result1).containsExactly(member);
+
+        List<Member> result2 = memberJpaRepository.findByUsername_Querydsl("member1");
+        assertThat(result2).containsExactly(member);
+    }
+
+}
+
+```
 
 ---
 
