@@ -877,7 +877,7 @@ public void startQuerydsl3() {
 
 <br><br>
 
-### 5) querydsl 결과 조회 방식** 
+### 5) querydsl 결과 조회 방식
 
 - `fetch()` : 리스트 조회**
 
@@ -1245,7 +1245,9 @@ List<Member> result = queryFactory
 
 <br>
 
-#### b. static import 활용
+#### b. static import 활용**
+
+- JPAExpressions를 직접 사용하지 않아서 JPA Native query처럼 구조가 더 간단해진다.
 
 ```java
 import static com.study.querydsl.entity.QMember.*;
@@ -1372,7 +1374,7 @@ String result = queryFactory
 
 # 5. 중급 문법 정리
 
-### 1) 프로젝션과 결과 반환 - 기본
+### 1) 프로젝션 결과 반환: 기본
 
 #### a. 프로젝션 개념 : 
 
@@ -1380,13 +1382,14 @@ String result = queryFactory
 
 - 프로젝션 대상이 하나면 타입을 명확하게 지정할 수 있음
 
-- 프로젝션 대상이 둘 이상이면 튜플이나 DTO로 조회
+- 프로젝션 대상이 둘 이상이면 튜플이나 DTO로 조회**
+	- Repository 내부에서 데이터를 조회할 때, Entity 외의 값 (ex, DTO)으로 편리하게 리턴받아 사용할 수 있도록 하기 위해서
 
 ---
 
 <br><br>
 
-### 2) 프로젝션과 결과 반환 - DTO 조회
+### 2) 프로젝션 결과 반환: DTO 조회
 
 #### a. DTO 준비
 
@@ -1448,7 +1451,7 @@ List<MemberDto> result = queryFactory
 
 #### b. 필드 직접 접근
 
-- Projections에 field 사용하기
+- Projections에 fields 사용하기
 
 ##### a) 속성명 직접 사용하기
 
@@ -1477,11 +1480,11 @@ public class UserDto {
 List<UserDto> fetch = queryFactory
 	.select(Projections.fields(UserDto.class,
 		member.username.as("name"),
-	ExpressionUtils.as(
-	JPAExpressions
-		.select(memberSub.age.max())
-		.from(memberSub), "age")
-		)
+		ExpressionUtils.as(
+		JPAExpressions
+			.select(memberSub.age.max())
+			.from(memberSub), "age")
+			)
 	).from(member)
 	.fetch();
 ```
@@ -1507,7 +1510,7 @@ List<MemberDto> result = queryFactory
 
 <br><br>
 
-### 4) 프로젝션과 결과 반환 - `@QueryProjection`**
+### 4) @QueryProjection**
 
 - 컴파일러로 타입을 체크할 수 있으므로 가장 안전한 방법이다. 다만 DTO에 QueryDSL 어노테이션을 유지해야 하는 점과 DTO까지 Q 파일을 생성해야 하는 단점이 있다.
 	- 그래서, @QueryProjection은 종속적으로 결합된다. 그래서, 문제가 많다.
@@ -1649,6 +1652,119 @@ String result = queryFactory
 # 6. 실무 활용 - 순수 JPA와 Querydsl
 
 ### 1) 순수 JPA 리포지토리와 Querydsl
+ 
+- 순수 JPA는 JPA Native query를 이용하고, Spring Data JPA는 JPA에서 Spring에 기본으로 제공해주는 메서드를 이용할 수 있다. 
+	- Spring Data JPA가 훨씬 간편하지만, 메서드가 제한적이다.(findAll 같은 것)
+
+---
+
+<br>
+
+- 실습 코드 : 
+
+- MemberJpaRepository.java
+
+```java
+package com.study.querydsl.repository;
+
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.entity.Member;
+import jakarta.persistence.EntityManager;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class MemberJpaRepository {
+
+    private final EntityManager em;
+    private final JPAQueryFactory queryFactory;
+
+    // EntityManager, JPAQueryFactory를 이렇게도 생성해서 사용 가능!!
+    public MemberJpaRepository(EntityManager em, JPAQueryFactory queryFactory) {
+        this.em = em;
+        this.queryFactory = queryFactory;
+    }
+
+    public void save(Member member){
+        em.persist(member);
+    }
+
+    // 객체 null 방지를 위해 Optional 사용 : Optional.ofNullable로 반환
+    public Optional<Member> findById(Long id){
+        Member findMember = em.find(Member.class, id);
+        return Optional.ofNullable(findMember);
+    }
+
+    public List<Member> findAll(){
+        return em.createQuery("select m from Member m", Member.class)
+                .getResultList();
+    }
+
+    public List<Member> findByUsername(String username){
+        return em.createQuery("select m from Member m where m.username = :username", Member.class)
+                .setParameter("username", username)
+                .getResultList();
+    }
+}
+
+```
+
+---
+
+
+<br><br>
+
+- MemberJpaRepositoryTest.java
+
+
+```java
+package com.study.querydsl.repository;
+
+import com.study.querydsl.entity.Member;
+import jakarta.persistence.EntityManager;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@SpringBootTest
+@Transactional
+public class MemberJpaRepositoryTest {
+
+    @Autowired
+    EntityManager entityManager;
+    @Autowired
+    MemberJpaRepository memberJpaRepository;
+
+    @Test
+    public void basicTest(){
+        Member member = new Member("member1", 10);
+        memberJpaRepository.save(member);
+
+        // 원래는 get()으로 받으면 안되지만 임시 테스트라서 이렇게 테스트 진행
+        Member findMember = memberJpaRepository.findById(member.getId()).get();
+        assertThat(findMember).isEqualTo(member);
+
+        List<Member> result1 = memberJpaRepository.findAll();
+        assertThat(result1).containsExactly(member);
+
+        List<Member> result2 = memberJpaRepository.findByUsername("member1");
+        assertThat(result2).containsExactly(member);
+    }
+
+}
+
+```
+
 
 
 ---
