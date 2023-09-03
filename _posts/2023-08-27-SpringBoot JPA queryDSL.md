@@ -1649,6 +1649,8 @@ String result = queryFactory
 
 ---
 
+<br><br>
+
 # 6. 실무 활용 - 순수 JPA와 Querydsl
 
 ### 1) 순수 JPA 리포지토리와 Querydsl**
@@ -1963,12 +1965,413 @@ public class MemberJpaRepositoryTest {
 
 ### 2) 동적쿼리 Builder 적용
 
+- 동적쿼리를 DTO와 BooleanBuilder를 이용하여 사용하기
+
+<br>
+
+#### a. DTO 준비
+
+- MemberTeamDto.java
+
+```java
+package com.study.querydsl.dto;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.annotations.QueryProjection;
+import lombok.*;
+
+import java.util.List;
+
+import static org.springframework.util.Assert.hasText;
+
+@Data
+public class MemberTeamDto {
+    private Long memberId;
+    private String username;
+    private int age;
+    private Long teamId;
+    private String teamName;
+
+    @QueryProjection
+    public MemberTeamDto(Long memberId, String username, int age, Long teamId, String teamName) {
+        this.memberId = memberId;
+        this.username = username;
+        this.age = age;
+        this.teamId = teamId;
+        this.teamName = teamName;
+    }
+
+}
+
+```
+
+<br>
+- MemberSearchCondition.jaca
+
+```java
+
+package com.study.querydsl.dto;
+
+import lombok.*;
+
+@Data
+public class MemberSearchCondition {
+    // 회원명, 팀명, 나이(ageGoe, ageLoe)
+
+    private String username;
+    private String teamName;
+    private Integer ageGoe;
+    private Integer ageLoe;
+    
+}
+
+```
+
+
+---
+
+<br><br>
+
+#### b. 실습 코드
+
+- builder로 따로 변수 빼고 이용하기!
+	- builder.and() 이용하기
+
+<br>
+- MemberJpaRepository.java
+
+```java
+package com.study.querydsl.repository;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import com.study.querydsl.dto.QMemberTeamDto;
+import com.study.querydsl.entity.Member;
+import com.study.querydsl.entity.QMember;
+import jakarta.persistence.EntityManager;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import static com.study.querydsl.entity.QMember.member;
+import static com.study.querydsl.entity.QTeam.team;
+import static org.springframework.util.StringUtils.hasText;
+
+@Repository
+public class MemberJpaRepository {
+
+    private final EntityManager em;
+    private final JPAQueryFactory queryFactory;
+
+    // EntityManager, JPAQueryFactory를 이렇게도 생성해서 사용 가능!!
+    public MemberJpaRepository(EntityManager em) {
+        this.em = em;
+        this.queryFactory = new JPAQueryFactory(em);
+    }
+
+    public void save(Member member){
+        em.persist(member);
+    }
+
+    // 객체 null 방지를 위해 Optional 사용 : Optional.ofNullable로 반환
+    public Optional<Member> findById(Long id){
+        Member findMember = em.find(Member.class, id);
+        return Optional.ofNullable(findMember);
+    }
+
+    // querydsl 중요!: 확실히 더 편하다..
+    public List<Member> findAll_Querydsl(){
+        return queryFactory
+                .selectFrom(member).fetch();
+    }
+
+    public List<Member> findByUsername_Querydsl(String username){
+        return queryFactory
+                .selectFrom(member)
+                .where(member.username.eq(username))
+                .fetch();
+    }
+
+    public List<MemberTeamDto> searchByBuilder(MemberSearchCondition condition){
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if(hasText(condition.getUsername())){
+            builder.and(member.username.eq(condition.getUsername()));
+        }
+
+        if(hasText(condition.getTeamName())){
+            builder.and(team.name.eq(condition.getTeamName()));
+        }
+
+        if(condition.getAgeGoe() != null){
+            builder.and(member.age.goe(condition.getAgeGoe()));
+        }
+
+        if(condition.getAgeLoe() != null){
+            builder.and(member.age.loe(condition.getAgeLoe()));
+        }
+
+        // QMemberTeamDto는 생성자를 사용하기
+        // 때문에 필드 이름을 맞추지 않아도 된다. 따라서 member.id 만 적으면 된다.
+        return queryFactory
+                .select(new QMemberTeamDto(
+                        member.id,
+                        member.username,
+                        member.age,
+                        team.id,
+                        team.name))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(builder)
+                .fetch();
+    }
+
+}
+
+```
+
+---
+
+<br>
+- 테스트 코드 :
+	- MemberJpaRepositoryTest.java
+
+```java
+package com.study.querydsl.repository;
+
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import com.study.querydsl.entity.Member;
+import com.study.querydsl.entity.Team;
+import jakarta.persistence.EntityManager;
+
+import jakarta.persistence.PersistenceContext;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest
+@Transactional
+public class MemberJpaRepositoryTest {
+
+    @PersistenceContext
+    EntityManager em;
+    @Autowired
+    MemberJpaRepository memberJpaRepository;
+
+    @Test
+    public void searchTest(){
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        em.persist(teamA);
+        em.persist(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamA);
+        Member member3 = new Member("member3", 30, teamB);
+        Member member4 = new Member("member4", 40, teamB);
+        em.persist(member1);
+        em.persist(member2);
+        em.persist(member3);
+        em.persist(member4);
+
+        MemberSearchCondition condition = new MemberSearchCondition();
+
+        condition.setAgeGoe(35);
+        condition.setAgeLoe(40);
+        condition.setTeamName("teamB");
+
+        List<MemberTeamDto> result = memberJpaRepository.searchByBuilder(condition);
+
+        assertThat(result).extracting("username").containsExactly("member4");
+
+    }
+
+}
+
+```
+
 
 ---
 
 <br><br>
 
 ### 3) 동적쿼리 Where 적용
+
+- where절에 파라미터를 이용하면, 조건을 재사용 가능!!
+	- 실무에서는 정책 관련하여 모든 것들을 항상 조건을 체크하고 넘어가야하는데 이러한 업무(플래그나 날짜 체크)들은 매우 반복적이라서 
+	- 다음처럼 파라미터를 사용하면 재사용할 수 있어서 편리하다
+
+<br>
+
+- MemberJpaRepository.java
+
+
+```java
+package com.study.querydsl.repository;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import com.study.querydsl.dto.QMemberTeamDto;
+import com.study.querydsl.entity.Member;
+import com.study.querydsl.entity.QMember;
+import jakarta.persistence.EntityManager;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import static com.study.querydsl.entity.QMember.member;
+import static com.study.querydsl.entity.QTeam.team;
+import static io.micrometer.common.util.StringUtils.isEmpty;
+import static org.springframework.util.StringUtils.hasText;
+
+
+@Repository
+public class MemberJpaRepository {
+
+    private final EntityManager em;
+    private final JPAQueryFactory queryFactory;
+
+    // EntityManager, JPAQueryFactory를 이렇게도 생성해서 사용 가능!!
+    public MemberJpaRepository(EntityManager em) {
+        this.em = em;
+        this.queryFactory = new JPAQueryFactory(em);
+    }
+
+    public void save(Member member){
+        em.persist(member);
+    }
+
+    // 동적쿼리 - Where절 파라미터 사용
+    public List<MemberTeamDto> searchByParameter(MemberSearchCondition condition){
+        return queryFactory
+                .select(new QMemberTeamDto(
+                        member.id,
+                        member.username,
+                        member.age,
+                        team.id,
+                        team.name
+                ))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()))
+                .fetch();
+    }
+
+    private BooleanExpression usernameEq(String username) {
+        return isEmpty(username) ? null : member.username.eq(username);
+    }
+
+    private BooleanExpression teamNameEq(String teamName) {
+        return isEmpty(teamName) ? null : team.name.eq(teamName);
+    }
+
+    private BooleanExpression ageGoe(Integer ageGoe) {
+        return ageGoe == null ? null : member.age.goe(ageGoe);
+    }
+
+    private BooleanExpression ageLoe(Integer ageLoe) {
+        return ageLoe == null ? null : member.age.loe(ageLoe);
+    }
+
+    // where절에 파라미터를 이용하면, 재사용 가능!!
+    public List<Member> findMember(MemberSearchCondition condition){
+        return queryFactory
+                .selectFrom(member)
+                .leftJoin(member.team, team)
+                .where(usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()))
+                .fetch();
+    }
+}
+
+```
+
+---
+
+<br>
+
+- MemberJpaRepositoryTest.java
+
+```java
+package com.study.querydsl.repository;
+
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import com.study.querydsl.entity.Member;
+import com.study.querydsl.entity.Team;
+import jakarta.persistence.EntityManager;
+
+import jakarta.persistence.PersistenceContext;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest
+@Transactional
+public class MemberJpaRepositoryTest {
+
+    @PersistenceContext
+    EntityManager em;
+    @Autowired
+    MemberJpaRepository memberJpaRepository;
+
+    @Test
+    public void searchByParameterTest(){
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        em.persist(teamA);
+        em.persist(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamA);
+        Member member3 = new Member("member3", 30, teamB);
+        Member member4 = new Member("member4", 40, teamB);
+        em.persist(member1);
+        em.persist(member2);
+        em.persist(member3);
+        em.persist(member4);
+
+        MemberSearchCondition condition = new MemberSearchCondition();
+
+        condition.setAgeGoe(35);
+        condition.setAgeLoe(40);
+        condition.setTeamName("teamB");
+
+        List<MemberTeamDto> result = memberJpaRepository.searchByParameter(condition);
+
+        assertThat(result).extracting("username").containsExactly("member4");
+
+    }
+
+}
+
+```
 
 
 ---
@@ -1977,11 +2380,175 @@ public class MemberJpaRepositoryTest {
 
 ### 4) 조회 API 컨트롤러 개발
 
+- 샘플데이터 100개 만들기
 
 
+#### a. application.yml에서 profiles 설정하기
+
+- local과 test 코드에서 데이터를 분리하여 사용할 수 있다.
+	- 운영서버에서는 샘플데이터 코드를 사용하면 안되기 때문이다.(충돌 가능성이 높다.)
+	
+<br>
+- profiles : local
+
+```yml
+spring:
+  profiles:
+    active: local
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/querydsl
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+#        show_sql: true # 에러가 너무 많아서 인메모리로 사용하자!
+        format_sql: true
+
+logging.level:
+  org.hibernate.SQL: debug
+  org.hibernate.orm.jdbc.bind: trace
+```
+
+<br>
+- profiles : test
 
 
+```yml
+spring:
+  profiles:
+    active: test
+```
+
+---
+
+<br>
+
+#### b. 실습 코드 :
+	
+<br>
+- 여기에 아래 코드인 샘플 데이터 만드는 로직을 다 넣고 싶지만, 스프링의 @PostConstruct 라이프 사이클 때문에 @Transactional과 같이 못 쓴다.
+	- 따라서, @PostConstruct 부분과 @Transactional 동작 부분을 분리시켜야 한다!
+
+<br>
+- InitMember.java
+
+```java
+package com.study.querydsl.controller;
+
+import com.study.querydsl.entity.Member;
+import com.study.querydsl.entity.Team;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+// 샘플 데이터 추가
+@Profile("local")
+@Component
+@RequiredArgsConstructor
+public class InitMember {
+    private final InitMemberService initMemberService;
+
+    // 원래는 서비스단이어야 하지만, 테스트라서 그냥 여기서 다 만들어버림!
+    // ** 여기에 아래 코드인 샘플 데이터 만드는 로직을 다 넣고 싶지만, 스프링의 @PostConstruct 라이프 사이클 때문에 @Transactional과 같이 못 쓴다.(스프링 공부하기!!)
+    // 따라서, @PostConstruct 부분과 @Transactional 동작 부분을 분리시켜야 한다.!
+    @PostConstruct
+    public void init(){
+        initMemberService.init();
+    }
+
+    @Component
+    static class InitMemberService{
+        @PersistenceContext
+        EntityManager em;
+
+        @Transactional
+        public void init(){
+            Team teamA = new Team("teamA");
+            Team teamB = new Team("teamB");
+            em.persist(teamA);
+            em.persist(teamB);
+
+            for(int i = 0; i < 100; i++){
+                Team selectedTeam = i % 2 == 0 ? teamA : teamB;
+                em.persist(new Member("member" + i, i, selectedTeam));
+            }
+        }
+    }
+}
 
 
+```
+
+<br>
+- MemberController.java
 
 
+```java
+package com.study.querydsl.controller;
+
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import com.study.querydsl.repository.MemberJpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+public class MemberController {
+
+    private final MemberJpaRepository memberJpaRepository;
+
+    @GetMapping("/v1/members")
+    public List<MemberTeamDto> searchMemberV1(MemberSearchCondition condition){
+        return memberJpaRepository.searchByParameter(condition);
+    }
+
+}
+
+```
+
+---
+
+<br>
+
+#### c. PostMan으로 샘플데이터 조회하기
+
+
+```java
+[
+    {
+        "memberId": 32,
+        "username": "member31",
+        "age": 31,
+        "teamId": 2,
+        "teamName": "teamB"
+    },
+    {
+        "memberId": 34,
+        "username": "member33",
+        "age": 33,
+        "teamId": 2,
+        "teamName": "teamB"
+    },
+    {
+        "memberId": 36,
+        "username": "member35",
+        "age": 35,
+        "teamId": 2,
+        "teamName": "teamB"
+    }
+]
+```
