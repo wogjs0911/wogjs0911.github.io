@@ -1384,6 +1384,7 @@ String result = queryFactory
 
 - 프로젝션 대상이 둘 이상이면 튜플이나 DTO로 조회**
 	- Repository 내부에서 데이터를 조회할 때, Entity 외의 값 (ex, DTO)으로 편리하게 리턴받아 사용할 수 있도록 하기 위해서
+	- 튜플은 Repository 외부에서 사용할 수 없어야 한다.**
 
 ---
 
@@ -2386,7 +2387,7 @@ public class MemberJpaRepositoryTest {
 #### a. application.yml에서 profiles 설정하기
 
 - local과 test 코드에서 데이터를 분리하여 사용할 수 있다.
-	- 운영서버에서는 샘플데이터 코드를 사용하면 안되기 때문이다.(충돌 가능성이 높다.)
+	- 운영서버에서는 샘플데이터를 사용하면 안 되기 때문이다.(충돌 가능성이 높다.)
 	
 <br>
 - profiles : local
@@ -2552,3 +2553,283 @@ public class MemberController {
     }
 ]
 ```
+
+
+
+---
+
+<br><br>
+
+# 7. 실무 활용 - 스프링 데이터 JPA와 Querydsl
+
+### 1) 스프링 데이터 JPA 테스트
+
+- 단순히 Repository에서 extends JpaRepository<>를 하여 사용
+	- 스프링 데이터에서 만들어진 메서드 사용하기!
+
+<br>
+- MemberRepository.java
+
+```java
+package com.study.querydsl.repository;
+
+import com.study.querydsl.entity.Member;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+public interface MemberRepository extends JpaRepository<Member, Long> {
+    List<Member> findByUsername(String username);
+
+}
+
+```
+
+---
+
+<br>
+- MemberRepositoryTest.java
+
+```java
+package com.study.querydsl.repository;
+
+
+import com.study.querydsl.entity.Member;
+import jakarta.persistence.EntityManager;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest
+@Transactional
+public class MemberRepositoryTest {
+
+    @Autowired
+    EntityManager em;
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Test
+    public void basicTest(){
+        Member member = new Member("member1", 10);
+        memberRepository.save(member);
+
+        // 스프링 데이터 JPA : 3가지 테스트
+        Member findMember = memberRepository.findById(member.getId()).get();
+        assertThat(findMember).isEqualTo(member);
+
+        List<Member> result1 = memberRepository.findAll();
+        assertThat(result1).containsExactly(member);
+
+        List<Member> result2 = memberRepository.findByUsername("member1");
+        assertThat(result2).containsExactly(member);
+    }
+}
+
+```
+
+---
+
+<br><br>
+
+### 2) 사용자 정의 Repository 만들기 
+
+- 스프링 데이터 JPA와 Querydsl 테스트
+
+- 중요! : 상속받거나 구현하는 관계 중요
+
+<br>
+
+#### a. 실습 코드 
+
+- MemberRepositoryCustom.java 인터페이스 생성
+
+```java
+package com.study.querydsl.repository;
+
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+
+import java.util.List;
+
+public interface MemberRepositoryCustom {
+    // Querydsl 전용 기능인 회원 search를 작성할 수 없다.
+    // 따라서, 사용자 정의 리포지토리 필요
+    List<MemberTeamDto> search(MemberSearchCondition condition);
+}
+
+```
+
+---
+
+<br>
+- MemberRepositoryImpl.java : 구현체 
+
+```java
+package com.study.querydsl.repository;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import com.study.querydsl.dto.QMemberTeamDto;
+import jakarta.persistence.EntityManager;
+
+import java.util.List;
+
+import static com.study.querydsl.entity.QMember.member;
+import static com.study.querydsl.entity.QTeam.team;
+import static io.micrometer.common.util.StringUtils.isEmpty;
+
+public class MemberRepositoryImpl implements MemberRepositoryCustom {
+    private final JPAQueryFactory queryFactory;
+
+    // 주입!
+    public MemberRepositoryImpl(EntityManager em) {
+        this.queryFactory = new JPAQueryFactory(em);
+    }
+
+    @Override
+    public List<MemberTeamDto> search(MemberSearchCondition condition) {
+        return queryFactory
+                .select(new QMemberTeamDto(
+                        member.id,
+                        member.username,
+                        member.age,
+                        team.id,
+                        team.name))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()))
+                .fetch();
+    }
+
+    private BooleanExpression usernameEq(String username) {
+        return isEmpty(username) ? null : member.username.eq(username);
+    }
+    private BooleanExpression teamNameEq(String teamName) {
+        return isEmpty(teamName) ? null : team.name.eq(teamName);
+    }
+    private BooleanExpression ageGoe(Integer ageGoe) {
+        return ageGoe == null ? null : member.age.goe(ageGoe);
+    }
+    private BooleanExpression ageLoe(Integer ageLoe) {
+        return ageLoe == null ? null : member.age.loe(ageLoe);
+    }
+}
+
+```
+
+---
+
+<br>
+
+- 관계 연결 : MemberRepository.java 수정
+	- extends를 2방향으로 진행 : `스프링 데이타 JPA`와 `사용자 커스텀 Repository`
+
+
+```java
+package com.study.querydsl.repository;
+
+import com.study.querydsl.entity.Member;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+// 상속에 해당하는 extends는 2개 이상도 가능하다.
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
+    List<Member> findByUsername(String username);
+
+}
+
+```
+
+
+---
+
+<br><br>
+
+- 스프링 데이터 JPA와 queryDSL의 Test 코드 :
+
+```java
+package com.study.querydsl.repository;
+
+
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import com.study.querydsl.entity.Member;
+import com.study.querydsl.entity.Team;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest
+@Transactional
+public class MemberRepositoryTest {
+
+    @Autowired
+    EntityManager em;
+
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Test
+    public void searchTest() {
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        em.persist(teamA);
+        em.persist(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamA);
+        Member member3 = new Member("member3", 30, teamB);
+        Member member4 = new Member("member4", 40, teamB);
+        em.persist(member1);
+        em.persist(member2);
+        em.persist(member3);
+        em.persist(member4);
+
+        MemberSearchCondition condition = new MemberSearchCondition();
+
+        condition.setAgeGoe(35);
+        condition.setAgeLoe(40);
+        condition.setTeamName("teamB");
+
+        List<MemberTeamDto> result = memberRepository.search(condition);
+
+        assertThat(result).extracting("username").containsExactly("member4");
+    }
+
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
