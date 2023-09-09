@@ -2843,13 +2843,113 @@ java.lang.NullPointerException: Cannot invoke "com.study.querydsl.repository.Mem
 #### a. 첫 번째 방법
 
 - 클래스 위에 @RequiredArgsConstructor 어노테이션을 달아준 후 repository 클래스 선언 시, 접근자를 final로 선언(final로 선언해야 Lombok이 작동함)
+	- 해결 실패
 
 <br>
 
 #### b. 두 번째 방법
 
-- 
+- DI가 제대로 되지 않았을 때,
+	- DI가 제대로 되지 않았다면 트랜잭션이 걸렸다 하더라도 값을 가져올 수 없어서 NullPointerException이 뜬다. 이 때, 확인해야할 부분은 주요 repository나 EntityManager를 @RequiredArgsConstruct로 했을 때, private final을 하지 않았는지를 확인해야한다. 
 
 
+
+<br>
+
+#### c. 세 번째 방법 : 최종**
+
+- 인텔리제이에서 Repository 테스트를 하는 경우, `command + shift + T` 커맨드로 해당 Repository에 테스트를 작성해야 한다.
+	- 인위적으로 테스트 코드 파일을 만들면, Repository import가 잡히지 않는다.
+
+<br>
+
+#### d. 생성자 주입하는 방법 2가지**
+
+```java
+    public MemberRepositoryImpl(EntityManager em) {
+        this.queryFactory = new JPAQueryFactory(em);
+    }
+```
+
+<br>
+
+```java
+    public MemberRepositoryImpl(JPAQueryFactory queryFactory) {
+        this.queryFactory = queryFactory;
+    }
+```
+
+---
+
+<br><br>
+
+### 4) JPA 설계 관점 : 특정 API에 종속적인 경우
+
+- 화면별로 추가적인 특정 query 메서드 만들기! 
+	- 기본적으로는 공통 API 메서드 사용하기
+
+```java
+package com.study.querydsl.repository;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import com.study.querydsl.dto.QMemberTeamDto;
+import jakarta.persistence.EntityManager;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+import static com.study.querydsl.entity.QMember.member;
+import static com.study.querydsl.entity.QTeam.team;
+import static io.micrometer.common.util.StringUtils.isEmpty;
+
+// ** 설계 관점 : 특정 API에 종속적인 경우, MemberRepository와 다른 MemberQueryRepository 만들기! **
+@Repository
+public class MemberQueryRepository {
+
+    private final JPAQueryFactory queryFactory;
+
+    // 주입!
+    public MemberQueryRepository(EntityManager em) {
+        this.queryFactory = new JPAQueryFactory(em);
+    }
+    
+    public List<MemberTeamDto> search(MemberSearchCondition condition) {
+        return queryFactory
+                .select(new QMemberTeamDto(
+                        member.id.as("memberId"),
+                        member.username,
+                        member.age,
+                        team.id.as("teamId"),
+                        team.name.as("teamName")))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()))
+                .fetch();
+    }
+
+    private BooleanExpression usernameEq(String username) {
+        return isEmpty(username) ? null : member.username.eq(username);
+    }
+
+    private BooleanExpression teamNameEq(String teamName) {
+        return isEmpty(teamName) ? null : team.name.eq(teamName);
+    }
+
+    private BooleanExpression ageGoe(Integer ageGoe) {
+        return ageGoe == null ? null : member.age.goe(ageGoe);
+    }
+
+    private BooleanExpression ageLoe(Integer ageLoe) {
+        return ageLoe == null ? null : member.age.loe(ageLoe);
+    }
+}
+
+```
 
 
