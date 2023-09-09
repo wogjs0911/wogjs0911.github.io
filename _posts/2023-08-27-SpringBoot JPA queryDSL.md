@@ -2641,7 +2641,10 @@ public class MemberRepositoryTest {
 ### 2) 사용자 정의 Repository 만들기 
 
 - 스프링 데이터 JPA와 Querydsl 테스트
+	- Querydsl 전용 기능인 회원 search를 작성할 수 없다.
+	- 따라서, 사용자 정의 Repository 필요!
 
+<br>
 - 중요! : 상속받거나 구현하는 관계 중요
 
 <br>
@@ -2738,6 +2741,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
 
 ```java
+
 package com.study.querydsl.repository;
 
 import com.study.querydsl.entity.Member;
@@ -2825,10 +2829,26 @@ public class MemberRepositoryTest {
 
 
 
+---
+
+<br><br>
+
+### 3) JPA Repository 호출 시 NullPointerException 해결방법
 
 
+```java
+java.lang.NullPointerException: Cannot invoke "com.study.querydsl.repository.MemberRepository.save(Object)" because "this.memberRepository" is null
+```
 
+#### a. 첫 번째 방법
 
+- 클래스 위에 @RequiredArgsConstructor 어노테이션을 달아준 후 repository 클래스 선언 시, 접근자를 final로 선언(final로 선언해야 Lombok이 작동함)
+
+<br>
+
+#### b. 두 번째 방법
+
+- 
 
 
 
