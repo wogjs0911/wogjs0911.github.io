@@ -1,7 +1,7 @@
 ---
 key: /2023/08/27/SpringBoot-JPA-queryDSL.html
 title: SpringBoot - queryDSL Study1
-tags: springboot JPA queryDSL
+tags: springboot JPA queryDSL QueryProjection BooleanBuilder
 ---
 
 # 1. Spring Boot 개발 환경 
