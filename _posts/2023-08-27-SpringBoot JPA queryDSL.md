@@ -2527,6 +2527,9 @@ public class MemberController {
 
 #### c. PostMan으로 샘플데이터 조회하기
 
+ 
+- PostMan API URL : `http://localhost:8080/v1/members?teamName=teamB&ageGoe=31&ageLoe=35`
+
 
 ```java
 [
@@ -2860,10 +2863,13 @@ java.lang.NullPointerException: Cannot invoke "com.study.querydsl.repository.Mem
 
 - 인텔리제이에서 Repository 테스트를 하는 경우, `command + shift + T` 커맨드로 해당 Repository에 테스트를 작성해야 한다.
 	- 인위적으로 테스트 코드 파일을 만들면, Repository import가 잡히지 않는다.
+	- 패키지도 계층형으로 생김(MemberRepositoryImplTest > MemberRepositoryTest)
 
 <br>
 
 #### d. 생성자 주입하는 방법 2가지**
+
+- 빈 등록 유무에 따라 달라진다.
 
 ```java
     public MemberRepositoryImpl(EntityManager em) {
@@ -2886,7 +2892,7 @@ java.lang.NullPointerException: Cannot invoke "com.study.querydsl.repository.Mem
 ### 4) JPA 설계 관점 : 특정 API에 종속적인 경우
 
 - 화면별로 추가적인 특정 query 메서드 만들기! 
-	- 기본적으로는 공통 API 메서드 사용하기
+	- 기본적으로는 MemberRepository 같이 공통 모듈 API 사용
 
 ```java
 package com.study.querydsl.repository;
@@ -2951,5 +2957,443 @@ public class MemberQueryRepository {
 }
 
 ```
+
+
+
+---
+
+<br><br>
+
+### 5) QueryDsl 페이징 연동
+
+#### a. 실습 코드 
+
+- MemberRepositoryCustom.java
+
+
+```java
+package com.study.querydsl.repository;
+
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+
+public interface MemberRepositoryCustom {
+    // Querydsl 전용 기능인 회원 search를 작성할 수 없다.
+    // 따라서, 사용자 정의 리포지토리 필요
+    List<MemberTeamDto> search(MemberSearchCondition condition);
+    Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable);
+    Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable);
+    Page<MemberTeamDto> searchPageComplex2(MemberSearchCondition condition, Pageable pageable);
+
+}
+
+```
+
+---
+
+<br>
+
+- MemberRepositoryImpl.java
+
+```java
+package com.study.querydsl.repository;
+
+import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import com.study.querydsl.dto.QMemberTeamDto;
+import com.study.querydsl.entity.Member;
+import jakarta.persistence.EntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.support.PageableUtils;
+import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+import static com.study.querydsl.entity.QMember.member;
+import static com.study.querydsl.entity.QTeam.team;
+import static io.micrometer.common.util.StringUtils.isEmpty;
+
+
+public class MemberRepositoryImpl implements MemberRepositoryCustom {
+
+    private final JPAQueryFactory queryFactory;
+
+    // 주입!
+    public MemberRepositoryImpl(EntityManager em) {
+        this.queryFactory = new JPAQueryFactory(em);
+    }
+
+    @Override
+    public List<MemberTeamDto> search(MemberSearchCondition condition) {
+        return queryFactory
+                .select(new QMemberTeamDto(
+                        member.id,
+                        member.username,
+                        member.age,
+                        team.id,
+                        team.name))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()))
+                .fetch();
+    }
+
+    // 1) 단순한 페이징, fetchResults()로 select와 count 한 번에 쿼리 실행
+    // 실제 쿼리는 2번 호출
+    @Override
+    public Page<MemberTeamDto> searchPageSimple(MemberSearchCondition condition, Pageable pageable) {
+
+        // fetchResults()를 사용하려면, 일단, QueryResults<>에 담아서 인자들을 뽑아낸다.
+        QueryResults<MemberTeamDto> results = queryFactory
+                .select(new QMemberTeamDto(
+                        member.id,
+                        member.username,
+                        member.age,
+                        team.id,
+                        team.name))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        List<MemberTeamDto> content = results.getResults();
+        long total = results.getTotal();
+
+        // Page<> '인터페이스'인데 이것의 '구현체'로서 PageImpl<>를 이용하여, 뽑아낸 인자들을 넣어준다.
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    // 2) 데이터 내용과 전체 카운트를 별도로 조회하는 방법
+    @Override
+    public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) {
+
+        // ** fetchResults = fetch() + fetchCount() **
+        // 전체 카운트를 조회 하는 방법을 최적화 할 수 있으면 이렇게 분리하면 된다.
+        // (예를 들어서, 전체 카운트를 조회할 때, 조인 쿼리를 줄일 수 있다면 상당한 효과가 있다.)
+        List<MemberTeamDto> content = queryFactory
+                .select(new QMemberTeamDto(
+                        member.id,
+                        member.username,
+                        member.age,
+                        team.id,
+                        team.name))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        long total = queryFactory
+                .select(member)
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()))
+                .fetchCount();
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public Page<MemberTeamDto> searchPageComplex2(MemberSearchCondition condition, Pageable pageable) {
+
+        // ** fetchResults = fetch() + fetchCount() **
+        // 전체 카운트를 조회 하는 방법을 최적화 할 수 있으면 이렇게 분리하면 된다.
+        // (예를 들어서, 전체 카운트를 조회할 때, 조인 쿼리를 줄일 수 있다면 상당한 효과가 있다.)
+        List<MemberTeamDto> content = queryFactory
+                .select(new QMemberTeamDto(
+                        member.id,
+                        member.username,
+                        member.age,
+                        team.id,
+                        team.name))
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Member> countQuery = queryFactory
+                .select(member)
+                .from(member)
+                .leftJoin(member.team, team)
+                .where(usernameEq(condition.getUsername()),
+                        teamNameEq(condition.getTeamName()),
+                        ageGoe(condition.getAgeGoe()),
+                        ageLoe(condition.getAgeLoe()));
+
+
+        return PageableExecutionUtils.getPage(content, pageable, () -> countQuery.fetchCount());
+//        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
+
+        // ** 람다나 stream API를 이용하는 경우, count 쿼리가 생략 가능한 경우 생략해서 처리 **
+        // 1) 페이지 시작이면서 컨텐츠 사이즈가 페이지 사이즈보다 작을 때
+        // 2) 마지막 페이지 일 때 (offset + 컨텐츠 사이즈를 더해서 전체 사이즈 구함, 더 정확히는 마지막 페이지이면서 컨텐츠 사이즈가 페이지 사이즈보다 작을 때)
+    }
+
+
+    private BooleanExpression usernameEq(String username) {
+        return isEmpty(username) ? null : member.username.eq(username);
+    }
+
+    private BooleanExpression teamNameEq(String teamName) {
+        return isEmpty(teamName) ? null : team.name.eq(teamName);
+    }
+
+    private BooleanExpression ageGoe(Integer ageGoe) {
+        return ageGoe == null ? null : member.age.goe(ageGoe);
+    }
+
+    private BooleanExpression ageLoe(Integer ageLoe) {
+        return ageLoe == null ? null : member.age.loe(ageLoe);
+    }
+}
+
+```
+
+---
+
+<br>
+
+- MemberController.java
+
+
+```java
+package com.study.querydsl.controller;
+
+import com.study.querydsl.dto.MemberSearchCondition;
+import com.study.querydsl.dto.MemberTeamDto;
+import com.study.querydsl.repository.MemberJpaRepository;
+import com.study.querydsl.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+public class MemberController {
+
+    private final MemberJpaRepository memberJpaRepository;
+    private final MemberRepository memberRepository;
+
+    @GetMapping("/v1/members")
+    public List<MemberTeamDto> searchMemberV1(MemberSearchCondition condition){
+        return memberJpaRepository.searchByParameter(condition);
+    }
+
+    @GetMapping("/v2/members")
+    public Page<MemberTeamDto> searchMemberV2(MemberSearchCondition condition, Pageable pageable){
+        return memberRepository.searchPageSimple(condition, pageable);
+    }
+
+    @GetMapping("/v3/members")
+    public Page<MemberTeamDto> searchMemberV3(MemberSearchCondition condition, Pageable pageable){
+        return memberRepository.searchPageComplex(condition, pageable);
+    }
+
+    @GetMapping("/v4/members")
+    public Page<MemberTeamDto> searchMemberV4(MemberSearchCondition condition, Pageable pageable){
+        return memberRepository.searchPageComplex2(condition, pageable);
+    }
+
+}
+
+```
+
+
+
+---
+
+<br><br>
+
+#### b. 실습 주의 :
+
+- 해당 실습을 위해서, 기존 H2 DB에 테이블이 존재한다면, `drop all objects` 명령어로 기존 테이블을 제거해야 한다. 
+	- InitMember에서 샘플 데이터가 만들어지기 때문이다. 
+
+
+---
+
+<br><br>
+
+#### c. PostMan 실습 및 결과
+
+
+- PostMan API URL : `http://localhost:8080/v4/members?size=5&page=2`
+
+
+<br>
+
+```java
+{
+    "content": [
+        {
+            "memberId": 11,
+            "username": "member10",
+            "age": 10,
+            "teamId": 1,
+            "teamName": "teamA"
+        },
+        {
+            "memberId": 12,
+            "username": "member11",
+            "age": 11,
+            "teamId": 2,
+            "teamName": "teamB"
+        },
+        {
+            "memberId": 13,
+            "username": "member12",
+            "age": 12,
+            "teamId": 1,
+            "teamName": "teamA"
+        },
+        {
+            "memberId": 14,
+            "username": "member13",
+            "age": 13,
+            "teamId": 2,
+            "teamName": "teamB"
+        },
+        {
+            "memberId": 15,
+            "username": "member14",
+            "age": 14,
+            "teamId": 1,
+            "teamName": "teamA"
+        }
+    ],
+    "pageable": {
+        "sort": {
+            "empty": true,
+            "sorted": false,
+            "unsorted": true
+        },
+        "offset": 10,
+        "pageNumber": 2,
+        "pageSize": 5,
+        "paged": true,
+        "unpaged": false
+    },
+    "last": false,
+    "totalPages": 20,
+    "totalElements": 100,
+    "first": false,
+    "size": 5,
+    "number": 2,
+    "sort": {
+        "empty": true,
+        "sorted": false,
+        "unsorted": true
+    },
+    "numberOfElements": 5,
+    "empty": false
+}
+```
+
+---
+
+<br><br>
+
+#### d. 테스트 후 로그 확인 
+
+##### a) 쿼리를 2번 날림
+
+- select, count 쿼리 2번 
+	- PostMan API URL : `http://localhost:8080/v4/members?size=5&page=2`
+	
+```java
+2023-09-10T17:27:19.179+09:00 DEBUG 4503 --- [nio-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        m1_0.member_id,
+        m1_0.username,
+        m1_0.age,
+        m1_0.team_id,
+        t1_0.name 
+    from
+        member m1_0 
+    left join
+        team t1_0 
+            on t1_0.team_id=m1_0.team_id offset ? rows fetch first ? rows only
+2023-09-10T17:27:19.183+09:00 TRACE 4503 --- [nio-8080-exec-6] org.hibernate.orm.jdbc.bind              : binding parameter [1] as [INTEGER] - [0]
+2023-09-10T17:27:19.185+09:00 TRACE 4503 --- [nio-8080-exec-6] org.hibernate.orm.jdbc.bind              : binding parameter [2] as [INTEGER] - [10]
+2023-09-10T17:27:19.207+09:00  INFO 4503 --- [nio-8080-exec-6] p6spy                                    : #1694334439207 | took 20ms | statement | connection 14| url jdbc:h2:tcp://localhost/~/querydsl
+select m1_0.member_id,m1_0.username,m1_0.age,m1_0.team_id,t1_0.name from member m1_0 left join team t1_0 on t1_0.team_id=m1_0.team_id offset ? rows fetch first ? rows only
+select m1_0.member_id,m1_0.username,m1_0.age,m1_0.team_id,t1_0.name from member m1_0 left join team t1_0 on t1_0.team_id=m1_0.team_id offset 0 rows fetch first 10 rows only;
+2023-09-10T17:27:19.210+09:00 DEBUG 4503 --- [nio-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        count(m1_0.member_id) 
+    from
+        member m1_0
+2023-09-10T17:27:19.212+09:00  INFO 4503 --- [nio-8080-exec-6] p6spy                                    : #1694334439212 | took 0ms | statement | connection 14| url jdbc:h2:tcp://localhost/~/querydsl
+select count(m1_0.member_id) from member m1_0
+select count(m1_0.member_id) from member m1_0;
+```
+
+----
+
+<br>
+
+##### b) 쿼리를 1번 날림
+
+- select 1번 : 쿼리 사이즈보다 조회 사이즈가 클 경우, count 쿼리를 조회하지 않는다.  
+	- PostMan API URL : `http://localhost:8080/v4/members?size=200&page=0`
+
+<br>
+- 이것은 queryDSL에서 제공해주는 기능이다.
+
+<br>
+
+```java
+2023-09-10T17:27:08.181+09:00 DEBUG 4503 --- [nio-8080-exec-4] org.hibernate.SQL                        : 
+    select
+        m1_0.member_id,
+        m1_0.username,
+        m1_0.age,
+        m1_0.team_id,
+        t1_0.name 
+    from
+        member m1_0 
+    left join
+        team t1_0 
+            on t1_0.team_id=m1_0.team_id offset ? rows fetch first ? rows only
+```
+
+
+
 
 
