@@ -192,7 +192,8 @@ public interface EmployeeFactory {
 	public Employee makeEmployee(EmployeeRecord r) throws InvalidEmployeeType; 
 } 
 
-@Configure public class EmployeeFactoryImpl implements EmployeeFactory { 
+@Configure 
+public class EmployeeFactoryImpl implements EmployeeFactory { 
 	public Employee makeEmployee(EmployeeRecord r) throws InvalidEmployeeType { 
 		switch(r.type){ 
 		case COMMISSION: return new ComissionedEmployee(r); 
@@ -202,7 +203,8 @@ public interface EmployeeFactory {
 	} 
 } 
 
-@Service public class EmployService{ 
+@Service 
+public class EmployService{ 
 	private EmployeeFactoryImpl employeeFactory; 
 
 	public Money getTotalAmount(EmployeeRecord r){ 
