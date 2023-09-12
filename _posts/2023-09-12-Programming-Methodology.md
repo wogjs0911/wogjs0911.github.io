@@ -93,11 +93,291 @@ tags: CleanCode OOP
 
 <br><br>
 
+### 4) 설계 예시
+
+#### a. 수정 방향
+
+- 코드를 읽는 사람이 쉽게 이해할 수 있고 예측할 수 있도록 수정 해보자.
+
+- 다음 코드를 비즈니스 요구사항의 변경에 유연하고 기능 확장성을 가지는 코드로 수정 해보자.
+
+
+<br>
+
+#### b. 예제 코드(수정 전)
+
+##### a) Entity 모음 + 비즈니스 로직
+
+- Invitation.java
+  
+```java
+public class Invitation {
+    private LocalDateTime when;
+}
+
+```
+
+
+<br>
+- Ticket.java
+  
+```java
+public class Ticket {
+    private Long fee;
+
+    public Ticket(Long fee) {
+        this.fee = fee;
+    }
+
+    public Long getFee() {
+        return fee;
+    }
+}
+
+```
+
+
+<br>
+- Audience.java
+  
+```java
+public class Audience {
+    private final Bag bag;
+
+    public Audience(Bag bag){
+        this.bag = bag;
+    }
+
+    public long buy(Ticket t){
+        return bag.hold(t);
+    }
+}
+```
+
+<br>
+- Bag.java
+  
+```java
+public class Bag {
+    private Long amount;
+    private final Invitation invitation;
+    private Ticket ticket;
+
+    public Bag(long amount) {
+        this(null, amount);
+    }
+
+    public Bag(Invitation invitation, long amount) {
+        this.invitation = invitation;
+        this.amount = amount;
+    }
+
+    public Long hold(Ticket ticket) {
+        if (hasInvitation()) {
+            setTicket(ticket);
+            return 0L;
+        } else {
+            setTicket(ticket);
+            minusAmount(ticket.getFee());
+            return ticket.getFee();
+        }
+    }
+
+    private boolean hasInvitation() {
+        return invitation != null;
+    }
+    private boolean hasTicket() {
+        return ticket != null;
+    }
+
+    private void setTicket(Ticket ticket) {
+        this.ticket = ticket;
+    }
+    private void minusAmount(long amount) {
+        this.amount -= amount;
+    }
+    private void plusAmount(long amount) {
+        this.amount += amount;
+    }
+}
+
+```
+
+
+
+<br>
+- Theater.java
+  
+```java
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class Theater {
+
+    public void enter(Audience audience, TicketSeller ticketSeller){
+        long ticketFee = ticketSeller.sellTo(audience);
+        ticketSeller.receivePay(ticketFee);
+    }
+
+}
+
+```
+
+
+<br>
+- TicketOffice.java
+  
+```java
+import java.util.Arrays;
+import java.util.List;
+
+public class TicketOffice {
+    private long amount;
+    private final List<Ticket> tickets;
+
+    public TicketOffice(Long amount, Ticket ... tickets) {
+        this.amount = amount;
+        this.tickets = Arrays.asList(tickets);
+    }
+
+    public Ticket publishTicket(){
+        return getTicket();
+    }
+
+    public void increaseSalesAmount(long amount){
+        plusAmount(amount);
+    }
+
+    public Ticket getTicket(){
+        return tickets.get(0);
+    }
+
+    public void minusAmount(long amount) {
+        this.amount -= amount;
+    }
+    private void plusAmount(long amount) {
+        this.amount += amount;
+    }
+}
+
+```
+
+
+<br>
+- TicketSeller.java
+  
+```java
+public class TicketSeller {
+    private final TicketOffice ticketOffice;
+
+    public TicketSeller(TicketOffice ticketOffice) {
+        this.ticketOffice = ticketOffice;
+    }
+
+    public long sellTo(Audience a) {
+        return a.buy(ticketOffice.publishTicket());
+    }
+
+    public void receivePay(long ticketFee){
+        ticketOffice.increaseSalesAmount(ticketFee);
+
+    }
+}
+```
+
+---
+
+<br><br>
+
+##### b) Controller, Service 단
+
+<br>
+- TheaterController.java
+  
+```java
+import com.cafe.service.CafeService;
+import com.theater.service.TheaterService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+
+@RestController
+@RequestMapping("/theater")
+@RequiredArgsConstructor
+public class TheaterController {
+    private final TheaterService theaterService;
+
+    @GetMapping("hello")
+    public String welcomeMessage(){
+        return "Welcome to The Wanted Theater";
+    }
+
+    @GetMapping("enter")
+    public String enter(){
+        return theaterService.enter();
+    }
+}
+
+```
+
+<br>
+- TheaterService.java
+  
+```java
+import com.theater.service.handler.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class TheaterService {
+    private final Theater theater;
+
+    public String enter(){
+        theater.enter(new Audience(new Bag(1000L)),
+                new TicketSeller(new TicketOffice(20000L, new Ticket(100L))));
+        return "Have a good time.";
+
+    }
+}
+
+
+```
+
+---
+
+<br>
+
+#### c. 예제 코드(수정 후)
+
+- Bag.java
+
+
+```java
+```
+
+<br>
+- TicketSeller.java
+
+
+```java
+```
+
+
+---
+
+<br><br>
+
 # 2. OOP
 
 - '오브젝트'(조영호) 참고
 
-### 0) 들어가기 전
+### 0) 들어가기 전 및 실습 코드 
  
 - 객체지향은 객체만 존재하면 의미가 없다. 메시지를 주고받아야 진짜 의미가 있는것이다.
 
@@ -107,7 +387,276 @@ tags: CleanCode OOP
         - Ex) 새 직원 유형을 추가할 때 마다 코드를 변경해야하기 때문이다.새 직원 유형을 추가할 때 마다 코드를 변경해야하기 때문이다.
             - 해결방법 : 팩토리 패턴으로 추상 팩토리 메서드를 이용하는 방법!
 
+---
+
 <br>
+
+#### a. 실습 코드 :
+
+- 수정하기 
+	- 각각의 객체들이 적절한 책임과 책임의 범위를 가지고 있는지 확인해보고, 너무 많은 책임과 넓은 범위의 책임을 가지고 있다면 적절하게 수정해보자.
+
+<br>
+- Barista.java
+
+```java
+import java.util.UUID;
+ 
+public class Barista {
+    private int rank; // 0: Beginner 1: Middle 2: Master
+    private int status; // 0: Waiting 1: Making
+
+    public Barista(int rank, int status) {
+        this.rank = rank;
+        this.status = status;
+    }
+
+    private void setRank(int rank) {
+        this.rank = rank;
+    }
+
+    private void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String makeBeverageTo(UUID orderId, Order o) {
+        o.changeOrderStatus(1);
+        StringBuilder makedOrders = new StringBuilder();
+        makedOrders.append("주문ID: ")
+            .append(orderId.toString())
+            .append("\n");
+        o.getOrderDetailInfo().forEach(((beverage, quantity) -> {
+            makedOrders.append(beverage.getMenuName())
+                .append(":")
+                .append(quantity);
+        }));
+        o.changeOrderStatus(2);
+        return makedOrders.toString();
+    }
+
+}
+
+```
+
+
+<br>
+- Beverage.java
+
+```java
+import java.util.Collections;
+import java.util.Map;
+
+public class Beverage {
+    private final String menuName;
+    private final long price;
+    private final Map<String, Long> extraRecipe;
+
+    public Beverage(String m, long p, Map<String, Long> r) {
+        this.menuName = m;
+        this.price = p;
+        this.extraRecipe = r;
+    }
+
+    public String getMenuName(){
+        return menuName;
+    }
+
+    public Beverage(String m, long p) {
+        this(m, p, Collections.emptyMap());
+    }
+
+    public long calculatePrice() {
+        long extraRecipeTotalAmount = 0L;
+        if (!extraRecipe.isEmpty()) {
+            for (String extraMenu : extraRecipe.keySet()) {
+                extraRecipeTotalAmount += extraRecipe.get(extraMenu);
+            }
+        }
+        return getPrice() + extraRecipeTotalAmount;
+    }
+
+    private long getPrice() {
+        return this.price;
+    }
+
+
+}
+
+```
+
+
+<br>
+- Cashier.java
+
+```java
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
+
+public class Cashier {
+    private static final Cafe cafe = new Cafe();
+    private static final OrderBook orderBook  = new OrderBook();
+
+    public UUID takeOrder(Map<Beverage, Integer> receivedOrders) {
+        UUID newOrderId = createOrderId();
+        orderBook.add(newOrderId, new Order(receivedOrders));
+
+        return newOrderId;
+    }
+
+    public String sendOrder(Barista toBarista, UUID withOrderId){
+        return toBarista.makeBeverageTo(withOrderId, orderBook.getOrder(withOrderId));
+    }
+
+    public String completeOrder(UUID u, String message){
+        orderBook.remove(u);
+        return message;
+    }
+
+    public long calculateTotalPrice(Map<Beverage, Integer> receivedOrders) {
+        AtomicLong totalPrice = new AtomicLong(0L);
+        receivedOrders.forEach(((beverage, quantity) -> {
+            totalPrice.addAndGet((long) beverage.calculatePrice() * quantity);
+        }));
+
+        return totalPrice.get();
+    }
+
+    private UUID createOrderId(){
+        return UUID.randomUUID();
+    }
+
+}
+
+```
+
+
+
+<br>
+- Cafe.java
+
+```java
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Cafe {
+    private final String name;
+    private Long sales;
+
+    public Cafe(){
+        this.name = "wantedCodingCafe";
+        this.sales = 10000L;
+    }
+
+    public String getCafeName(){
+        return name;
+    }
+
+    public void plusSales(Long amount){
+        this.sales += amount;
+    }
+
+    public void minusSales(Long amount){
+        this.sales -= amount;
+    }
+}
+
+```
+
+<br>
+- Customer.java
+
+```java
+import java.util.Map;
+
+public class Customer {
+    private String paymentMethod;
+    private final Cashier cashier;
+    private final Map<Beverage, Integer> myOrders;
+
+    public Customer(String p, Map<Beverage, Integer> o, Cashier c) {
+        this.paymentMethod = p;
+        this.myOrders = o;
+        this.cashier = c;
+    }
+
+    private void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String buy() {
+        long totalPrice = cashier.calculateTotalPrice(myOrders);
+        return cashier.takeOrder(myOrders, totalPrice);
+    }
+}
+
+```
+
+
+<br>
+- Order.java
+
+```java
+import java.util.*;
+
+public class Order {
+    private final Map<Beverage, Integer> orderGroup;
+    private int status; // 0: pending 1: processing 2: completed
+
+    public Order(Map<Beverage, Integer> o, int s){
+        this.orderGroup = o;
+        this.status = s;
+    }
+
+    public Order(Map<Beverage, Integer> o){
+        this(o, 0);
+    }
+
+    public Map<Beverage, Integer> getOrderDetailInfo(){
+        return this.orderGroup;
+    }
+
+    public void changeOrderStatus(int orderStatus) {
+        updateOrder(orderStatus);
+    }
+
+    private void updateOrder(int status) {
+        this.status = status;
+    }
+}
+
+```
+
+
+
+<br>
+- OrderBook.java
+
+```java
+import java.util.HashMap;
+import java.util.UUID;
+
+public class OrderBook {
+    private static final HashMap<UUID, Order> orderForms = new HashMap<>();
+
+    public void add(UUID u, Order o){
+        orderForms.put(u, o);
+    }
+    public void remove(UUID u){
+        orderForms.remove(u);
+    }
+
+    public Order getOrder(UUID u){
+        return orderForms.get(u);
+    }
+}
+
+```
+
+---
+
+<br><br>
 
 ### 1) 객체 및 캡슐화를 이용하는 과정**
 
@@ -196,9 +745,12 @@ public interface EmployeeFactory {
 public class EmployeeFactoryImpl implements EmployeeFactory { 
 	public Employee makeEmployee(EmployeeRecord r) throws InvalidEmployeeType { 
 		switch(r.type){ 
-		case COMMISSION: return new ComissionedEmployee(r); 
-		case HOURLY: return new HourlyEmployee(r); 
-		case SALARIED: return new SalariedEmployee(r); 
+			case COMMISSION: 
+				return new ComissionedEmployee(r); 
+			case HOURLY: 
+				return new HourlyEmployee(r); 
+			case SALARIED: 
+				return new SalariedEmployee(r); 
 		}
 	} 
 } 
@@ -215,8 +767,8 @@ public class EmployService{
 			else 
 				return Money.ZERO; 
 			}
-		}
 	}
+}
 ```
 
 
@@ -251,7 +803,7 @@ public class EmployService{
 
 <br><br>
 
-### 6) 언제 인터페이스? 언제 추상화를 쓰는지?
+### 6) 언제 인터페이스? 언제 추상화를 쓰는지?**
 
 - a. 추상화가 되어있는 방법에서 상태값을 공유해서 사용하면, 추상화를 사용하고 아니라면 인터페이스를 사용한다!
 
@@ -280,7 +832,12 @@ public class EmployService{
 
 - 멀티 모듈, 자료구조, 알고리즘
 
-- 네트워크, 
+- 네트워크, DB, OS 정리
+
+- 개발 : 
+	- Redis : Refresh Token, Access Token
+	- Kafka pipe line
+	- Spring Batch
 
 
 
