@@ -97,9 +97,9 @@ tags: CleanCode OOP
 
 #### a. 수정 방향
 
-- 코드를 읽는 사람이 쉽게 이해할 수 있고 예측할 수 있도록 수정 해보자.
+- 다음 코드를 코드를 읽는 사람이 쉽게 이해할 수 있고 예측할 수 있도록 수정해보자!
 
-- 다음 코드를 비즈니스 요구사항의 변경에 유연하고 기능 확장성을 가지는 코드로 수정 해보자.
+- 다음 코드를 비즈니스 요구사항의 변경에 유연하고 기능 확장성을 가지는 코드로 수정해보자!
 
 
 <br>
@@ -329,6 +329,7 @@ public class TheaterController {
 - TheaterService.java
   
 ```java
+
 import com.theater.service.handler.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -391,7 +392,7 @@ public class TheaterService {
 
 <br>
 
-#### a. 실습 코드 :
+#### a. 실습 코드(수정 전) :
 
 - 수정하기 
 	- 각각의 객체들이 적절한 책임과 책임의 범위를 가지고 있는지 확인해보고, 너무 많은 책임과 넓은 범위의 책임을 가지고 있다면 적절하게 수정해보자.
@@ -652,6 +653,102 @@ public class OrderBook {
     }
 }
 
+```
+
+<br>
+- CafeController.java
+
+```java
+import com.cafe.service.CafeService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+
+@RestController
+@RequestMapping("/cafe")
+@RequiredArgsConstructor
+public class CafeController {
+    private final CafeService cafeService;
+
+    @GetMapping("hello")
+    public String welcomeMessage(){
+        return "Welcome to The Wanted coding cafe!!";
+    }
+
+    @GetMapping("test")
+    public String test(){
+        return "test";
+    }
+
+    @GetMapping("order")
+    public String orderFromMenu(){
+        HashMap<String, Integer> menu = new HashMap<String, Integer>();
+        menu.put("AMERICANO", 3);
+        return cafeService.orderFrom(menu);
+    }
+}
+
+```
+
+
+
+<br>
+- CafeController.java
+
+```java
+import com.cafe.service.handler.Cafe;
+import com.cafe.service.handler.Cashier;
+import com.cafe.service.handler.Customer;
+import com.cafe.service.handler.Beverage;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class CafeService {
+    private final Cafe wCafe;
+
+    public String orderFrom(HashMap<String, Integer> menu){
+        // 들어 온 주문에 따라서 적절한 `Beverage` 객체를 상속 받은 객체를 생성
+        // Cashier 생성자 파라미터에 Barista 추가 필요
+        Cashier cashier = new Cashier(wCafe);
+        Map<Beverage, Integer> myOrders = new HashMap<>();
+        myOrders.put(new Americano(), 3);
+        Customer c1 = new Customer("Card", myOrders);
+        return c1.buyCoffee(cashier);
+    }
+}
+
+```
+
+
+---
+
+#### b. 실습 코드(수정 후) :
+
+<br>
+- Beverage.java
+
+```java
+```
+
+<br>
+- Cashier.java
+
+```java
+```
+
+
+<br>
+- Barista.java
+
+```java
 ```
 
 ---
