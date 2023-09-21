@@ -108,7 +108,7 @@ tags: springboot JPA Hibernate
 
 <br><br>
 
-# 3. JPA 연관관계
+# 4. JPA 연관관계
 
 
 ### 1) JPA 연관관계 핵심 개념**
@@ -150,7 +150,7 @@ tags: springboot JPA Hibernate
 
 ### 3) 연관관계 매핑 종류
 
-- 일대다 관계 : '1'이 연관관계의 주인이지만, 'N'에서 외래키를 관리하는 희한한 구조이다.(객체와 RDB의 구조 차이로 인해)
+- 일대다 관계 : '1'이 연관관계의 주인이지만, 'N'에서 외래키를 관리하는 희안한 구조이다.(객체와 RDB의 구조 차이로 인해)
 	- 외래키가 반대편 테이블에 있어서 불편하며, 그래서 다대일관계를 많이 이용하자!
 
 <br>
@@ -164,7 +164,7 @@ tags: springboot JPA Hibernate
 
 <br><br>
 
-# 4. 고급 매핑
+# 5. 고급 매핑
 
 ### 1) 상속 매핑
 
@@ -205,7 +205,7 @@ tags: springboot JPA Hibernate
 
 <br><br>
 
-# 5. 프록시 개념
+# 6. 프록시 개념
 
 - 프록시 객체는 한번만 초기화되며 원본 엔티티를 상속받는다!
 
@@ -227,7 +227,7 @@ tags: springboot JPA Hibernate
 
 <br><br>
 
-# 6. 즉시로딩, 지연로딩
+# 7. 즉시로딩, 지연로딩
 
 - Member 테이블을 조회할 때,  Member 테이블과 Team 테이블을 함께 조회해야 하는지?
 	- 즉시 로딩(EAGER)의 경우에는 Member 테이블에 연관된 Team 테이블 개수마다 쿼리가 실행된다. 이것이 Jpql의 N+1 문제점이다.
