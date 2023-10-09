@@ -207,7 +207,7 @@ tags: springboot JPA Hibernate
 
 # 6. 프록시 개념
 
-- 프록시 객체는 한번만 초기화되며 원본 엔티티를 상속받는다!
+- 프록시 객체는 한 번만 초기화되며 원본 엔티티를 상속받는다!**
 
 <br>
 - 기존의 테이블을 복사해다가 껍데기를 사용하는 경우
@@ -229,6 +229,8 @@ tags: springboot JPA Hibernate
 
 # 7. 즉시로딩, 지연로딩
 
+### 0) 개념 정리*
+
 - Member 테이블을 조회할 때,  Member 테이블과 Team 테이블을 함께 조회해야 하는지?
 	- 즉시 로딩(EAGER)의 경우에는 Member 테이블에 연관된 Team 테이블 개수마다 쿼리가 실행된다. 이것이 Jpql의 N+1 문제점이다.
 
@@ -241,6 +243,125 @@ tags: springboot JPA Hibernate
 	- @ManyToOne, @OneToOne
 	
 <br>
-- 결론 : 가급적 지연로딩 이용하기
+- 결론 : 가급적 지연로딩 이용하기**\
+	- 즉시 로딩은 상상하지 못한 쿼리가 나간다.
+
+<br>	
+- 중요** : JPQL fetch 조인이나, 엔티티 그래프 기능을 사용해라!**
+
+
+---
+
+<br><br>
+
+### 1) 지연 로딩 
+
+- Member와 Team 테이블에서 원하는 테이블만 따로 조회가 가능하다.
+
+```java
+@Entity 
+public class Member {
+ 
+	@Id
+	@GeneratedValue
+	private Long id;
+	 
+	@Column(name = "USERNAME")
+	private String name;
+	 
+	@ManyToOne(fetch = FetchType.LAZY) //**
+	@JoinColumn(name = "TEAM_ID")
+	private Team team;
+	..
+}
+```
+
+---
+
+<br><br>
+
+### 2) 즉시 로딩 
+
+- Member와 Team 테이블을 함께 조회!
+
+```java
+@Entity
+public class Member {
+ 
+	@Id
+	@GeneratedValue
+	private Long id;
+	 
+	@Column(name = "USERNAME")
+	private String name;
+	 
+	@ManyToOne(fetch = FetchType.EAGER) //**
+	@JoinColumn(name = "TEAM_ID")
+	private Team team;
+	..
+}
+```
+
+
+---
+
+<br><br>
+
+# 8. CASCADE, 고아객체
+
+### 1) CASCADE
+
+#### a. CASCADE 개념
+
+- 특정 엔티티를 영속 상태로 만들 때 연관된 엔티티도 함께 영속 상태로 만들도 싶을 때 사용한다. DB의 CASCADE 속성과도 같은 의미
+	- 부모 엔티티를 저장할 때 자식 엔티티도 함께 저장.
+
+<br>
+
+```java
+@OneToMany(mappedBy="parent", cascade=CascadeType.PERSIST)
+```
+
+<br>
+#### b. CASCADE 주의점** 
+
+- 영속성 전이는 연관관계를 매핑하는 것과 아무 관련이 없음 
+
+- 엔티티를 영속화할 때 연관된 엔티티도 함께 영속화하는 편리함을 제공할 뿐
+
+
+---
+
+<br>
+
+#### c. 종류 
+
+- ALL: 모두 적용
+
+- PERSIST: 영속
+
+- REMOVE: 삭제
+
+- MERGE: 병합
+
+- REFRESH: REFRESH
+
+- DETACH: DETACH
+
+
+---
+
+<br><br>
+
+### 2) 고아 객체
+
+
+
+
+
+
+
+
+
 
 
