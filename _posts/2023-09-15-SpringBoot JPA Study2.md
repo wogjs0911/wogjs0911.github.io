@@ -712,5 +712,123 @@ public class Member {
 ```
 
 
+---
+
+<br><br>
+
+# 11. 객체지향 쿼리 언어
+
+### 1) 페치 조인(fetch join)
+
+
+#### a. fetch join 개념
+
+- SQL 조인 종류X
+
+<br>
+- JPQL에서 성능 최적화를 위해 제공하는 기능
+
+<br>
+- 연관된 엔티티나 컬렉션을 SQL 한 번에 함께 조회하는 기능
+
+<br>
+- join fetch 명령어 사용
+
+<br>
+- 페치 조인 :
+	- `:= [ LEFT [OUTER] | INNER ] JOIN FETCH 조인경로`
+
+---
+
+<br><br>
+
+#### b. fetch join 사용 과정 
+
+- 회원을 조회하면서 연관된 팀도 함께 조회(SQL 한 번에)
+
+<br>
+- SQL을 보면 회원 뿐만 아니라 팀(T.*)도 함께 SELECT
+
+<br>
+- [JPQL]
+	- select m from Member m join fetch m.team
+
+<br>
+- [SQL]
+	- `SELECT M.*, T.* FROM MEMBER M`
+	- `INNER JOIN TEAM T ON M.TEAM_ID=T.ID`
+
+
+---
+
+<br><br>
+
+### 2) 페치 조인 사용 예시
+
+#### a. 페치 조인 사용 예시
+
+
+```java
+
+String jpql = "select m from Member m join fetch m.team";
+List<Member> members = em.createQuery(jpql, Member.class)
+			.getResultList();
+
+for (Member member : members) {
+
+	//페치 조인으로 회원과 팀을 함께 조회해서 지연 로딩X
+	System.out.println("username = " + member.getUsername() + ", " +
+	"teamName = " + member.getTeam().name());
+}
+
+```
+
+---
+
+
+<br><br>
+
+#### b. 컬렉션 페치 조인 사용 코드
+
+
+```java
+
+String jpql = "select t from Team t join fetch t.members where t.name = '팀A'"
+List<Team> teams = em.createQuery(jpql, Team.class).getResultList();
+
+for(Team team : teams) {
+	System.out.println("teamname = " + team.getName() + ", team = " + team);
+
+	for (Member member : team.getMembers()) {
+	
+		//페치 조인으로 팀과 회원을 함께 조회해서 지연 로딩 발생 안함
+		System.out.println(“-> username = " + member.getUsername()+ ", member = " + member);
+	}
+}
+```
+
+---
+
+<br><br>
+
+### 3) 페치 조인 사용하는 이유**
+
+- 실무에서 '지연로딩'을 전체적으로 주로 사용하는데 다른 테이블을 함께 조회하고 싶을 때, fetch join을 사용하여 일부분만 함께 테이블을 조회할 수 있도록 하자! 
+
+
+
+---
+
+<br><br>
+
+### 4) 다형성 쿼리, 엔티티 직접 사용
+
+
+
+---
+
+<br><br>
+
+### 5) Named 쿼리, 벌크 연산
 
 
