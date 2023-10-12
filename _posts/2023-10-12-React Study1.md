@@ -9,8 +9,8 @@ tags: React Vite JS
 ### 1) Node.js 실행하기
 
 - Node.js 사용 시, pakage.json의 scripts에서 실행 스크립트를 추가 설정하면 Node.js 실행 시, 모든 경로를 다 써주지 않아도 된다.
-	- `node src/index.js` : 같은 것들은 하지 않아도 된다.
-	- `npm run start` : 이제는 이렇게 간단히 Node.js를 실행한다.
+	- `node src/index.js` : 이러한 명령어 같은 것들은 이젠 더 이상 사용하지 않아도 된다.
+	- `npm run start` : 이제는 이렇게 간단한 명령어로 Node.js 코드를 실행한다.
 
 
 <br>
@@ -19,7 +19,7 @@ tags: React Vite JS
 
 - package.json : 
 
-```javascript
+```json
 
 {
   "name": "section1",
@@ -130,7 +130,7 @@ console.log(color);
 - `Render Tree` : `Render Tree`는 `HTML`과 `CSS`로 표현한 각각의 요소들의 배치와 모양 그리고 스타일을 합쳐서 `웹페이지의 설계도`를 의미하는 것이다. 
 
 <br>
-- `Layout`(= Reflow), `Painting`(= Repaint)는 자주 실행하면 성능 악화가 되어 여러 수정사항을 한 번에 모아서 DOM을 업데이트 해야 한다.
+- `Layout`(= `Reflow`), `Painting`(= `Repaint`)는 자주 실행하면 성능 악화가 되어 여러 수정사항을 한 번에 모아서 DOM을 업데이트 해야 한다.
 	- Layout은 화면에 나타날 요소들의 위치와 크기를 결정하고 Painting는 실제 요소들을 화면 그려내는 과정이다.
 
 <br>
@@ -150,8 +150,9 @@ console.log(color);
 
 <br>
 - `npm create vite@latest` : `Vite`를 이용하여 React 앱 개발 환경 구성	명령어
-	- 바벨이나 웹팩를 이용할 수도 있지만 개발 환경을 구성하기 위해서는 추가적인 개념이 필요하다.
-	- 추가적으로 React를 선택하여 React 개발 환경 구축
+	- 바벨이나 웹팩를 이용할 수도 있지만 개발 환경을 구성하기 위해서는 추가적인 개념이 필요하다. 
+	- 그래서, 비교적 기본 프론트 웹 개발 환경을 구성해주는 Vite를 이용한다.
+	- Vite 명령어를 사용하고나서 프로젝트를 설치하는 과정에서 'React'를 선택하여 `React 개발 환경 구축`
 
 
 <br>
@@ -260,7 +261,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 - `export default App`처럼 사용하거나 `export default function App(){}` 처럼 사용한다.
 
 <br>
-- `useState`에서 `State`라는 중요 개념!(긱 컴포넌트의 상태 관리 개념 중요!)
+- `useState`에서 `State`라는 중요 개념!(각각의 컴포넌트 상태관리 개념 중요!)
 
 
 ```jsx
@@ -316,7 +317,7 @@ export default App
 - 초기 React 앱의 코드를 지우고 동작 원리를 이해하기 위한 샘플 코드이다.
 
 <br>
-- 'return'에서 반환되는 요소에는 항상 `최상위 태그 내부`에서 동작해야 한다. `div 태그`나 `이름이 없어도 되는 태그` 등등
+- 'return'에서 반환되는 요소는 항상 `최상위 태그 내부`에서 동작해야 한다.(`div 태그`나 `이름이 없어도 되는 태그` 등등)
 
 <br>
 - `React.StrictMode` : React 라이브러리에서 제공되는 기능 중 하나로, 개발 환경에서 애플리케이션의 잠재적인 문제를 식별하고 경고를 생성하는 데 도움을 줍니다. StrictMode를 사용하면 개발자가 더 나은 코드를 작성하고 React 애플리케이션의 성능을 최적화할 수 있습니다.
@@ -351,9 +352,10 @@ export default App;
 <br><br>
 
 - main.jsx
-	- 화면 구성
+	- 화면 구성용 템플릿 느낌 
 
 ```jsx
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
@@ -373,28 +375,257 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 # 3. React.js 입문
 
+
+### 0) 컴포넌트 사용법
+
+- 모듈 시스템 사용
+	- `/components/~~` 폴더 내부에서 컴포넌트 사용
+	- `export default function`와 `import`로 웹 구조 사용
+
+<br>
+
+---
+
+#### a. 실습 코드 
+
+<br>
+- Body.jsx
+
+```jsx
+export default function Body() {
+  return (
+    <div>
+      <h1>body</h1>
+    </div>
+  );
+}
+
+``` 
+
+<br>
+- Header.jsx
+
+
+```jsx
+const Header = () => {
+  return (
+    <header>
+      <h1>header</h1>
+    </header>
+  );
+};
+
+export default Header;
+
+``` 
+
+<br>
+- Footer.jsx
+
+
+```jsx
+export default function Footer() {
+  return (
+    <footer>
+      <h1>footer</h1>
+    </footer>
+  );
+}
+
+``` 
+
+<br>
+- App.jsx
+
+```jsx
+import "./App.css";
+import Header from "./components/Header";
+import Body from "./components/Body";
+import Footer from "./components/Footer";
+
+function App() {
+  return (
+    <>
+      <Header />
+      <Body />
+      <Footer />
+    </>
+  );
+}
+
+export default App;
+
+``` 
+
+---
+
+<br><br>
+
+
 ### 1) JSX 문법
 
+#### a. 중괄호 사용법 :
 
+- a) 변수에서 중괄호 사용 :
 
+<br>
+- b) 함수에서 중괄호 사용 :
 
+<br>
+- 아래 챕터 ` c. JSX에서 CSS 사용법` 코드 참고하기
 
+---
 
+<br><br>
 
+#### b. JS에서 객체 사용하는 방법
+
+- a) 중괄호에서 삼항연산 이용 :
+	- JSX의 html 태그에서 3항 연산 가능
+
+<br>
+- b) 변수로 따로 빼서 객체 이용 :
+	- `...buttonProps` : 객체를 변수로 따로 빼서 JS spread 문법 이용하기
+
+<br>
+	
+```jsx
+function ButtonChild() {
+  return <div>버튼의 자식 컴포넌트</div>;
+}
+
+export default function Body() {
+  const buttonProps = {
+    text: "1번 버튼",
+    color: "yellow",
+    a: 1,
+    b: 2,
+    c: 3,
+  };
+
+  return (
+    <div className="body">
+      <h1>body</h1>
+      <Button {...buttonProps}>
+        <ButtonChild />
+      </Button>
+      <Button text={"2번 버튼"} />
+      <Button text={"3번 버튼"} />
+    </div>
+  );
+}
+```
+
+---
+
+<br><br>
+
+#### c. JSX에서 CSS 사용법
+
+- `{{}}` : 중괄호 2개 이용하여 JSX에서 CSS 속성을 사용할 수 있다.
+
+<br>
+- `className` : class가 아니라 className를 이용하여 CSS를 사용할 수 있다.
+	- JSX에서 classs는 JS용 예약어이다.
+
+<br>
+
+```jsx
+
+import "./Button.css";
+
+export default function Button({ text, color, children }) {
+  return (
+    <button
+      style={{ backgroundColor: color }}
+      className="button"
+    >
+      {children}
+    </button>
+  );
+}
+
+Button.defaultProps = {
+  color: "none",
+};
+```
 
 
 ---
 
 <br><br>
 
-### 2) Props
+### 2) Props**
+
+- 부모에서 자식에게 속성을 넘겨준다. 
+
+<br>
+- 속성을 넘겨받는 방법은 3가지 정도 있다.**
+	- 아래 코드가 가장 간편한 방법 : `export default function Button({ text, color, children }) {}`
+
+<br>
+
+#### a. 예시 코드 
+
+<br>
+- Body.jsx
+
+```jsx
+import "./Body.css";
+import Button from "./Button";
+
+function ButtonChild() {
+  return <div>버튼의 자식 컴포넌트</div>;
+}
+
+export default function Body() {
+  const buttonProps = {
+    text: "1번 버튼",
+    color: "yellow",
+    a: 1,
+    b: 2,
+    c: 3,
+  };
+
+  return (
+    <div className="body">
+      <h1>body</h1>
+      <Button {...buttonProps}>
+        <ButtonChild />
+      </Button>
+      <Button text={"2번 버튼"} />
+      <Button text={"3번 버튼"} />
+    </div>
+  );
+}
 
 
+```
 
+---
 
+<br>
+- Button.jsx
 
+```jsx
+import "./Button.css";
 
+export default function Button({ text, color, children }) {
+  return (
+    <button
+      style={{ backgroundColor: color }}
+      className="button"
+    >
+      {children}
+    </button>
+  );
+}
 
+Button.defaultProps = {
+  color: "none",
+};
+
+```
 
 ---
 
@@ -402,21 +633,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 ### 3) React : 이벤트 핸들링
 
+- React의 DOM을 조작하기 위한 이벤트 핸들링 방법
 
-
-
-
-
-
----
-
-<br><br>
-
-### 4) State
-
-
-
-
+<br>
+- 복합된 이벤트 객체 사용('e') :
+	- 크로스 브라우징 이슈 해결 가능
 
 
 
@@ -424,9 +645,51 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 <br><br>
 
-### 5) State와 Props
+### 4) State**
 
+- 컴포넌트용 상태관리가 가능하다.
 
+<br>
+- `useState`를 사용해야 컴포넌트가 업데이트된다.
+	- 안쓰고 그냥 변수로 사용하면, 화면이 절대로 업데이트가 안 된다.
+
+<br>
+- import { useState } from "react"; : 이렇게 불러서 State를 사용한다.
+
+<br><br>
+
+#### a. 실습코드 :
+
+- Body.jsx
+
+```jsx
+import { useState } from "react";
+
+export default function Body() {
+  const [light, setLigth] = useState("OFF");
+
+  return (
+    <div className="body">
+      {light}
+      <button
+        onClick={() => {
+          setLigth("ON");
+        }}
+      >
+        불켜기
+      </button>
+      <button
+        onClick={() => {
+          setLigth("OFF");
+        }}
+      >
+        불끄기
+      </button>
+    </div>
+  );
+}
+
+```
 
 
 
@@ -434,11 +697,152 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 <br><br>
 
-### 6) State로 사용자 입력 관리하기
+### 5) State와 Props**
 
+- State와 Props의 관계 정리 : 
+	- 부모에서 자식에서 State를 Props로 넘겨주면, 부모의 State가 변경되면 부모의 컴포넌트가 렌더링되고 Props된 자식도 컴포넌트가 렌더링된다.(각각의 함수들이 다시 실행된다.)
 
+<br>
+- 중요*: State 변경 시, Props로 State 값을 넘겨준 부모와 자식 관계 간에 화면이 업데이트되는 것을 console.log로 테스트 해보기
 
+<br><br>
 
+#### a. 실습코드 :
+
+- Body.jsx
+
+```jsx
+import { useState } from "react";
+
+function LigthBulb({ light }) {
+  return (
+    <>
+      {light === "ON" ? (
+        <div style={{ backgroundColor: "orange" }}>ON</div>
+      ) : (
+        <div style={{ backgroundColor: "gray" }}>OFF</div>
+      )}
+    </>
+  );
+}
+
+function StaticLigthBulb() {
+  console.log("STATIC LIGTH BULB 컴포넌트 : ");
+  return <div style={{ backgroundColor: "gray" }}>OFF</div>;
+}
+
+export default function Body() {
+  const [light, setLigth] = useState("OFF");
+
+  return (
+    <div className="body">
+      <LigthBulb light={light} />
+      <StaticLigthBulb />
+      <button
+        onClick={() => {
+          setLigth("ON");
+        }}
+      >
+        불켜기
+      </button>
+      <button
+        onClick={() => {
+          setLigth("OFF");
+        }}
+      >
+        불끄기
+      </button>
+    </div>
+  );
+}
+
+```
+
+---
+
+<br><br>
+
+### 6) State로 사용자 입력 관리하기**
+
+- 실시간으로 업데이트되는 사용자의 입력을 웹 화면에서 바로 볼 수 있다.
+	- 'State' 개념과 onChange라는 '이벤트 함수' 사용
+
+<br>
+
+#### a. useState로 통합 방법
+
+- `const [state, setState] = useState({})` : 'a) `객체`로 통합시키기'
+
+<br>
+- `<input value={state.name} />` : 'b) 이렇게 `value`에 객체 속성으로 사용'
+	- `<select value={state.gender}>`
+	- `<textarea value={state.bio} />`
+
+---
+
+<br><br>
+
+#### b. onChange로 통합 방법
+
+- `[e.target.name]: e.target.value,` : 'a) JS의 `Computed` 객체(계산된 객체) 개념 사용'
+
+<br>
+- `<input name="name" />` : 'b) 이렇게 name을 설정해서 이벤트 객체의 `키` 값으로 사용'
+
+<br>
+
+```jsx
+import "./Body.css";
+import { useState } from "react";
+
+export default function Body() {
+  const [state, setState] = useState({
+    name: "",
+    gender: "",
+    bio: "",
+  });
+
+  const onChange = (e) => {
+    console.log(e.target.name + " : " + e.target.value);
+    setState({
+      ...state,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  return (
+    <div className="body">
+      <div>
+        <input
+          name="name"
+          placeholder="이름"
+          value={state.name}
+          onChange={onChange}
+        />
+      </div>
+      <div>
+        <select
+          name="gender"
+          value={state.gender}
+          onChange={onChange}
+        >
+          <option value="">밝히지 않음</option>
+          <option value="male">남성</option>
+          <option value="female">여성</option>
+        </select>
+      </div>
+      <div>
+        <textarea
+          name="bio"
+          value={state.bio}
+          onChange={onChange}
+        />
+      </div>
+    </div>
+  );
+}
+
+```
 
 
 
@@ -446,7 +850,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 <br><br>
 
-### 7) Ref
+### 7) Ref**
 
 
 
