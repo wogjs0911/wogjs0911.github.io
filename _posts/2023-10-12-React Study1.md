@@ -318,6 +318,7 @@ export default App
 
 <br>
 - 'return'에서 반환되는 요소는 항상 `최상위 태그 내부`에서 동작해야 한다.(`div 태그`나 `이름이 없어도 되는 태그` 등등)
+	- 최상위 태그는 1개만 존재해야 한다.
 
 <br>
 - `React.StrictMode` : React 라이브러리에서 제공되는 기능 중 하나로, 개발 환경에서 애플리케이션의 잠재적인 문제를 식별하고 경고를 생성하는 데 도움을 줍니다. StrictMode를 사용하면 개발자가 더 나은 코드를 작성하고 React 애플리케이션의 성능을 최적화할 수 있습니다.
@@ -464,15 +465,66 @@ export default App;
 
 ### 1) JSX 문법
 
+
 #### a. 중괄호 사용법 :
 
 - a) 변수에서 중괄호 사용 :
 
-<br>
-- b) 함수에서 중괄호 사용 :
+
+```jsx
+
+export default function Body() {
+  const number = 10;
+  const string = "hello";
+  const bool = true;
+  const obj = {
+  	a:1,
+  };
+
+  return (
+    <div className="body">
+      <h1>body</h1>
+      <h2>{10}</h2>
+      <h2>{number % 2 === 0 ? "짝수" : "홀수"}</h2>
+      <h2>{string}</h2>
+      <h2>{bool}</h2>
+      <h2>{obj.a}</h2>
+    </div>
+  );
+}
+```
+
+---
 
 <br>
-- 아래 챕터 ` c. JSX에서 CSS 사용법` 코드 참고하기
+- b) 함수에서 중괄호 사용** :
+	- `func` 함수명이 아니라 `func()` 함수 그 자체로 보내야 한다.
+
+```jsx
+export default function Body() {
+  const number = 10;
+  const string = "hello";
+  const bool = true;
+  const obj = {
+  	a:1,
+  };
+  
+  const func = () => {
+  	return "func";
+  };
+
+  return (
+    <div className="body">
+      <h1>body</h1>
+      <h2>{func()}</h2>
+      <h2>{obj.a}</h2>
+    </div>
+  );
+}
+```
+
+<br>
+- 아래 챕터 `c. JSX에서 CSS 사용법` 코드 참고하기
 
 ---
 
@@ -482,6 +534,7 @@ export default App;
 
 - a) 중괄호에서 삼항연산 이용 :
 	- JSX의 html 태그에서 3항 연산 가능
+	- 3항 연산을 이용하거나 if ~ else 문을 이용하기
 
 <br>
 - b) 변수로 따로 빼서 객체 이용 :
@@ -627,6 +680,29 @@ Button.defaultProps = {
 
 ```
 
+
+<br>
+
+#### b. Props 사용하는 다른 방법
+
+```jsx
+export default function Button(props){
+	const { color, text } = props;	
+	console.log(props);
+	
+	return {
+	<button
+		style={{
+			backgroundColor: c
+		}}
+		className="button"
+	>
+		{text}
+	</button>
+	};
+}
+```
+
 ---
 
 <br><br>
@@ -647,14 +723,16 @@ Button.defaultProps = {
 
 ### 4) State**
 
-- 컴포넌트용 상태관리가 가능하다.
+- 컴포넌트용 상태관리가 가능하다.**
+	- State 함수(`light`)에 의해 컴포넌트가 업데이트가 되며 업데이트된 값은 State 변수(`setLight`)에 저장하여 사용한다.
 
 <br>
 - `useState`를 사용해야 컴포넌트가 업데이트된다.
 	- 안쓰고 그냥 변수로 사용하면, 화면이 절대로 업데이트가 안 된다.
+		- onClick() 이벤트에서 useState의 함수를 사용하지 않고 값만 변경한 경우이다.
 
 <br>
-- import { useState } from "react"; : 이렇게 불러서 State를 사용한다.
+- `import { useState } from "react";` : 이렇게 '예약어'로 불러내서 State를 사용한다.
 
 <br><br>
 
@@ -666,21 +744,21 @@ Button.defaultProps = {
 import { useState } from "react";
 
 export default function Body() {
-  const [light, setLigth] = useState("OFF");
+  const [light, setLight] = useState("OFF");
 
   return (
     <div className="body">
       {light}
       <button
         onClick={() => {
-          setLigth("ON");
+          setLight("ON");
         }}
       >
         불켜기
       </button>
       <button
         onClick={() => {
-          setLigth("OFF");
+          setLight("OFF");
         }}
       >
         불끄기
@@ -699,11 +777,17 @@ export default function Body() {
 
 ### 5) State와 Props**
 
-- State와 Props의 관계 정리 : 
-	- 부모에서 자식에서 State를 Props로 넘겨주면, 부모의 State가 변경되면 부모의 컴포넌트가 렌더링되고 Props된 자식도 컴포넌트가 렌더링된다.(각각의 함수들이 다시 실행된다.)
+- State와 Props의 관계 정리** : 
+	- 부모로부터 자식으로 State를 Props로 넘겨주면, 
+		- 부모의 State가 변경될 때, 부모의 컴포넌트가 렌더링되고 Props된 자식도 다시 컴포넌트가 렌더링된다.(즉, 각각의 함수들이 다시 실행된다.)
+		- 매우 중요한 개념이다. 
 
 <br>
-- 중요*: State 변경 시, Props로 State 값을 넘겨준 부모와 자식 관계 간에 화면이 업데이트되는 것을 console.log로 테스트 해보기
+- 중요** : State 변경 시, Props로 State 값을 넘겨준 부모와 자식 관계 간에 화면이 업데이트되는 것을 console.log로 테스트 해보기
+
+<br>
+- 추가로 `StaticState` 개념** :
+	- 항상 값이 State가 변하더라도 일정하다. 
 
 <br><br>
 
@@ -766,6 +850,9 @@ export default function Body() {
 
 - 실시간으로 업데이트되는 사용자의 입력을 웹 화면에서 바로 볼 수 있다.
 	- 'State' 개념과 onChange라는 '이벤트 함수' 사용
+	
+<br>
+- 매우 중요한 개념이며 실무에서 자주 쓰임.
 
 <br>
 
@@ -852,17 +939,337 @@ export default function Body() {
 
 ### 7) Ref**
 
+- 특정 DOM 요소에 직접 접근할 수 있다. 
+
+- 또는, DOM의 값을 유지하도록하고 '참조하는 메서드'라고도 부른다. 직접 접근하여 조작이 가능하다.
+
+- DOM에 직접 접근하지 않고 값을 참조만 가능!!
+
+- 보통은 '유효성 검사' 시에 사용된다.('회원가입' 등등에서)
+
+---
+
+<br>
+
+#### a. 실습 코드 :
+
+- useRef를 사용하여 특정 DOM 요소에 접근하여 제어가 가능하다.
+
+- import 부분, 변수 선언 부분, 컨트롤러 부분, 뷰 부분으로 나누어 React 앱을 실행시킨다.
+
+```jsx
+import "./Body.css";
+import { useState, useRef } from "react";
+
+export default function Body() {
+  const nameRef = useRef();
+  const [state, setState] = useState({
+    name: "",
+    gender: "",
+    bio: "",
+  });
+
+  const onChange = (e) => {
+    console.log(e.target.name + " : " + e.target.value);
+    setState({
+      ...state,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const onSubmit = () => {
+    if (state.name === "") {
+      nameRef.current.focus();
+    }
+  };
+
+  return (
+    <div className="body">
+      <div>
+        <input
+          ref={nameRef}
+          name="name"
+          placeholder="이름"
+          value={state.name}
+          onChange={onChange}
+        />
+      </div>
+      <div>
+        <select
+          name="gender"
+          value={state.gender}
+          onChange={onChange}
+        >
+          <option value="">밝히지 않음</option>
+          <option value="male">남성</option>
+          <option value="female">여성</option>
+        </select>
+      </div>
+      <div>
+        <textarea
+          name="bio"
+          value={state.bio}
+          onChange={onChange}
+        />
+      </div>
+      <div>
+        <button onClick={onSubmit}>회원가입</button>
+      </div>
+    </div>
+  );
+}
+
+```
+
+
+---
+
+<br><br>
+
+### 8) 추가 : JS 리터럴 개념**
+
+- JS 객체 리터럴 = {key : value} 형태의 객체
+
+<br>
+- JS 템플릿 리터럴 = '${state.name}'
+
+<br>
+- React 앱 구성 : import 부분, 변수 선언 부분, 컨트롤러 부분, 뷰 부분으로 나누어 React 앱을 실행시킨다.
+
+
+---
+
+<br><br>
+
+# 4. 프로젝트 1 : 카운터 앱
+
+### 1) UI 구성 
+
+- html과 css 이용하기 
+	- html의 section 태그로 구성하기
+
+<br>
+- 간단하게 UI 구성 
+
+---
+
+<br>
+
+	
+#### a. 실습 코드 :
+
+
+- App.jsx
+
+```jsx
+import "./App.css";
+import Controller from "./components/Controller";
+import Viewer from "./components/Viewer";
+
+function App() {
+  return (
+    <div className="App">
+      <h1>Simple Counter</h1>
+      <section>
+        <Viewer />
+      </section>
+      <section>
+        <Controller />
+      </section>
+    </div>
+  );
+}
+
+export default App;
+
+```
+
+<br>
+- View.jsx
+
+```jsx
+export default function Viewer() {
+  return (
+    <div>
+      <div>현재 카운트 : </div>
+      <h1>0</h1>
+    </div>
+  );
+}
+```
 
 
 
+<br>
+- Controller.jsx
+
+```jsx
+export default function Controller() {
+  return (
+    <div>
+      <button>-1</button>
+      <button>-10</button>
+      <button>-100</button>
+      <button>+100</button>
+      <button>+10</button>
+      <button>+1</button>
+    </div>
+  );
+}
+```
+
+
+---
+
+
+<br><br>
+
+### 2) 기능 구현하기** 
+
+- 리액트의 모든 컴포넌트는 계층 구조를 이룬다.
+	- 여러 컴포넌트들은 부모, 자식관계르 가지고 있어야 한다.
+	
+<br>	
+
+#### a. State Lifting(State 끌어올리기)**
+
+- 데이터를 넘겨줄 때는 무조건 부모, 자식 관계이여야 한다.
+
+- State들이 공유할 수 있도록 공통 부모가 되는 곳에 State를 끌어 올려서 컴포넌트를 설계해야 한다.
+
+<br>
+
+#### b. 단방향 데이터 흐름**
+
+- 데이터의 흐름을 파악하기 쉽다.
+
+- 아무리 복잡한 어플리케이션을 만들더라도 데이터 흐름 파악이 직관적이다.
+
+- 따라서, 부모에서 자식으로 State를 Props시킨다.
+
+---
+
+<br>
+	
+#### c. 실습 코드 :
+
+- 중요** : 어느 곳에 State를 보관할 것인지 선택하는 과정!!
+	- 즉, 어떤 컴포넌트가 그 State를 가지게 할 것인가? 
+
+- App.jsx**
+
+```jsx
+import "./App.css";
+import Controller from "./components/Controller";
+import Viewer from "./components/Viewer";
+
+function App() {
+  const [count, setCount] = useState(0);
+ 
+  const onClickButton = (value) => {
+    setCount(count + value);
+  }
+  
+  return (
+    <div className="App">
+      <h1>Simple Counter</h1>
+      <section>
+        <Viewer count={count}/>
+      </section>
+      <section>
+        <Controller onClickButton={onClickButtton}/>
+      </section>
+    </div>
+  );
+}
+
+export default App;
+
+```
+
+<br>
+- View.jsx
+
+```jsx
+export default function Viewer(props) {
+  return (
+    <div>
+      <div>현재 카운트 : </div>
+      <h1>{props.count}</h1>
+    </div>
+  );
+}
+
+// 구조분해 할당도 이용가능!! 
+export default function Viewer({ count }) {
+  return (
+    <div>
+      <div>현재 카운트 : </div>
+      <h1>{count}</h1>
+    </div>
+  );
+}
+```
 
 
 
+<br>
+- Controller.jsx
 
-
-
-
-
-
+```jsx
+export default function Controller({ onClickButton }) {
+  return (
+    <div>
+      <button 
+        onClick = {() => {
+          onClickButton(-1);
+        }}
+      >
+        -1
+      </button>
+      <button
+        onClick = {() => {
+          onClickButton(-10);
+        }}
+      >
+        -10
+      </button>
+      <button
+        onClick = {() => {
+          onClickButton(-100);
+        }}
+       >
+         -100
+      </button>
+      <button
+        onClick = {() => {
+          onClickButton(100);
+        }}
+       >
+         +100
+      </button>
+      <button
+        onClick = {() => {
+          onClickButton(10);
+        }}
+      >
+        +10
+      </button>
+      <button
+        onClick = {() => {
+          onClickButton(1);
+        }}
+      >
+        +1
+      </button>
+    </div>
+  );
+}
+```
+	
+	
+	
+	
+	
 
 
