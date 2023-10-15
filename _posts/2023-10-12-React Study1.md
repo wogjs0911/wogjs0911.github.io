@@ -579,7 +579,7 @@ export default function Body() {
 
 <br>
 - `className` : class가 아니라 className를 이용하여 CSS를 사용할 수 있다.
-	- JSX에서 classs는 JS용 예약어이다.
+	- JSX에서 class는 JS용 예약어이다.
 
 <br>
 
@@ -864,6 +864,7 @@ export default function Body() {
 - `<input value={state.name} />` : 'b) 이렇게 `value`에 객체 속성으로 사용'
 	- `<select value={state.gender}>`
 	- `<textarea value={state.bio} />`
+	- JS 구조분해 할당 개념 이용!
 
 ---
 
@@ -1033,6 +1034,12 @@ export default function Body() {
 <br>
 - JS 템플릿 리터럴 = '${state.name}'
 
+<br>
+- JS 구조분해 할당 개념 이용!
+	- `<textarea value={state.bio} />`에서
+		- `state.bio`
+	
+	
 <br>
 - React 앱 구성 : import 부분, 변수 선언 부분, 컨트롤러 부분, 뷰 부분으로 나누어 React 앱을 실행시킨다.
 
@@ -1268,8 +1275,560 @@ export default function Controller({ onClickButton }) {
 ```
 	
 	
+---
+
+<br><br>
+
+# 5. 라이프 사이클, 개발자 도구, React Hook
 	
-	
-	
+### 1) React 라이프 사이클
+
+<br>
+
+#### a. React 라이프 사이클 개념 정리
 
 
+- Mount, Update, Unmount
+
+<br>
+- Mount(탄생) : 
+	- 컴포넌트가 화면에 렌더링 된다. 
+	- 서버에서 데이터를 불러온다. 
+
+<br>
+- Update(변화) :
+	- 컴포넌트가 리렌더 된다.
+	- 어떤 값이 변경되었는지 콘솔에 출력
+
+
+<br>
+- Unmount(죽음) :
+	- 컴포넌트가 화면에서 제거 된다.
+	- 컴포넌트가 사용하던 메모리 정리 및 해제
+
+<br>
+- 중요** : 이 모든 라이프사이클은 useEffect 함수를 이용하면 쉽게 제어할 수 있다.**
+
+---
+
+<br><br>
+
+#### b. React 라이프 사이클 제어하기
+
+- 라이프 사이클 제어하기
+
+<br>
+
+##### a) Update 제어 
+
+- useEffect의 2번째 인자를 제어하면, Update로서 동작한다.
+
+<br>
+- useEffect는 처음 렌더링 시(마운트), 동작하므로, `isMountRef.current`를 조건문(if문)으로 걸어주어서 처음 컴포넌트가 렌더링 시에는 제외하고 그 이후 Update 시, 코드가 동작하도록 한다.
+
+<br> 
+
+```jsx
+  useEffect(() => {
+    if (!isMountRef.current) {
+      isMountRef.current = true;
+      return;
+    }
+    console.log("업데이트");
+  });
+
+```
+
+
+<br>
+
+##### b) Mount 제어 
+
+- deps인 2번째 인자에 빈 배열로 설정하면 아무 일도 동작하지 않아서 Mount로만 동작할 때, 코드가 동작한다.
+
+<br>
+
+```jsx
+  useEffect(() => {
+    console.log("마운트");
+  }, []);
+```
+
+
+<br>
+
+##### c) Unmount 제어**
+
+- 2번째 인자에 빈 배열 배열 추가하면 아무 일도 동작하지 않아서 Mount로 동작한다.
+
+<br>
+- useEffect 함수 이내의 반환되는 것도 함수로 반환한다.
+
+<br>
+- useEffect의 첫번째 인자인 콜백함수 안에서 	새로운 함수를 리턴하고 있는 것이다.
+
+<br>
+- useEffect의 첫번째 인자인 콜백함수 안에서 새로운 함수를 반환하게 되면, 이렇게 반환된 함수는 이 useEffect의 콜백함수가 다시 호출되기 전이나 또는 useEffect를 가지고 있는 컴포넌트가 Unmount일 때 실행이 된다. 
+
+<br>
+- 정리하면, 2가지 방식으로 다시 새로운 함수가 실행되는데
+	- 즉, 첫번째 이유로는 Unmount일 때, 실행되거나 두번째 이유는 콜백함수가 다시 실행될 때, useEffect의 첫번째 인자인 콜백함수 안에서 새로운 함수를 실행할 수 있다.
+
+<br>
+- 그렇지만 `deps`(dependency array)에 빈 배열을 전달하면 Mount 시점에 한 번만 호출 된다. 즉, useEffect의 콜백함수는 두 번 다시는 호출되지 않아서 위에서 조건인 두번째 조건은 만족하지 않아서 Unmount일 때만 동작한다. 
+
+<br>
+- 중요** : `deps`로 빈 배열로 설정해두면, 오직 컴포넌트가 언마운트될 때만 실행되는 코드를 작성할 수 있다. 
+
+<br>
+
+```jsx
+import { useEffect } from "react";
+
+export default function Even() {
+  useEffect(() => {
+    return () => {
+      console.log("EVEN 언마운트");
+    };
+  }, []);
+
+  return <div>짝수입니다</div>;
+}
+
+```
+
+---
+
+<br>
+
+##### d) 실습코드**
+
+```jsx
+import "./App.css";
+import { useState, useEffect, useRef } from "react";
+import Controller from "./components/Controller";
+import Viewer from "./components/Viewer";
+import Even from "./components/Even";
+
+function App() {
+  const isMountRef = useRef();
+  const [count, setCount] = useState(0);
+
+  const onClickButton = (value) => {
+    setCount(count + value);
+  };
+
+  useEffect(() => {
+    console.log("마운트");
+  }, []);
+
+  useEffect(() => {
+    if (!isMountRef.current) {
+      isMountRef.current = true;
+      return;
+    }
+    console.log("업데이트");
+  });
+
+  return (
+    <div className="App">
+      <h1>Simple Counter</h1>
+      <section>
+        <section>
+          <Viewer count={count} />
+          {count % 2 === 0 && <Even />}
+        </section>
+      </section>
+      <section>
+        <Controller onClickButton={onClickButton} />
+      </section>
+    </div>
+  );
+}
+
+export default App;
+
+```
+
+
+
+
+---
+
+<br><br>
+
+### 2) React 개발자 도구
+
+- 크롬의 웹스토어에서 `react developer tools` 검색
+
+<br>
+- 설정에서 사용을 클릭하고
+	- 사이트 액세스는 `모든 사이트에서`로 설정!
+	- `시크릿 모드에서 허용`나 `파일 URL에 대한 액세스 허용`도 설정 ON하자!
+
+<br>
+- 크롬의 개발자 모드에서 개발 중인 리액트의 앱에서는 새로 고침 시, `react developer tools`가 주황색 아이콘으로 동작하게 된다.
+
+<br>
+- 이곳에서는 컴포넌트의 계층 구조로서 컴포넌트의 정보를 확인 할 수  있다.
+	- State, Props, ref, useEffect 등등 확인  가능
+	- Props는 임의로 수정 가능
+
+<br>
+- 톱니바퀴 모양인 설정에서 `highlight updates when components render`를 설정 On하면, 어떤 컴포넌트가 켜졌는지 확인할 수 있다.
+
+
+<br>
+- 정리 : 크롬의 디버깅을 하는 것과 같다.
+	- 더 세분화되어 있다.
+
+
+---
+
+<br><br>
+
+### 3) React Hook 등장 배경
+
+
+- 함수 컴포넌트에서 리액트가 제공하는 다양한 기능을 사용할 수 있도록 도와주는 메서드
+
+
+<br>
+
+#### a. 기존에 알아본 Hooks :
+
+- `useState`, `useRef`, `useEffect`
+	
+	
+	
+<br>
+
+---
+
+#### b. 추후 알아볼 Hooks : 
+
+- useReducer
+
+- useCallBack
+
+- useMemo
+
+- useContext
+
+- useLayoutEffect
+
+- useTransition
+
+- useDefferedValue
+
+
+	
+<br>
+
+---
+
+#### c. 이전 Hooks의 문제점 :
+
+- 기존의 클래스 컴포넌트는 모든 기능을 이용할 수 있다. 함수 컴포넌트는 아무런 기능도 못 쓴다. 그저 UI만 렌더링 하는 컴포넌트이다.
+
+<br>
+
+- 클래스 컴포넌트는 이러한 장점들이 많아도 클래스의 JS 문법으로만 만들어야 해서 코드량이 매우 많고 매우 복잡하다. 
+
+<br>
+
+- 함수 컴포넌트는 비교적 문법이 간결하고 코드량이 짧다. 그래서, 함수 컴포넌트로 리액트 앱의 모든 것을 개발하려고 했지만, 클래스 컴포넌트의 좋은 장점인 다양한 기능들을 이용하지 못해서 아쉬움이 많았다.
+
+<br><br>
+
+- 결론 : 그래서, 등장한 것이 함수 컴포넌트에서도 클래스 컴포넌트의 좋은 기능을 낚아채듯이 가져와서 사용할 수 있듯이 리액트 개발팀에서는 `다양한 Hooks 메서드`를 소개하게 되었다.
+
+<br>
+
+- 다양한 Hooks 메서드 : 클래스 컴포넌트의 다양한 기능을 사용할 수 있는 장점을 이용할 수 있으며, 이제는 간결한 문법도 이용할 수 있다.
+
+
+---
+
+<br><br>
+
+
+### 4) Custom Hooks 필요한 이유
+
+- 클래스 컴포넌트의 다양한 기능을 사용할 수 있는 장점을 이용할 수 있으며, 이제는 간결한 문법도 이용할 수 있다.
+
+- `Custom Hooks` :
+	- 이런 리액트 Hooks를 입맛대로 커스텀하는 기능이다.
+
+<br>
+
+#### a. Custom Hooks이 필요한 이유
+
+<br>
+##### a) 기존의 State를 이용하는 과정 :
+
+- 1) 새로운 State	 생성 
+
+- 2) 이벤트 핸들러 함수 생성 
+
+- 3) input 태그에 value, onChange 설정
+
+
+<br><br>
+
+##### b) 기존의 Ref를 이용하는 과정 :
+
+- 1) 컴포넌트가 이미 마운트 되었는지 저장할 Ref 생성
+
+- 2) 컴포넌트가 업데이트될 때, 실행하고자 하는 함수
+
+- 3) 컴포넌트가 업데이트 될 때에만 onMount 함수 호출
+
+
+<br>
+##### c) 여기서 문제점 발생 :
+
+- 다양한 컴포넌트에서 같은 동작을 시키고 싶은 State와 Ref가 있다면, 중복 코드가 발생해서 코드량이 많아 진다. 
+
+<br>
+- 즉, 예를 들면, Header, Body, Footer 컴포넌트에 업데이트 라이프 사이클 로직이 각각 필요하다면 말이다. 각각의 컴포넌트에 업데이트 라이프 사이클 로직을 심어줘야 한다.
+
+<br>
+- 중요** : 
+	- React Hooks는 일반 함수에서 호출할 수 없기 때문에 위의 문제점이 여전히 발생한다. 
+	- 즉, 같은 컴포넌트 내부에서만 호출이 가능하며, 또 다른 React Hoooks(Custom Hook 포함)에서만 호출이 가능하다.
+
+- 결론** :
+	- Custom Hook을 만들어 로직을 분리하면 된다 
+
+---
+
+<br><br>
+
+
+##### d) Custom Hook 실습 코드** :
+
+- 1) JS 파일로 만들어야 한다. 파일의 이름을 기존의 Hooks들처럼 `useXXX`로 바꾸고 파일 내부의 컴포넌트 이름도 `useXXX`로 변경하면, `Custom Hook`을 사용할 수 있다.
+
+<br>
+- 2) JS 파일의 이름과 컴포넌트의 이름은 동일하게 만들고 그 안에서 `useRef()`와 `useEffect()`를 사용하면 된다. useEffect()는 업데이트 시, 동작 시킬 `콜백함수`를 함께 사용해도 된다. 
+
+<br><br>
+
+- useUpdate.js
+	- cb()는 업데이트 시, 동작시킬 '콜백함수'
+
+```js
+import { useEffect, useRef } from "react";
+
+export default function useUpdate(cb){
+	const isMounRef = useRef(false);
+	
+	useEffect(() => {
+		if(!isMountRef.current){
+			isMountRef.current = true;
+			return;
+		}
+		cb();
+	});
+}
+
+```
+
+<br>
+
+- App.jsx
+
+```jsx
+import useUpdate from "../hook/useUpdate";
+
+export default function App() {
+	useUpdate(onMount);
+	
+	const onMount = () => {
+		console.log("App 컴포넌트 업데이트");
+	};
+	
+	return <>...</>; 
+}
+```
+
+
+---
+
+<br><br>
+
+- 초기 코드의 변경되는 과정들 : 
+	- 아래 코드에서 onUpdate 파일의 이름을 useXXX로 바꾸고 컴포넌트의 이름도 useXXX로 변경하면, Custom Hook을 사용할 수 있다.
+	- onUpdate -> useUpdate
+
+
+- 1) App.jsx
+
+```jsx
+import { useEffect, useRef } from "react";
+
+export default function App() {
+	const isMounRef = useRef(false);
+	
+	const onMount = () => {
+		console.log("App 컴포넌트 업데이트");
+	}
+	
+	useEffect(() => {
+		if(!isMountRef.current){
+			isMountRef.current = true;
+			return;
+		}
+		onMount();
+	});
+}
+```
+
+<br>
+
+- 2) onUpdate.js
+
+```js
+import { useEffect, useRef } from "react";
+
+export default function onUpdate(){
+	const isMounRef = useRef(false);
+	
+	const onMount = () => {
+		console.log("App 컴포넌트 업데이트");
+	}
+	
+	useEffect(() => {
+		if(!isMountRef.current){
+			isMountRef.current = true;
+			return;
+		}
+		onMount();
+	});
+	
+}
+
+
+```
+
+---
+
+<br><br>
+
+
+### 5) Custom Hooks 최종 실습 
+
+- `src/hooks`의 경로에서 Custom Hooks 생성
+
+- useInput.js
+
+```js
+import { useState } from "react";
+
+export default function useInput() {
+  const [value, setValue] = useState("");
+  const onChange = (e) => {
+    setValue(e.target.value);
+  };
+  return [value, onChange];
+}
+
+```
+
+<br>
+- useUpdate.js
+
+```js
+import { useRef, useEffect } from "react";
+
+export default function useUpdate(cb) {
+  const isMountRef = useRef(false);
+
+  useEffect(() => {
+    if (!isMountRef.current) {
+      isMountRef.current = true;
+      return;
+    }
+    cb();
+  });
+}
+```
+
+---
+
+<br>
+
+```jsx
+import "./App.css";
+import { useState } from "react";
+import Controller from "./components/Controller";
+import Viewer from "./components/Viewer";
+import Even from "./components/Even";
+import useUpdate from "./hooks/useUpdate";
+import useInput from "./hooks/useInput";
+
+function App() {
+  const [count, setCount] = useState(0);
+  const [text, onChangeText] = useInput("");
+
+  const onClickButton = (value) => {
+    setCount(count + value);
+  };
+
+  useUpdate(() => {
+    console.log("APP UPDATE");
+  });
+
+  return (
+    <div className="App">
+      <h1>Simple Counter</h1>
+      <section>
+        <section>
+          <Viewer count={count} />
+          {count % 2 === 0 && <Even />}
+        </section>
+      </section>
+      <section>
+        <Controller onClickButton={onClickButton} />
+      </section>
+      <input value={text} onChange={onChangeText} />
+    </div>
+  );
+}
+
+export default App;
+
+```
+
+
+<br>
+
+- Controller.jsx
+
+```jsx
+import useUpdate from "../hooks/useUpdate";
+
+export default function Controller({ onClickButton }) {
+  useUpdate(() => {
+    console.log("Controller UPDATE");
+  });
+  return (
+    <div>
+      <button onClick={() => onClickButton(-1)}>-1</button>
+      <button onClick={() => onClickButton(-10)}>
+        -10
+      </button>
+      <button onClick={() => onClickButton(-100)}>
+        -100
+      </button>
+      <button onClick={() => onClickButton(100)}>
+        +100
+      </button>
+      <button onClick={() => onClickButton(10)}>+10</button>
+      <button onClick={() => onClickButton(1)}>+1</button>
+    </div>
+  );
+}
+
+```
