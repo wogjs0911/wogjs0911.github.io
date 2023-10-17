@@ -1661,7 +1661,8 @@ export default function App() {
 - 초기 코드의 변경되는 과정들 : 
 	- 아래 코드에서 onUpdate 파일의 이름을 useXXX로 바꾸고 컴포넌트의 이름도 useXXX로 변경하면, Custom Hook을 사용할 수 있다.
 	- onUpdate -> useUpdate
-
+	
+<br>
 
 - 1) App.jsx
 
@@ -1740,6 +1741,7 @@ export default function useInput() {
 - useUpdate.js
 
 ```js
+
 import { useRef, useEffect } from "react";
 
 export default function useUpdate(cb) {
@@ -1758,6 +1760,8 @@ export default function useUpdate(cb) {
 ---
 
 <br>
+
+- App.jsx
 
 ```jsx
 import "./App.css";
@@ -1831,4 +1835,233 @@ export default function Controller({ onClickButton }) {
   );
 }
 
+```
+
+---
+
+<br><br>
+
+# 6. 프로젝트 2 : Todo 앱
+
+### 1) UI 구성
+
+- 컴포넌트를 만드는 방법과 CSS 및 퍼블리싱도 중요!
+
+<br><br>
+
+- App.jsx
+
+```jsx
+import { useState } from 'react'
+import './App.css'
+import Header from './components/Header'
+import TodoEditor from './components/TodoEditor'
+import TodoList from './components/TodoList'
+
+function App() {
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor />
+      <TodoList />
+    </div>
+  )
+}
+
+export default App
+
+```
+
+---
+
+<br>
+
+- Header.jsx
+
+
+```jsx
+import "./Header.css";   // import가 중요!!
+
+export default function Header() {
+    return <div className="Header">
+        <h1>
+            {new Date().toDateString()}
+        </h1>
+    </div>;
+}
+
+```
+
+
+---
+
+<br>
+
+- TodoEditor.jsx
+
+
+```jsx
+import "./TodoEditor.css";
+
+export default function TodoEditor(){
+    return (
+        <div className="TodoEditor">
+            <input placeholder="새로운 Todo ..."/>
+            <button>추가</button>
+        </div>
+    );
+}
+```
+
+
+---
+
+<br>
+
+- TodoList.jsx
+
+
+```jsx
+import "./TodoList.css";
+import TodoItem from "./TodoItem";
+
+export default function TodoList(){
+    return (
+        <div className="TodoList">
+            <h4>Todos</h4>
+            <input placeholder="검색어를 입력하세요"/>
+            <div className="todos_wrapper">
+                <TodoItem />
+                <TodoItem />
+                <TodoItem />
+                <TodoItem />
+            </div>
+        </div>
+    );
+}
+```
+
+
+
+
+---
+
+<br>
+
+- TodoItem.jsx
+
+
+```jsx
+
+import "./TodoItem.css";
+
+export default function TodoItem(){
+    return (
+        <div className="TodoItem">
+            <input type="checkbox"/>
+            <div className="content">투두</div>
+            <div className="date">작성일</div>
+            <button>삭제</button>
+        </div>
+    );
+}
+```
+
+
+---
+
+<br><br>
+
+### 2) 기능 구현을 위한 샘플 데이터 준비 
+
+- State 초기 개발 테스트을 위한 샘플 데아터 마련
+
+<br><br>
+
+- App.jsx
+
+```jsx
+import { useState } from 'react'
+import './App.css'
+import Header from './components/Header'
+import TodoEditor from './components/TodoEditor'
+import TodoList from './components/TodoList'
+
+// State 초기 개발 테스트을 위한 샘플 데아터 마련
+const mockData = [
+  {
+    id: 0,
+    isDone: true,
+    content: "React 공부하기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 1,
+    isDone: false,
+    content: "빨래 널기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 2,
+    isDone: true,
+    content: "음악 연습하기",
+    createdDate: new Date().getTime(),
+  }
+]
+
+function App() {
+
+  const [todos, setTodos] = useState(mockData);
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor />
+      <TodoList />
+    </div>
+  )
+}
+
+export default App
+
+```
+
+<br><br>
+
+- 리액트 개발자 도구에서 위에서 생성된 개발을 위한 샘플 데이터인 State 확인
+
+```jsx
+[
+  {
+    "name": "State",
+    "value": [
+      {
+        "id": 0,
+        "isDone": true,
+        "content": "React 공부하기",
+        "createdDate": 1697554083178
+      },
+      {
+        "id": 1,
+        "isDone": false,
+        "content": "빨래 널기",
+        "createdDate": 1697554083178
+      },
+      {
+        "id": 2,
+        "isDone": true,
+        "content": "음악 연습하기",
+        "createdDate": 1697554083178
+      }
+    ],
+    "subHooks": [],
+    "hookSource": {
+      "lineNumber": 41,
+      "functionName": "App",
+      "fileName": "http://localhost:5173/src/App.jsx?t=1697554083389",
+      "columnNumber": 29
+    }
+  }
+]
 ```
