@@ -2074,9 +2074,17 @@ export default App
 
 ### 3) 등록 기능 구현
 
+- Props로 State 넘겨주고 넘겨받은 State를 새로운 컴포넌트에서 인자로 사용하는 과정 중요!
+
+- 설계 시, 컴포넌트 간에 어떤 State와 함수를 넘겨줄지, 잘 설계해야 한다.
+
+<br>
+
+#### a. 실습 코드
+
 - App.jsx
 	- 중요 1 : 시퀀스처럼 id가 자동적으로 증가하도록 하는 방법
-	- 중요 2 :  리스트에서 새로운 목록 추가하는 방법 : 예전에 부모, 자식의 시블링에서 해본 듯
+	- 중요 2 : 리스트에서 새로운 목록 추가하는 방법 : 예전에 부모, 자식의 시블링에서 해본 듯
 
 ```jsx
 import { useState, useRef } from 'react'
@@ -2149,7 +2157,7 @@ export default App
 import "./TodoEditor.css";
 import { useState, useRef } from "react";
 
-export default function TodoEditor(){
+export default function TodoEditor({ onCreate }){
 
     const inputRef = useRef();
     const [content, setContent] = useState("");
@@ -2165,7 +2173,7 @@ export default function TodoEditor(){
             inputRef.current.focus();
             return;
         }
-        onCreate();
+        onCreate(content);
         setContent("");
     }
 
@@ -2190,6 +2198,122 @@ export default function TodoEditor(){
     );
 }
 ```
+
+
+---
+
+<br><br>
+
+### 4) 조회 기능 구현**
+
+- Props로 State 넘겨주고 넘겨받은 State를 새로운 컴포넌트에서 인자로 사용하는 과정 중요!
+
+<br>
+- React에서는 'map' 메서드가 for-each문과 같게 동작해서 객체의 인자를 하나씩 꺼내는 과정이 가능하여 매우 중요하다!!
+	- map은 새로운 콜백함수를 반환한다.
+
+<br><br>
+- TodoList.jsx
+	- filter 사용하는 과정 중요!!(괄호 주의!! 
+	- map도 주의!! 마치 for-each문과 같아서 TodoItem에도 id를 심어줘야 한다.
+
+
+```jsx
+import { useState } from "react";
+import TodoItem from "./TodoItem";
+import "./TodoList.css";
+
+export default function TodoList({ todos }) {
+    const [search, setSearch] = useState("");
+
+    const onChangeSearch = (e) => {
+        setSearch(e.target.value);
+    };
+
+    // filter 사용하는 과정 중요!!(괄호 주의!! 아래 map도 주의!!)
+    // toLowerCase를 양쪽에 써서 대소문자 구분 없음.
+    const filterTodos = () => {
+        if(search === ""){
+            return todos;
+        }
+        return todos.filter((todo) =>
+            todo.content
+                .toLowerCase()
+                .includes(search.toLowerCase())
+        );
+    };
+
+    return (
+        <div className="TodoList">
+            <h4>Todos</h4>
+            <input 
+                value={search}
+                onChange={onChangeSearch}
+                placeholder="검색어를 입력하세요"
+            />
+            <div className="todos_wrapper">
+                {filterTodos().map((todo) => (
+                    <TodoItem key={todo.id} {...todo}/>
+            // for-each문과 같아서 odoItem에도 id를 심어줘야 한다.
+                ))}
+            </div>
+        </div>
+    );
+}
+```
+
+---
+
+<br><br>
+
+- TodoItem.jsx
+
+```jsx
+import "./TodoItem.css";
+
+export default function TodoItem({
+    content,
+    createDate,
+    isDone,
+    id,
+}) {
+    return (
+        <div className="TodoItem">
+            <input type="checkbox" checked={isDone} />
+            <div className="content">{content}</div>
+            <div className="date">
+                {new Date(createDate).toLocaleDateString()}
+            </div>
+            <button>삭제</button>
+        </div>
+    );
+}
+```
+
+
+
+---
+
+<br><br>
+
+### 5) 수정 기능 구현
+
+
+
+
+
+
+
+
+---
+
+<br><br>
+
+### 6) 삭제 기능 구현
+
+
+
+
 
 
 
