@@ -2065,3 +2065,137 @@ export default App
   }
 ]
 ```
+
+
+
+---
+
+<br><br>
+
+### 3) 등록 기능 구현
+
+- App.jsx
+	- 중요 1 : 시퀀스처럼 id가 자동적으로 증가하도록 하는 방법
+	- 중요 2 :  리스트에서 새로운 목록 추가하는 방법 : 예전에 부모, 자식의 시블링에서 해본 듯
+
+```jsx
+import { useState, useRef } from 'react'
+import './App.css'
+import Header from './components/Header'
+import TodoEditor from './components/TodoEditor'
+import TodoList from './components/TodoList'
+
+// State 초기 개발 테스트을 위한 샘플 데아터 마련
+const mockData = [
+  {
+    id: 0,
+    isDone: true,
+    content: "React 공부하기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 1,
+    isDone: false,
+    content: "빨래 널기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 2,
+    isDone: true,
+    content: "음악 연습하기",
+    createdDate: new Date().getTime(),
+  }
+]
+
+function App() {
+  const [todos, setTodos] = useState(mockData);
+  const idRef = useRef(3);  // 위의 샘플 데이터 때문에 id는 3번부터 시작
+
+  // 1. 시퀀스처럼 id가 자동적으로 증가하도록 하는 방법, 중요!!
+  // 2. 리스트에서 새로운 목록 추가하는 방법 : 예전에 부모, 자식의 시블링에서 해본 듯
+  const onCreate = (content) => {
+    const newTodo = {
+      id: idRef.cuurent++,
+      isDone: false,
+      content,
+      createDate: new Date().getTime(),
+    }
+    setTodos([...todos, newTodo]);
+  }
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor onCreate={onCreate} />
+      <TodoList />
+    </div>
+  )
+}
+
+export default App
+
+```
+
+
+---
+
+<br><br>
+
+- TodoEditor.jsx
+	- 중요 1 : State 상태 변화 관리 함수 설정!
+	- 중요 2 : 필수 입력 값이 비어있으면 유효성 검사하는 것처럼 포커싱가도록 하는 방법
+
+```jsx
+import "./TodoEditor.css";
+import { useState, useRef } from "react";
+
+export default function TodoEditor(){
+
+    const inputRef = useRef();
+    const [content, setContent] = useState("");
+
+    // State 상태 변화 관리 함수 설정!
+    const onChangeContent = (e) => {
+        setContent(e.target.value);
+    }
+
+    // 필수 입력 값이 비어있으면 유효성 검사하는 것처럼 포커싱가도록
+    const onClick = () => {
+        if(content == ""){
+            inputRef.current.focus();
+            return;
+        }
+        onCreate();
+        setContent("");
+    }
+
+    // 입력 시, 키보드 입력에 관한 추가 기능!
+    const onKeydown = (e) => {
+        if(e.keyCode === 13){
+            onClick();
+        }
+    }
+
+    return (
+        <div className="TodoEditor">
+            <input 
+                ref={inputRef}
+                value={content}
+                onChange={onChangeContent}
+                onKeyDown={onKeydown}
+                placeholder="새로운 Todo ..."
+            />
+            <button onClick={onClick}>추가</button>
+        </div>
+    );
+}
+```
+
+
+
+
+
+
+
+
+
