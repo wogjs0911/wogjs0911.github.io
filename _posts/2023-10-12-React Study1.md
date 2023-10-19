@@ -84,7 +84,7 @@ console.log(sub(1, 2));
 
 <br><br>
 
-### 3) Node.js 라이브러리 사용하기 
+### 3) Node.js 라이브러리 사용
 
 - `npm i randomcolor` : 해당 명령어로 NPM에서 패키지를 다운받기
 	- 기본적으로 JS는 라이브러리를 `패키지`라고 부른다.
@@ -846,7 +846,7 @@ export default function Body() {
 
 <br><br>
 
-### 6) State로 사용자 입력 관리하기**
+### 6) State: 사용자 입력 관리*
 
 - 실시간으로 업데이트되는 사용자의 입력을 웹 화면에서 바로 볼 수 있다.
 	- 'State' 개념과 onChange라는 '이벤트 함수' 사용
@@ -1718,7 +1718,7 @@ export default function onUpdate(){
 <br><br>
 
 
-### 5) Custom Hooks 최종 실습 
+### 5) Custom Hooks 실습
 
 - `src/hooks`의 경로에서 Custom Hooks 생성
 
@@ -2296,13 +2296,306 @@ export default function TodoItem({
 
 <br><br>
 
-### 5) 수정 기능 구현
+### 5) 수정 기능 구현**
+
+- 리액트 앱에서는 부모 컴포넌트에서 컴포넌트를 제어하는 컨트롤러를 만들고, 자식 컴포넌트는 이러한 컨트롤러를 넘겨 받아 로직에 사용하며, id만을 부모 컴포넌트로 다시 넘겨준다.
+
+<br>
+
+- 즉, React에서는 주로 자식컴포넌트에서는 id만 넘겨주고 부모컴포넌트에서 컨트롤한다.
+	- 이러한 방식은 희안하다. 이렇게 할 수 밖에 없는 이유는 `Props`로서 `State`(상태 변화 관리)가 부모 자식간의 관계에서만 공유되기 때문이다!
+	- Vue.js에서도 emit를 사용하면, 이러한 방식으로 구성할 수 있을 것 같다. 부모에서만 컴포넌트에 관한 공통 컨트롤러를 가지고 있을 수 있기 때문이다. 
+
+<br>	
+
+- 추가로 여기서, TodoList.jsx 단순히 징검다리 역할만 해준다. 뒤에서 이렇게 불필요하게 함수를 단순히 넘겨받는 과정을 해결할 수 있다.
+
+<br>	
+
+- 최종적으로 아래의 로직을 구현하면, 앞에서 '4)' 내용에서는 체크박스가 체크가 되지 않았는데, 체크박스를 On/Off 할 수 있다.
+
+---
+
+<br><br>
+
+#### a. 실습코드 : 
+
+- App.jsx
+	- map에서 3항연산 사용 방법!!
+	- `if-else`문보다 더 간단하다!!
 
 
+```jsx
+import { useState, useRef } from 'react'
+import './App.css'
+import Header from './components/Header'
+import TodoEditor from './components/TodoEditor'
+import TodoList from './components/TodoList'
+
+// State 초기 개발 테스트을 위한 샘플 데아터 마련
+const mockData = [
+  {
+    id: 0,
+    isDone: true,
+    content: "React 공부하기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 1,
+    isDone: false,
+    content: "빨래 널기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 2,
+    isDone: true,
+    content: "음악 연습하기",
+    createdDate: new Date().getTime(),
+  }
+]
+
+function App() {
+  const [todos, setTodos] = useState(mockData);
+  const idRef = useRef(3);  // 위의 샘플 데이터 때문에 id는 3번부터 시작
+
+  const onCreate = (content) => {
+    const newTodo = {
+      id: idRef.cuurent++,
+      isDone: false,
+      content,
+      createDate: new Date().getTime(),
+    }
+    setTodos([...todos, newTodo]);
+  }
+
+  // map에서 3항연산 사용 방법!!
+  // if-else문보다 더 간단하다!!
+  const onUpdate = (targetId) => {
+    setTodos(
+      todos.map((todo) =>
+      todo.id === targetId
+      ? {...todo, isDone: !todo.isDone}
+      : todo 
+      )
+    );
+  };
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor onCreate={onCreate} />
+      <TodoList todos={todos} onUpdate={onUpdate} />
+    </div>
+  )
+}
+
+export default App;
+
+```
+
+---
+
+<br><br>
+
+- TodoList.jsx
+	- 단순히 징검다리 역할만 해준다. 뒤에서 이렇게 불필요하게 함수를 단순히 넘겨받는 과정을 해결할 수 있다.
+
+```jsx
+import { useState } from "react";
+import TodoItem from "./TodoItem";
+import "./TodoList.css";
+
+export default function TodoList({ todos, onUpdate }) {
+    const [search, setSearch] = useState("");
+
+    const onChangeSearch = (e) => {
+        setSearch(e.target.value);
+    };
+
+    const filterTodos = () => {
+        if(search === ""){
+            return todos;
+        }
+        return todos.filter((todo) =>
+            todo.content
+                .toLowerCase()
+                .includes(search.toLowerCase())
+        );
+    };
+
+    return (
+        <div className="TodoList">
+            <h4>Todos</h4>
+            <input 
+                value={search}
+                onChange={onChangeSearch}
+                placeholder="검색어를 입력하세요"
+            />
+            <div className="todos_wrapper">
+                {filterTodos().map((todo) => (
+                    <TodoItem 
+                        key={todo.id} 
+                        {...todo}
+                        onUpdate={onUpdate} />
+                        // 단순히 함수를 넘겨받아 그 다음 자삭에게 넘겨주는 징검다리 역할만 해준다.
+                ))}
+            </div>
+        </div>
+    );
+}
+```
 
 
+---
 
+<br><br>
 
+- TodoItem.jsx
+	- React에서는 주로 자식컴포넌트에서는 id만 넘겨주고 부모에서 컨트롤한다.
+	- Props로서 State가 부모 자식간의 관계에서만 공유되기 때문이다!
+
+```jsx
+import "./TodoItem.css";
+
+export default function TodoItem({
+    content,
+    createDate,
+    isDone,
+    id,
+    onUpdate,
+}) {
+    // React에서는 주로 자식컴포넌트에서는 id만 넘겨주고 부모에서 컨트롤한다.
+    // Props로서 State가 부모 자식간의 관계에서만 공유되기 때문이다!
+    const onChangeCheckbox = () => {
+        onUpdate(id);
+    }
+    return (
+        <div className="TodoItem">
+            <input 
+                onChange={onChangeCheckbox}
+                type="checkbox" 
+                checked={isDone} 
+            />
+            <div className="content">{content}</div>
+            <div className="date">
+                {new Date(createDate).toLocaleDateString()}
+            </div>
+            <button>삭제</button>
+        </div>
+    );
+}
+```
+
+---
+
+<br><br>
+
+#### b. 실습 결과
+
+- 리액트 개발자 도구 이용
+	- 아래 실습 결과에서 `id: 0`의 `isDone` 값 확인해보기
+
+<br><br>
+
+- 체크박스의 체크 전(업데이트 전)
+
+```jsx
+[
+  {
+    "name": "State",
+    "value": [
+      {
+        "id": 0,
+        "isDone": false,
+        "content": "React 공부하기",
+        "createdDate": 1697712809469
+      },
+      {
+        "id": 1,
+        "isDone": false,
+        "content": "빨래 널기",
+        "createdDate": 1697712809469
+      },
+      {
+        "id": 2,
+        "isDone": true,
+        "content": "음악 연습하기",
+        "createdDate": 1697712809469
+      }
+    ],
+    "subHooks": [],
+    "hookSource": {
+      "lineNumber": 41,
+      "functionName": "App",
+      "fileName": "http://localhost:5173/src/App.jsx?t=1697711402248",
+      "columnNumber": 29
+    }
+  },
+  {
+    "name": "Ref",
+    "value": 3,
+    "subHooks": [],
+    "hookSource": {
+      "lineNumber": 42,
+      "functionName": "App",
+      "fileName": "http://localhost:5173/src/App.jsx?t=1697711402248",
+      "columnNumber": 17
+    }
+  }
+]
+``` 
+
+---
+
+<br>
+
+- 체크박스의 체크 후(업데이트 후)
+
+```jsx
+[
+  {
+    "name": "State",
+    "value": [
+      {
+        "id": 0,
+        "isDone": true,
+        "content": "React 공부하기",
+        "createdDate": 1697712809469
+      },
+      {
+        "id": 1,
+        "isDone": false,
+        "content": "빨래 널기",
+        "createdDate": 1697712809469
+      },
+      {
+        "id": 2,
+        "isDone": true,
+        "content": "음악 연습하기",
+        "createdDate": 1697712809469
+      }
+    ],
+    "subHooks": [],
+    "hookSource": {
+      "lineNumber": 41,
+      "functionName": "App",
+      "fileName": "http://localhost:5173/src/App.jsx?t=1697711402248",
+      "columnNumber": 29
+    }
+  },
+  {
+    "name": "Ref",
+    "value": 3,
+    "subHooks": [],
+    "hookSource": {
+      "lineNumber": 42,
+      "functionName": "App",
+      "fileName": "http://localhost:5173/src/App.jsx?t=1697711402248",
+      "columnNumber": 17
+    }
+  }
+]
+``` 
 
 
 ---
@@ -2312,8 +2605,182 @@ export default function TodoItem({
 ### 6) 삭제 기능 구현
 
 
+#### a. 실습 코드 
 
+- App.jsx
+	- Delete가 '!=='인 이유에 관하여 생각해보기 중요!!
+	- Delete에서는 삭제된 목록은 빼고 나머지 목록만 보여야하기 때문이다.
 
+```jsx
+import { useState, useRef } from 'react'
+import './App.css'
+import Header from './components/Header'
+import TodoEditor from './components/TodoEditor'
+import TodoList from './components/TodoList'
+
+// State 초기 개발 테스트을 위한 샘플 데아터 마련
+const mockData = [
+  {
+    id: 0,
+    isDone: true,
+    content: "React 공부하기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 1,
+    isDone: false,
+    content: "빨래 널기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 2,
+    isDone: true,
+    content: "음악 연습하기",
+    createdDate: new Date().getTime(),
+  }
+]
+
+function App() {
+  const [todos, setTodos] = useState(mockData);
+  const idRef = useRef(3);  // 위의 샘플 데이터 때문에 id는 3번부터 시작
+
+  const onCreate = (content) => {
+    const newTodo = {
+      id: idRef.cuurent++,
+      isDone: false,
+      content,
+      createDate: new Date().getTime(),
+    }
+    setTodos([...todos, newTodo]);
+  }
+
+  const onUpdate = (targetId) => {
+    setTodos(
+      todos.map((todo) =>
+      todo.id === targetId
+      ? {...todo, isDone: !todo.isDone}
+      : todo 
+      )
+    );
+  };
+
+  // Delete는 '!=='인 이유에 관하여 주의!!
+  const onDelete = (targetId) => {
+    setTodos(todos.filter((todo) => 
+      todo.id !== targetId);)
+  }
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor onCreate={onCreate} />
+      <TodoList 
+        todos={todos} 
+        onUpdate={onUpdate}
+        onDelete={onDelete} 
+      />
+    </div>
+  )
+}
+
+export default App;
+
+```
+
+<br><br>
+
+- TodoList.jsx
+	- 단순히 징검다리 역할
+
+```jsx
+import { useState } from "react";
+import TodoItem from "./TodoItem";
+import "./TodoList.css";
+
+export default function TodoList({ todos, onUpdate, onDelete }) {
+    const [search, setSearch] = useState("");
+
+    const onChangeSearch = (e) => {
+        setSearch(e.target.value);
+    };
+
+    // filter 사용하는 과정 중요!!(괄호 주의!! 아래 map도 주의!!)
+    // toLowerCase를 양쪽에 써서 대소문자 구분 없음.
+    const filterTodos = () => {
+        if(search === ""){
+            return todos;
+        }
+        return todos.filter((todo) =>
+            todo.content
+                .toLowerCase()
+                .includes(search.toLowerCase())
+        );
+    };
+
+    return (
+        <div className="TodoList">
+            <h4>Todos</h4>
+            <input 
+                value={search}
+                onChange={onChangeSearch}
+                placeholder="검색어를 입력하세요"
+            />
+            <div className="todos_wrapper">
+                {filterTodos().map((todo) => (
+                    <TodoItem 
+                        key={todo.id} 
+                        {...todo}
+                        onUpdate={onUpdate}
+                        onDelete={onDelete} />
+            // for-each문과 같아서 TodoItem에도 id를 심어줘야 한다.
+                ))}
+            </div>
+        </div>
+    );
+}
+```
+
+<br><br>
+
+- TodoItem.jsx
+	- 부모 컴포넌트로부터 넘겨받은 Delete 함수는 자식컴포넌트에서 id만 부모에게 넘겨주고 대신 부모에서 함수가 동작하여 컨트롤한다.
+
+    
+```jsx
+import "./TodoItem.css";
+
+export default function TodoItem({
+    content,
+    createDate,
+    isDone,
+    id,
+    onUpdate,
+    onDelete
+}) {
+    const onChangeCheckbox = () => {
+        onUpdate(id);
+    }
+
+    const onClickDeleteButton = () => {
+        onDelete(id);
+    }
+
+    return (
+        <div className="TodoItem">
+            <input 
+                onChange={onChangeCheckbox}
+                type="checkbox" 
+                checked={isDone} 
+            />
+            <div className="content">{content}</div>
+            <div className="date">
+                {new Date(createDate).toLocaleDateString()}
+            </div>
+            <button onClick={onClickDeleteButton}>삭제</button>
+        </div>
+    );
+}
+```
 
 
 
