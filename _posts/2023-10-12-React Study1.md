@@ -2604,12 +2604,13 @@ export default function TodoItem({
 
 ### 6) 삭제 기능 구현
 
+- 아래 로직대로 구현하면, 샘플 데이터만 삭제되더라 기존 데이터 삭제는 어떻게 하지?
 
 #### a. 실습 코드 
 
 - App.jsx
 	- Delete가 '!=='인 이유에 관하여 생각해보기 중요!!
-	- Delete에서는 삭제된 목록은 빼고 나머지 목록만 보여야하기 때문이다.
+	- Delete에서는 삭제된 목록은 빼고 나머지 목록만 보여야하기 때문이다.	
 
 ```jsx
 import { useState, useRef } from 'react'
@@ -2644,6 +2645,8 @@ function App() {
   const [todos, setTodos] = useState(mockData);
   const idRef = useRef(3);  // 위의 샘플 데이터 때문에 id는 3번부터 시작
 
+  // 1. 시퀀스처럼 id가 자동적으로 증가하도록 하는 방법, 중요!!
+  // 2. 리스트에서 새로운 목록 추가하는 방법 : 예전에 부모, 자식의 시블링에서 해본 듯
   const onCreate = (content) => {
     const newTodo = {
       id: idRef.cuurent++,
@@ -2654,6 +2657,8 @@ function App() {
     setTodos([...todos, newTodo]);
   }
 
+  // map에서 3항연산 사용 방법!!
+  // if-else문보다 더 간단하다!!
   const onUpdate = (targetId) => {
     setTodos(
       todos.map((todo) =>
@@ -2666,9 +2671,8 @@ function App() {
 
   // Delete는 '!=='인 이유에 관하여 주의!!
   const onDelete = (targetId) => {
-    setTodos(todos.filter((todo) => 
-      todo.id !== targetId);)
-  }
+    setTodos(todos.filter((todo) => todo.id !== targetId));
+  };
 
   return (
     <div className="App">
@@ -2685,6 +2689,7 @@ function App() {
 
 export default App;
 
+
 ```
 
 <br><br>
@@ -2697,7 +2702,11 @@ import { useState } from "react";
 import TodoItem from "./TodoItem";
 import "./TodoList.css";
 
-export default function TodoList({ todos, onUpdate, onDelete }) {
+export default function TodoList({
+    todos, 
+    onUpdate, 
+    onDelete,
+}) {
     const [search, setSearch] = useState("");
 
     const onChangeSearch = (e) => {
@@ -2731,7 +2740,8 @@ export default function TodoList({ todos, onUpdate, onDelete }) {
                         key={todo.id} 
                         {...todo}
                         onUpdate={onUpdate}
-                        onDelete={onDelete} />
+                        onDelete={onDelete} 
+                    />
             // for-each문과 같아서 TodoItem에도 id를 심어줘야 한다.
                 ))}
             </div>
@@ -2757,13 +2767,15 @@ export default function TodoItem({
     onUpdate,
     onDelete
 }) {
+    // React에서는 주로 자식컴포넌트에서는 id만 넘겨주고 부모에서 컨트롤한다.
+    // Props로서 State가 부모 자식간의 관계에서만 공유되기 때문이다!
     const onChangeCheckbox = () => {
         onUpdate(id);
-    }
+    };
 
     const onClickDeleteButton = () => {
         onDelete(id);
-    }
+    };
 
     return (
         <div className="TodoItem">
