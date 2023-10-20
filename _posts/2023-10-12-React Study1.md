@@ -2072,7 +2072,7 @@ export default App
 
 <br><br>
 
-### 3) 등록 기능 구현
+### 3) 등록 기능 구현**
 
 - Props로 State 넘겨주고 넘겨받은 State를 새로운 컴포넌트에서 인자로 사용하는 과정 중요!
 
@@ -2793,6 +2793,275 @@ export default function TodoItem({
     );
 }
 ```
+
+
+---
+
+<br><br>
+
+# 7. useReducer : 상태 관리 분리
+
+
+### 1) useReducer 개념
+
+- useState와 같은 역할을 하며, 새로운 State를 생성한다. 또한, State를 업데이트 시키는 함수도 제공한다.
+
+<br>
+- 추가적으로 컴포넌트 외부에 State 관리 로직 분리가 가능하다.**
+
+---
+
+<br>
+
+#### a. useReducer 구조 정리
+
+<br>
+- `const [저장 값, dispatch] = useReducer(reducer, 저장 값의 초기화); `
+
+<br>
+- dispatch : 어떤 함수를 실행시킬지 설정(트리거) - 어떤 상태 변화를 할지 선택
+	- dispatch 내부의 설정은 `action`이라는 인수로 reducer에 전달이 되는데 이러한 설정을 `action 객체`라고 불린다.
+
+<br>
+- reducer : 어떤 동작을 실행시킬 함수이며 반환을 하는 값으로 저장되는 값을 업데이트시킨다.
+	- 여기서 action 객체를 사용한다.
+
+---
+
+<br>
+
+#### b. 실습 코드 :
+ 
+- useState 실습 : 
+
+```jsx
+import { useState } from "react";
+
+// useState를 이용한 카운터 앱
+export default function A() {
+  const [count, setCount] = useState(0);
+
+  const onDecrease = () => {
+    setCount(count - 1);
+  };
+
+  const onIncrease = () => {
+    setCount(count + 1);
+  };
+
+  return (
+    <div>
+      <h4>{count}</h4>
+      <div>
+        <button onClick={onDecrease}>-</button>
+        <button onClick={onIncrease}>+</button>
+      </div>
+    </div>
+  );
+}
+
+```
+
+---
+
+<br><br>
+
+- useReducer 실습 : 
+
+```jsx
+// useReducer를 이용해 카운터 앱 구현
+import { useReducer } from "react";
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "DECREASE":
+      return state - action.data;
+    case "INCREASE":
+      return state + action.data;
+  }
+}
+
+export default function B() {
+  const [count, dispatch] = useReducer(reducer, 0);
+
+  return (
+    <div>
+      <h4>{count}</h4>
+      <div>
+        <button
+          onClick={() =>
+            dispatch({ type: "DECREASE", data: 1 })
+          }
+        >
+          -
+        </button>
+        <button
+          onClick={() =>
+            dispatch({ type: "INCREASE", data: 1 })
+          }
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
+```
+
+
+
+---
+
+<br><br>
+
+### 2) useReducer 실습
+
+- Todo 앱으로 useReducer 실습
+
+
+```jsx
+import { useReducer, useRef, useState } from "react";
+import "./App.css";
+import Header from "./components/Header";
+import TodoEditor from "./components/TodoEditor";
+import TodoList from "./components/TodoList";
+
+const mockData = [
+  {
+    id: 0,
+    isDone: true,
+    content: "React 공부하기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 1,
+    isDone: false,
+    content: "빨래 널기",
+    createdDate: new Date().getTime(),
+  },
+  {
+    id: 2,
+    isDone: true,
+    content: "음악 연습하기",
+    createdDate: new Date().getTime(),
+  },
+];
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "CREATE": {
+      return [...state, action.data];
+    }
+    case "UPDATE": {
+      return state.map((it) =>
+        it.id === action.data
+          ? { ...it, isDone: !it.isDone }
+          : it
+      );
+    }
+    case "DELETE": {
+      return state.filter((it) => it.id !== action.data);
+    }
+  }
+}
+
+function App() {
+  const [todos, dispatch] = useReducer(reducer, mockData);
+  const idRef = useRef(3);
+
+  const onCreate = (content) => {
+    dispatch({
+      type: "CREATE",
+      data: {
+        id: idRef.current++,
+        isDone: false,
+        content,
+        createdDate: new Date().getTime(),
+      },
+    });
+  };
+
+  const onUpdate = (targetId) => {
+    dispatch({
+      type: "UPDATE",
+      data: targetId,
+    });
+  };
+
+  const onDelete = (targetId) => {
+    dispatch({
+      type: "DELETE",
+      data: targetId,
+    });
+  };
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor onCreate={onCreate} />
+      <TodoList
+        todos={todos}
+        onUpdate={onUpdate}
+        onDelete={onDelete}
+      />
+    </div>
+  );
+}
+
+export default App;
+
+```
+
+
+
+
+
+
+
+
+
+
+---
+
+<br><br>
+
+# 8. React 앱 최적화 과정
+
+
+### 1) useMemo
+
+
+
+
+
+
+
+---
+
+<br><br>
+
+
+### 2) React.memo
+
+
+
+
+
+
+---
+
+<br><br>
+
+### 3) useCallBack
+
+
+
+
+
+
+
+
 
 
 
