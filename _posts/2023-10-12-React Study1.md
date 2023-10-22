@@ -2832,7 +2832,7 @@ export default function TodoItem({
 
 #### b. 실습 코드 :
  
-- useState 실습 : 
+- 기존 useState 코드 : 
 
 ```jsx
 import { useState } from "react";
@@ -2866,8 +2866,8 @@ export default function A() {
 
 <br><br>
 
-- useReducer 실습 : 
-
+- useReducer로 실습 : 
+ㅂ
 ```jsx
 // useReducer를 이용해 카운터 앱 구현
 import { useReducer } from "react";
@@ -2917,82 +2917,109 @@ export default function B() {
 
 ### 2) useReducer 실습
 
-- Todo 앱으로 useReducer 실습
+- dispatch에 type이랑 데이터 변수 정리!** 
 
+- reducer는 아래 dispatch의 변수들을 동작시킬 컨트롤러 역할이다.
+
+#### a. Todo 앱으로 useReducer 실습 
 
 ```jsx
-import { useReducer, useRef, useState } from "react";
-import "./App.css";
-import Header from "./components/Header";
-import TodoEditor from "./components/TodoEditor";
-import TodoList from "./components/TodoList";
+import { useState, useRef, useReducer } from 'react'
+import './App.css'
+import Header from './components/Header'
+import TodoEditor from './components/TodoEditor'
+import TodoList from './components/TodoList'
 
 const mockData = [
   {
     id: 0,
     isDone: true,
     content: "React 공부하기",
-    createdDate: new Date().getTime(),
+    createDate: new Date().getTime(),
   },
   {
     id: 1,
     isDone: false,
     content: "빨래 널기",
-    createdDate: new Date().getTime(),
+    createDate: new Date().getTime(),
   },
   {
     id: 2,
     isDone: true,
     content: "음악 연습하기",
-    createdDate: new Date().getTime(),
-  },
-];
+    createDate: new Date().getTime(),
+  }
+]
 
-function reducer(state, action) {
+// ** reducer는 아래 dispatch의 변수들을 동작시킬 컨트롤러 역할이다.
+function reducer(state, action){
   switch (action.type) {
-    case "CREATE": {
+    case "CREATE":{
       return [...state, action.data];
     }
-    case "UPDATE": {
+
+    case "UPDATE":{
       return state.map((it) =>
-        it.id === action.data
-          ? { ...it, isDone: !it.isDone }
-          : it
+      it.id === action.data
+        ? { ...it, isDone: !it.isDone }
+        : it
       );
     }
-    case "DELETE": {
+
+    case "DELETE":{
       return state.filter((it) => it.id !== action.data);
     }
+    
   }
 }
 
 function App() {
-  const [todos, dispatch] = useReducer(reducer, mockData);
-  const idRef = useRef(3);
+  const [todos, dispatch] = useReducer(reducer, mockData); 
+  const idRef = useRef(3);  
+  // const [todos, setTodos] = useState(mockData);
 
+  // ** dispatch는 type이랑 데이터 변수 정리!** 
   const onCreate = (content) => {
+    // const newTodo = {
+    //   id: idRef.cuurent++,
+    //   isDone: false,
+    //   content,
+    //   createDate: new Date().getTime(),
+    // }
+    // setTodos([...todos, newTodo]);
+
     dispatch({
       type: "CREATE",
       data: {
-        id: idRef.current++,
+        id:  idRef.current++,
         isDone: false,
         content,
-        createdDate: new Date().getTime(),
+        createDate: new Date().getTime(),
       },
     });
   };
 
   const onUpdate = (targetId) => {
+    // setTodos(
+    //   todos.map((todo) =>
+    //     todo.id === targetId
+    //       ? { ...todo, isDone: !todo.isDone }
+    //       : todo
+    //   )
+    // );
+
     dispatch({
       type: "UPDATE",
-      data: targetId,
+      data: targetId
     });
   };
 
   const onDelete = (targetId) => {
+    // setTodos(todos.filter((todo) => todo.id !== targetId));
+
     dispatch({
       type: "DELETE",
-      data: targetId,
+      data: targetId
     });
   };
 
@@ -3000,26 +3027,19 @@ function App() {
     <div className="App">
       <Header />
       <TodoEditor onCreate={onCreate} />
-      <TodoList
-        todos={todos}
+      <TodoList 
+        todos={todos} 
         onUpdate={onUpdate}
-        onDelete={onDelete}
+        onDelete={onDelete} 
       />
     </div>
-  );
+  )
 }
 
 export default App;
 
+
 ```
-
-
-
-
-
-
-
-
 
 
 ---
@@ -3028,11 +3048,110 @@ export default App;
 
 # 8. React 앱 최적화 과정
 
+- 최적화 : 
+	- 불필요한 연산 다시 수행하지 않게 하기
+
 
 ### 1) useMemo
 
+- 문제점 : 전체 TODO 목록 개수, 완료한 TODO 목록 개수, 미완료한 TODO 목록 개수는 TodoList 개수가 변하지 않으면, 컴포넌트 리렌더되면 안된다.
+	- TodoList 내부에서 조회될 때는 컴포넌트 리렌더가 되면 안 된다.
+
+<br>
+- 특정 조건을 만족하지 않으면, 다시 실행하지 않도록 도와주는 새로운 React Hook이다.
+
+<br>
+- 복잡한 연산을 불필요한 상황에서 사용하지 않도록 조건을 설정한다.
+
+<br>
+- useMemo에서 deps에는 콜백함수로 전달한 복잡한 연산인 다시 수행시킬 조건이 되는 변수를 넣어주면 된다.
+
+<br>
+- useMemo에서 콜백함수가 반환하는 것들을 진짜로 반환하게 된다.
+
+<br>
+- 즉, todos(TodoList) 변수의 값이 변하지 않으면 useMemo에서 반환되는 변수를 반환하지 않는다.
+
+---
+
+<br>
+
+#### a. 실습 코드 :
+
+- TodoList.jsx
+
+```jsx
+import { useState, useMemo } from "react";
+import TodoItem from "./TodoItem";
+import "./TodoList.css";
+
+export default function TodoList({
+    todos, 
+    onUpdate, 
+    onDelete,
+}) {
+    const [search, setSearch] = useState("");
+
+    const onChangeSearch = (e) => {
+        setSearch(e.target.value);
+    };
+
+    const filterTodos = () => {
+        if(search === ""){
+            return todos;
+        }
+        return todos.filter((todo) =>
+            todo.content
+                .toLowerCase()
+                .includes(search.toLowerCase())
+        );
+    };
+
+    // ** todos(TodoList) 변수의 값이 변하지 않으면 useMemo에서 반환되는 변수를 반환하지 않는다.
+    const { totalCount, doneCount, notDoneCount } =
+        useMemo (() => {
+            const totalCount = todos.length;
+            const doneCount = todos.filter(
+                (todo) => todo.isDone
+            ).length;
+        const notDoneCount = totalCount - doneCount;
+
+        return {
+            totalCount,
+            doneCount,
+            notDoneCount,
+        };
+    }, [todos]);
 
 
+    return (
+        <div className="TodoList">
+            <h4>Todos</h4>
+            <div>
+                <div>전체 투두 : {totalCount}</div>
+                <div>완료 투두 : {doneCount}</div>
+                <div>미완 투두 : {notDoneCount}</div>
+            </div>
+            <input 
+                value={search}
+                onChange={onChangeSearch}
+                placeholder="검색어를 입력하세요"
+            />
+            <div className="todos_wrapper">
+                {filterTodos().map((todo) => (
+                    <TodoItem 
+                        key={todo.id} 
+                        {...todo}
+                        onUpdate={onUpdate}
+                        onDelete={onDelete} 
+                    />
+            // for-each문과 같아서 TodoItem에도 id를 심어줘야 한다.
+                ))}
+            </div>
+        </div>
+    );
+}
+```
 
 
 
@@ -3044,10 +3163,89 @@ export default App;
 
 ### 2) React.memo
 
+- 불필요하게 렌더링 시키지 않는다.
+
+---
+
+<br><br>
+
+#### a. 실습 코드 1 : 
+
+- `memo`를 이용하여 불필요한 렌더링을 제거하는 방향으로 설계
+
+<br>
+- Header.jsx
+
+```jsx
+import "./Header.css";   // import가 중요!!
+import { memo } from "react";
+
+function Header() {
+    return <div className="Header">
+        <h1>
+            {new Date().toDateString()}
+        </h1>
+    </div>;
+}
+
+// 최적화된 Header(불필요하게 렌더링 시키지 않는다.)
+// const OptimizedHeaderComponent = memo(Header);
+// export default OptimizedHeaderComponent;
+
+export default memo(Header);
+```
+
+---
+
+<br><br>
+
+#### b. 실습 코드 2 : 
+
+- `memo`를 이용하여 불필요한 렌더링을 제거하는 방향으로 설계
+
+<br>
+- TodoItem.jsx
+
+```jsx
+import "./TodoItem.css";
+import { memo } from "react";
 
 
+function TodoItem({
+    content,
+    createDate,
+    isDone,
+    id,
+    onUpdate,
+    onDelete
+}) {
 
+    const onChangeCheckbox = () => {
+        onUpdate(id);
+    };
 
+    const onClickDeleteButton = () => {
+        onDelete(id);
+    };
+
+    return (
+        <div className="TodoItem">
+            <input 
+                onChange={onChangeCheckbox}
+                type="checkbox" 
+                checked={isDone} 
+            />
+            <div className="content">{content}</div>
+            <div className="date">
+                {new Date(createDate).toLocaleDateString()}
+            </div>
+            <button onClick={onClickDeleteButton}>삭제</button>
+        </div>
+    );
+}
+
+export default memo(TodoItem);
+```
 
 ---
 
@@ -3055,7 +3253,117 @@ export default App;
 
 ### 3) useCallBack
 
+- useCallBack Hook을 통해 어떤 함수의 재생성을 막아서 변화된 Todo 리스트 항목만 렌더링되도록 가능하게 만들어 준다.
 
+<br>
+- 특정 함수들은 App 컴포넌트가 리렌더링될 때, 모두 재생성 되기 때문에 useCallBack을 이용해서 불필요한 함수의 재생성은 막아야 한다.
+
+---
+
+<br>
+
+#### a. 실습 코드 :
+
+- App.jsx
+
+```jsx
+import { useRef, useReducer, useCallback } from 'react'
+import './App.css'
+import Header from './components/Header'
+import TodoEditor from './components/TodoEditor'
+import TodoList from './components/TodoList'
+
+const mockData = [
+  {
+    id: 0,
+    isDone: true,
+    content: "React 공부하기",
+    createDate: new Date().getTime(),
+  },
+  {
+    id: 1,
+    isDone: false,
+    content: "빨래 널기",
+    createDate: new Date().getTime(),
+  },
+  {
+    id: 2,
+    isDone: true,
+    content: "음악 연습하기",
+    createDate: new Date().getTime(),
+  }
+]
+
+// ** reducer는 아래 dispatch의 변수들을 동작시킬 컨트롤러 역할이다.
+function reducer(state, action){
+  switch (action.type) {
+    case "CREATE":{
+      return [...state, action.data];
+    }
+
+    case "UPDATE":{
+      return state.map((it) =>
+      it.id === action.data
+        ? { ...it, isDone: !it.isDone }
+        : it
+      );
+    }
+
+    case "DELETE":{
+      return state.filter((it) => it.id !== action.data);
+    }
+    
+  }
+}
+
+// ** 컴포넌트 앱 내부에서 useCallback을 이용하여 어떤 함수가 재생성되는 것을 막는다.**
+function App() {
+  const [todos, dispatch] = useReducer(reducer, mockData); 
+  const idRef = useRef(3);  
+
+  // ** dispatch는 type이랑 데이터 변수 정리!** 
+  const onCreate = (content) => {
+    dispatch({
+      type: "CREATE",
+      data: {
+        id:  idRef.current++,
+        isDone: false,
+        content,
+        createDate: new Date().getTime(),
+      },
+    });
+  };
+
+  const onUpdate = useCallback((targetId) => {
+    dispatch({
+      type: "UPDATE",
+      data: targetId
+    });
+  }, []);
+
+  const onDelete = useCallback((targetId) => {
+    dispatch({
+      type: "DELETE",
+      data: targetId
+    });
+  }, []);
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoEditor onCreate={onCreate} />
+      <TodoList 
+        todos={todos} 
+        onUpdate={onUpdate}
+        onDelete={onDelete} 
+      />
+    </div>
+  )
+}
+
+export default App;
+
+```
 
 
 
