@@ -1018,6 +1018,11 @@ export default App;
 - TodoList.jsx
 	- 이제는 함수들을 넘겨주지 않아도 된다(onCreate, onUpdate)
 
+<br>
+- todos가 구조분해할당 형태인('{}')가 아니라 todos 변수 자체로 받는 이유** : 
+	- 이전에 App 컴포넌트에서 Context를 넘겨줄 때, 객체 형태('{}')가 아니라 변수로 넘겨주었다.
+	- memoizedDispatches는 객체 형태로 넘겨주어서 다른 컴포넌트에서는 구조분해할당을 이용해서 Context 이용한다.
+
 ```jsx
 import { useState, useMemo, useContext } from "react";
 import TodoItem from "./TodoItem";
@@ -1200,3 +1205,160 @@ export default function TodoEditor({  }){
 }
 ```
 
+
+
+---
+
+<br><br>
+
+# 10. 프로젝트 3 : Naras 
+
+### 1) React Router : 페이지 라우팅 정의
+
+- React Router 라이브러리 설치 : `npm install react-router-dom`
+
+
+- package.json
+
+
+```json
+{
+  "name": "section6",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.17.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "vite": "^4.4.5"
+  }
+}
+
+```
+
+---
+
+<br>
+
+#### a. 실습 코드 
+
+- App.jsx
+	- Routes 아래에 Route가 있다.
+	- Routes, Route는 React Router의 메서드
+	- 알맞은 URL이 없을 경우에 예외처리를 하기 위해서 path를 '*'로 설정(element도 설정)
+	
+<br>
+- 이렇게 설정 후 개발 서버에서 브라우저를 키고 URL에 `http://localhost:5173`, `http://localhost:5173/search` 등으로 이동하여 테스트하기
+
+<br>
+
+```jsx
+import { Routes, Route } from 'react-router-dom';
+import './App.css'
+import Home from './components/Home';
+import Country from './components/Country';
+import Search from './components/Search';
+import NotFound from './components/NotFound';
+
+function App() {
+  return (
+   <Routes>
+    <Route path='/' element={<Home/>}/>
+    <Route path='/search' element={<Search/>}/>
+    <Route path='/country' element={<Country/>}/>
+    <Route path='*' element={<NotFound/>}/>
+   </Routes> 
+  )
+
+}
+
+export default App;
+
+```
+
+---
+
+<br><br>
+
+- Home.jsx
+
+
+```jsx
+export default function Home() {
+    return (
+        <div>Home Component</div>
+    )
+}
+```
+
+
+---
+
+<br><br>
+
+- Search.jsx
+
+
+```jsx
+export default function Search(){
+    return (
+        <div>Search Component</div>
+    )
+}
+```
+
+
+
+---
+
+<br><br>
+
+- Country.jsx
+
+
+```jsx
+export default function Country(){
+    return (
+        <div>Country Component</div>
+    )
+}
+```
+
+---
+
+<br><br>
+
+- NotFound.jsx
+
+
+```jsx
+export default function NotFound(){
+    return (
+        <div>NotFound Component</div>
+    )
+}
+```
+
+
+
+
+
+
+
+---
