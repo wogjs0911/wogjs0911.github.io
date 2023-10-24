@@ -1,7 +1,7 @@
 ---
 key: /2023/10/12/React-Study1.html
 title: React - React Study1
-tags: React Vite JS 
+tags: React Vite State Props Hooks JS map filter destructurize callback spread
 ---
 
 # 1. Node.js 

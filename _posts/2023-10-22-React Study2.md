@@ -1258,8 +1258,33 @@ export default function TodoEditor({  }){
 
 #### a. 실습 코드 
 
+
+
+- main.jsx
+	- BrowserRouter로 App 컴포넌트(=최상위 컴포넌트)를 감싸는 것 매우 중요!!
+
+```jsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+import { BrowserRouter } from 'react-router-dom'
+
+// BrowserRouter로 감싸는 것 매우 중요!!
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+)
+
+```
+
+---
+
+<br><br>
+
 - App.jsx
-	- Routes 아래에 Route가 있다.
+	- Routes 메서드 하위 계층에 Route 메서드가 있다.
 	- Routes, Route는 React Router의 메서드
 	- 알맞은 URL이 없을 경우에 예외처리를 하기 위해서 path를 '*'로 설정(element도 설정)
 	
@@ -1356,9 +1381,185 @@ export default function NotFound(){
 ```
 
 
+---
+
+<br><br>
+
+### 2) React Router : 페이지 이동
+
+- 페이지 이동 : 
+	- Link, useNavigate 이용
+	
+<br>
+
+#### a. 실습 코드
+
+- App.jsx
+	- Link, useNavigate 메서드를 이용하면, 페이지 이동이 가능하다. 
+	
+```jsx
+
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import './App.css'
+import Home from './components/Home';
+import Country from './components/Country';
+import Search from './components/Search';
+import NotFound from './components/NotFound';
+
+function App() {
+  // 'Link'나 'useNavigate'를 이용하여 현재 페이지에서 이동할 수 있다!
+  // 마치 html의 a태그나 Vue.js에서의 router-link와 같다. 
+  // 또한, Router의 push 메서드를 이용하여도 이동 가능
+  const nav = useNavigate();
+  
+  const onClick = () => {
+    nav("/search");
+  }
+
+  return (
+    <>
+      <Routes>
+        <Route path='/' element={<Home/>}/>
+        <Route path='/search' element={<Search/>}/>
+        <Route path='/country' element={<Country/>}/>
+        <Route path='*' element={<NotFound/>}/>
+      </Routes>
+      <div>
+        <Link to={"/"}>Home</Link>
+        <Link to={"/search"}>Search</Link>
+        <Link to={"/country"}>Country</Link>
+
+        <button onClick={onClick}>
+          서치 페이지로 이동
+        </button>
+      </div>
+   </> 
+  )
+
+}
+
+export default App;
+
+```
 
 
+---
+
+<br><br>
+
+### 3) React Router : 동적 경로
+
+- 쿼리스트링, Path 인자 활용하여 동적 경로 표현 : 
+	- useSearchParams, useParams 이용
+
+<br>
+
+#### a. 실습 코드
+
+- App.jsx
+	- path에 `/country/:code`를 입력하면 useParams 메서드를 이용하여 '동적 경로' 활용 가능
+	
+```jsx
+
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import './App.css'
+import Home from './components/Home';
+import Country from './components/Country';
+import Search from './components/Search';
+import NotFound from './components/NotFound';
+
+function App() {
+  // 'Link'나 'useNavigate'를 이용하여 현재 페이지에서 이동할 수 있다!
+  // 마치 html의 a태그나 Vue.js에서의 router-link와 같다. 
+  // 또한, Router의 push 메서드를 이용하여도 이동 가능
+  const nav = useNavigate();
+  
+  const onClick = () => {
+    nav("/search");
+  }
+
+  return (
+    <>
+      <Routes>
+        <Route path='/' element={<Home/>}/>
+        <Route path='/search' element={<Search/>}/>
+        <Route path='/country/:code' element={<Country/>}/>
+        <Route path='*' element={<NotFound/>}/>
+      </Routes>
+      <div>
+        <Link to={"/"}>Home</Link>
+        <Link to={"/search"}>Search</Link>
+        <Link to={"/country"}>Country</Link>
+
+        <button onClick={onClick}>
+          서치 페이지로 이동
+        </button>
+      </div>
+   </> 
+  )
+
+}
+
+export default App;
+
+```
+
+
+---
+
+<br>
+
+- Country.jsx
+
+```jsx
+import { useParams } from "react-router-dom"
+
+export default function Country(){
+    // useParams를 이용하여 '/'의 뒤에 이어지는 'Path 경로 값'을 가져올 수 있다.
+    const params = useParams();
+    console.log(params);
+
+    return (
+        <div>Country : {params.code}</div>
+    );
+}
+```
+
+---
+
+<br>
+
+- Search.jsx
+
+```jsx
+import { useSearchParams } from "react-router-dom"
+
+export default function Search(){
+    // useSearchParams를 이용하여 검색에 쓰이는 
+    // 쿼리스트링의 파라미터 값을 가져올 수 있다.
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    return (
+        <div>Search {searchParams.get("q")}</div>
+    );
+}
+```
 
 
 
 ---
+
+<br><br>
+
+### 4) Naras 전반적인 레이아웃 및 UI 작업
+
+#### a. 실습 코드 :
+
+- App.jsx
+
+```jsx
+```
+
+
+
+
