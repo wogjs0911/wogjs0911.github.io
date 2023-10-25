@@ -1555,11 +1555,236 @@ export default function Search(){
 
 #### a. 실습 코드 :
 
+- main.jsx
+
+```jsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+import { BrowserRouter } from 'react-router-dom'
+
+// BrowserRouter로 감싸는 것 매우 중요!!
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+)
+
+```
+
+---
+
+<br>
+
+- index.css
+
+```css
+html,
+body {
+  margin: 0px;
+  background-color: rgb(245, 245, 245);
+}
+
+```
+
+---
+
+<br>
+
 - App.jsx
 
 ```jsx
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import './App.css'
+import Home from './pages/Home';
+import Country from './pages/Country';
+import Search from './pages/Search';
+import NotFound from './pages/NotFound';
+import Layout from './components/Layout';
+
+function App() {
+  // 'Link'나 'useNavigate'를 이용하여 현재 페이지에서 이동할 수 있다!
+  // 마치 html의 a태그나 Vue.js에서의 router-link와 같다. 
+  // 또한, Router의 push 메서드를 이용하여도 이동 가능
+  // const nav = useNavigate();
+  
+  // const onClick = () => {
+  //   nav("/search");
+  // }
+
+  // ** 최상위 태그 필요!!(Layout 추가!!) **
+  return (
+    <Layout>
+      <Routes>
+        <Route path='/' element={<Home/>}/>
+        <Route path='/search' element={<Search/>}/>
+        <Route 
+          path='/country/:code' 
+          element={<Country/>}
+        />
+        <Route path='*' element={<NotFound/>}/>
+      </Routes>
+   </Layout> 
+  )
+}
+
+export default App;
+
 ```
 
+---
 
+<br>
+
+- Layout.jsx
+	- 상위 컴포넌트로 전달 받은 State를 Props로 넘겨받는데 이는 children 인자로 받는다.
+	- 여기서, children 인자는 Router에 의해 정보가 전달된 App 컴포넌트 내부의 모든 컴포넌트가 들어갈 수 있다.
+		- url이 '/'이면. Home 컴포넌트의 정보가 Props로 전달되고 url이 '/search'라면 Search 컴포넌트의 정보가 Props로 전달된다.
+
+<br>
+- main.jsx에서 Router를 이용할 수 있는 `BrowserRouter` 내부에 `App` 컴포넌트가 있는데 
+
+<br>
+- App 컴포넌트는 Layout 컴포넌트를 반환하기 때문에 App 컴포넌트 내부 계층의 모든 컴포넌트를 넣을 수 있다.
+
+```jsx
+import style from "./Layout.module.css";
+
+export default function Layout({ children }) {
+    return (
+        <div>
+            <header className={style.header}>
+                <div>🌏 NARAS</div>
+            </header>
+            <main className={style.main}></main>
+        </div>
+    );
+}
+```
+
+---
+
+<br>
+
+- Layout.module.css
+	- css를 module로 이용하여 간단히 뽑아내는 방법 중요!!
+	- 나중에는 's'로 별칭을 사용하여 jsx에서도 css를 별칭으로 간략히 뽑아낼 수 있다.
+
+```css
+/* 중요!! css를 module로 이용하는 방법 */
+.header {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 50px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.main{
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 80px 10px;
+}
+```
+
+---
+
+<br><br>
+
+### 5) React : API 호출
+
+- `get`, `post`, `put`, `delete` 요청에 대한 API 호출!
+
+<br>
+- axios는 url에 action에 들어간다.
+
+<br>
+- fetch는 url이 인자에 들어간다.
+
+<br>
+- 중요! : 
+	- API 호출은 비동기 처리라서 언제 요청값을 받을지 몰라서 await(기다리도록)를 사용한다.
+
+---
+
+<br><br>
+
+#### a. 실습 코드 :
+
+- api.js
+	- API 설계
+	- API 요청을 따로 파일을 빼서 만들면 가독성이 증가한다!
+
+```js
+import axios from "axios";
+
+// **API 요청을 따로 파일을 빼서 만들면 가독성이 증가한다!
+// async + await 중요!!
+export async function fetchCountries() {
+    try {
+        // axios는 url에 action에 들어간다.
+        // fetch는 url이 인자에 들어간다.
+
+        // * 중요! :API 요청은 비동기 처리라서 
+        // 언제 요청값을 받을지 몰라서 await(기다리도록)를 사용한다.
+        const response = await axios.get(
+            "https://naras-api.vercel.app/all"
+        );
+        
+        // response.data로 반환하면, 컴포넌트에서도 data로 받는다.
+        return response.data;
+    } catch (e) {
+        return [];        
+    }
+}
+```
+
+---
+
+<br><br>
+
+- Home.jsx
+    - ** API로 데이터 받는 과정 처리하는 과정 **
+	    - 1) useState -> async fn -> await fetchCountries ->
+	    - 2) setCountries에 API data를 담아서 State 인자인 countries에 저장
+	    - 3) useEffect()로 API로 받은 데이터가 변화 시, 업데이트 시킬지 체크!!
+
+
+```jsx
+import { useEffect, useState } from "react";
+import { fetchCountries } from "../api";
+// ** 데이터 API 요청하는 외부 모듈도 꼭 import 시켜야 한다.
+// 그리고 State와 연결!!
+
+export default function Home() {
+
+    // ** API로 데이터 받는 과정 처리하는 과정 **
+    // 1) useState -> async fn -> await fetchCountries ->
+    // 2) setCountries에 API data를 담아서 State 인자인 countries에 저장
+    // 3) useEffect()로 API로 받은 데이터가 변화 시, 업데이트 시킬지 체크!!
+    const [countries, setCountries] = useState();
+
+    const setInitData = async () => {
+        // ** axios을 이용한 데이터 API 설계에서 
+        // 반환 값을 response.data로 설정해서 data로 받자!!
+        const data = await fetchCountries();
+        setCountries(data);
+    }
+
+    useEffect(() =>{
+        setInitData();
+    }, []);
+
+    return (
+        <div>Home</div>
+    );
+}
+```
 
 
