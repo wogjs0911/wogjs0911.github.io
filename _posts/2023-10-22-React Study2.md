@@ -1553,6 +1553,22 @@ export default function Search(){
 
 ### 4) Naras 전반적인 레이아웃 및 UI 작업
 
+
+- Layout.jsx에선, 상위 컴포넌트로 전달 받은 State를 Props로 넘겨받는데 이는 children 인자로 받는다.
+	- 여기서, children 인자는 Router에 의해 정보가 전달된 App 컴포넌트 내부의 모든 컴포넌트가 들어갈 수 있다.
+		- url이 '/'이면. Home 컴포넌트의 정보가 Props로 전달되고 url이 '/search'라면 Search 컴포넌트의 정보가 Props로 전달된다.
+
+<br>
+- main.jsx에서 Router를 이용할 수 있는 `BrowserRouter` 내부에 `App` 컴포넌트가 있는데 
+
+<br>
+- App 컴포넌트는 Layout 컴포넌트를 반환하기 때문에 App 컴포넌트 내부 계층의 모든 컴포넌트를 넣을 수 있다.
+
+<br>
+- 중요** : css를 module로 이용하여 간단히 뽑아내는 방법 
+	- 나중에는 's'로 별칭을 사용하여 jsx에서도 css를 별칭으로 간략히 뽑아낼 수 있다.
+
+
 #### a. 실습 코드 :
 
 - main.jsx
@@ -1711,6 +1727,12 @@ export default function Layout({ children }) {
 - 중요! : 
 	- API 호출은 비동기 처리라서 언제 요청값을 받을지 몰라서 await(기다리도록)를 사용한다.
 
+<br>
+- ** API로 데이터 받는 과정 처리하는 과정 **
+	- 1) 외부 js 파일에서 API 호출 로직 설계(여기선, fetchCountries 함수로 설계)
+    - 2) useState -> async fn -> await fetchCountries 호출 -> setCountries에 API data를 담아서 State 인자인 countries에 저장(async, await 이용)
+    - 3) useEffect()로 API로 받은 데이터가 변화 시, 업데이트 시킬지 체크!!
+
 ---
 
 <br><br>
@@ -1786,5 +1808,649 @@ export default function Home() {
     );
 }
 ```
+
+---
+
+<br><br>
+
+- 실습 결과 : 
+	- 리액트 개발자 도구에서 API 데이터 컴포넌트 결과 확인 가능
+
+```jsx
+[
+  {
+    "name": "State",
+    "value": [
+      "{capital: Array(1), code: \"ABW\", commonName: \"Aruba…}",
+      "{capital: Array(1), code: \"AFG\", commonName: \"Afgha…}",
+      "{capital: Array(1), code: \"AGO\", commonName: \"Angol…}",
+      "{capital: Array(1), code: \"AIA\", commonName: \"Angui…}",
+      "{capital: Array(1), code: \"ALA\", commonName: \"Åland…}",
+      "{capital: Array(1), code: \"ALB\", commonName: \"Alban…}",
+      "{capital: Array(1), code: \"AND\", commonName: \"Andor…}",
+    ],
+    "subHooks": [],
+    "hookSource": {
+      "lineNumber": 22,
+      "functionName": "Home",
+      "fileName": "http://localhost:5173/src/pages/Home.jsx",
+      "columnNumber": 37
+    }
+  },
+  {
+    "name": "Effect",
+    "value": "ƒ () {}",
+    "subHooks": [],
+    "hookSource": {
+      "lineNumber": 27,
+      "functionName": "Home",
+      "fileName": "http://localhost:5173/src/pages/Home.jsx",
+      "columnNumber": 3
+    }
+  }
+]
+```
+
+
+---
+
+<br><br>
+
+### 6) React : API 호출 2 
+
+- 쿼리스트링처럼 파라미터를 이용해서 API 호출하는 방법!!
+
+<br>
+- `useState`, `useEffect`, `async-await arrow function` 사용법 익숙해지기!!
+
+---
+
+<br><br>
+
+#### a. 실습 코드
+
+- api.js
+	- API 호출 추가(인자 이용)
+	- 백틱에 리터럴 템플릿 형태로 사용!
+
+```jsx
+
+import axios from "axios";
+
+export async function fetchCountries() {
+    try {
+        // axios는 url에 action에 들어간다.
+        // fetch는 url이 인자에 들어간다.
+
+        // * 중요! :API 요청은 비동기 처리라서 
+        // 언제 요청값을 받을지 몰라서 await(기다리도록)를 사용한다.
+        const response = await axios.get(
+            "https://naras-api.vercel.app/all"
+        );
+        
+        // response.data로 반환하면, 컴포넌트에서도 data로 받는다.
+        return response.data;
+    } catch (e) {
+        return [];
+        // try-catch를 이용한 에러 발생 시, null이 아닌 빈 배열 반환!!        
+    }
+}
+
+// ** API 요청을 위해 넘겨받은 인자를 백틱에 리터럴 템플릿 형태로 사용!
+export async function fetchSearchResults(q) {
+    try {
+        const response = await axios.get(`
+            https://naras-api.vercel.app/search?q=${q}
+        `);
+
+        return response.data;
+    } catch (e) {
+        return [];
+    }
+}
+
+export async function fetchCountry(code) {
+    try{
+        const response = axios.get(
+            `https://naras-api.vercel.app/code/${code}`
+        );
+        return response.data;
+    } catch (e) {
+        return [];
+    }
+}
+
+```
+
+
+---
+
+<br>
+
+- Country.jsx
+	- async, await 중요!!(프로미스 개념 들어감)
+
+```jsx
+import { useParams } from "react-router-dom"
+import { fetchCountry } from "../api";
+import { useEffect, useState } from "react";
+
+export default function Country(){
+    // useParams를 이용하여 '/'의 뒤에 이어지는 'Path 경로 값'을 가져올 수 있다.
+    const params = useParams();
+    console.log(params);
+
+    const [country, setCountry] = useState();
+
+    const setInitData = async () => {
+        const data = await fetchCountry(params.code);
+        setCountry(data);
+    }
+    
+    useEffect (() => {
+        setInitData();
+    }, [params.code]);
+
+    return (
+        <div>Country : {params.code}</div>
+    );
+}
+```
+
+---
+
+<br>
+
+- Search.jsx
+	- async, await 개념 중요!!
+
+
+```jsx
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom"
+import { fetchSearchResults } from "../api";
+
+export default function Search(){
+    // useSearchParams를 이용하여 검색에 쓰이는 
+    // 쿼리스트링의 파라미터 값을 가져올 수 있다.
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const [countries, setCountries] = useState();
+
+    const setInitData = async () => {
+        const data = await fetchSearchResults(q);
+        setCountries(data);
+    };
+
+    useEffect(()=>{
+        setInitData();
+    }, []);
+
+    return (
+        <div>Search {searchParams.get("q")}</div>
+    );
+}
+```
+
+---
+
+<br><br>
+
+### 7) fetch vs axios 정리
+
+- [fetch vs axios 참고 사이트](https://iridescent-zeal.tistory.com/221)
+
+<br>
+- 우선 `fetch()`는 url이 인자로 들어가고, axios는 url이 option 객체로 들어갑니다. 또한 fetch()는 body 프로퍼티를 사용하며 stringify()로 되어지고, axios는 data 프로퍼티를 사용합니다. 
+
+<br>
+- 이처럼 axios는 HTTP 통신의 요구사항을 컴팩트한 패키지로써 사용하기 쉽게 설계되어 있습니다.  
+
+---
+
+<br>
+
+#### a. fetch
+
+```jsx
+// src/FetchMovie.jsx
+import React, { useState, useEffect } from 'react';
+import Movie from './Movie';
+
+const FetchMovie = ({url}) => {
+  const [movies, setMovies] = useState([])
+
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8'
+    }
+  }
+
+  useEffect(() => {
+    fetch(url, options)
+    .then(response => response.json())
+    .then(response => {
+      setMovies(response.results)
+    })
+  }, []);
+
+  return (
+    <>
+      <h1>Fetch로 영화 정보 가져오기</h1>
+      {movies.map((movie) => (
+        <Movie 
+          key={movie.id}
+          title={movie.title}
+          vote_average={movie.vote_average}
+          backdrop_path={movie.backdrop_path}></Movie>
+      ))}
+      <hr />
+    </>
+  );
+};
+
+export default FetchMovie;
+```
+
+---
+
+<br>
+
+#### b. axios
+
+```jsx
+
+// src/AxiosMovie.jsx
+import React, { useEffect, useState } from 'react';
+import axios from "axios";
+import Movie from './Movie';
+
+const AxiosMovie = ({url}) => {
+  const [movies, setMovies] = useState([]);
+
+  useEffect(() => {
+    axios.get(url)
+      .then(response => response.data)
+      .then(response => {
+        setMovies(response.results)
+      })
+  }, []);
+
+  return (
+    <>
+      <h1>AXIOS로 영화 정보 가져오기</h1>
+      {movies.map((movie) => (
+        <Movie 
+          key={movie.id}
+          title={movie.title}
+          vote_average={movie.vote_average}
+          backdrop_path={movie.backdrop_path}></Movie>
+      ))}
+    </>
+  );
+};
+
+export default AxiosMovie;
+```
+
+
+---
+
+<br><br>
+
+### 8) 각 컴포넌트별 기능 구현
+
+<br>
+
+
+#### a. Home
+
+- 현재까지는, index 페이지에서 Search bar에 나라 코드를 검색하면, search 페이지로 이동하여, 나라 코드에 관한 검색 결과 확인 가능 
+
+- 헤더 클릭시, index 페이지로 이동!
+
+<br>
+
+- Layout.jsx
+
+```jsx
+import { useNavigate } from "react-router-dom";
+import style from "./Layout.module.css";
+
+export default function Layout({ children }) {
+    const nav = useNavigate();
+
+    const onClickHeader = () =>{
+        nav(`/`);
+    }
+
+    return (
+        <div>
+            <header 
+                onClick={onClickHeader}
+                className={style.header}
+            >
+                <div>🌏 NARAS</div>
+            </header>
+            <main className={style.main}>{children}</main>
+        </div>
+    );
+}
+```
+
+---
+
+<br>
+- Home.jsx
+
+```jsx
+import { useEffect, useState } from "react";
+import { fetchCountries } from "../api";
+import Searchbar from "../components/Searchbar";
+import CountryList from "../components/CountryList";
+import style from "./Home.module.css";
+// ** 데이터 API 요청하는 외부 모듈도 꼭 import 시켜야 한다.
+// 그리고 State와 연결!!
+
+export default function Home() {
+
+    // ** API로 데이터 받는 과정 처리하는 과정 **
+    // 1) useState -> async fn -> await fetchCountries ->
+    // 2) setCountries에 API data를 담아서 State 인자인 countries에 저장
+    // 3) useEffect()로 API로 받은 데이터가 변화 시, 업데이트 시킬지 체크!!
+    const [countries, setCountries] = useState([]);
+
+    const setInitData = async () => {
+        // ** axios을 이용한 데이터 API 설계에서 
+        // 반환 값을 response.data로 설정해서 data로 받자!!
+        const data = await fetchCountries();
+        setCountries(data);
+    };
+
+    // deps에 아무것도 없어서 mount로 동작
+    useEffect(() => {
+        setInitData();
+    }, []);
+
+    return (
+        <div className="style.container">
+            <Searchbar />
+            <CountryList countries={countries}/>
+        </div>
+    );
+}
+```
+
+---
+
+<br>
+- Search.jsx
+
+```jsx
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom"
+import { fetchSearchResults } from "../api";
+
+export default function Search(){
+    // useSearchParams를 이용하여 검색에 쓰이는 
+    // 쿼리스트링의 파라미터 값을 가져올 수 있다.
+    const [searchParams, setSearchParams] = useSearchParams();
+    const q = searchParams.get("q");
+
+    const [countries, setCountries] = useState([]);
+
+    const setInitData = async () => {
+        const data = await fetchSearchResults(q);
+        setCountries(data);
+    };
+
+    useEffect(()=>{
+        setInitData();
+    }, [q]);
+
+    return (
+        <div>Search {searchParams.get("q")}</div>
+    );
+}
+```
+
+---
+
+<br>
+- Searchbar.jsx
+
+```jsx
+import { useState } from "react";
+import style from "./Searchbar.module.css";
+import { useNavigate } from "react-router-dom";
+
+export default function Searchbar() {
+    const [search, setSearch] = useState(""); 
+    const nav = useNavigate();
+
+    const onChangeSearch = (e) => {
+        setSearch(e.target.value);
+    }
+
+    const onkeyDown = (e) => {
+        if(e.keyCode === 13){
+            onClickSearch();
+        }
+    }
+
+    const onClickSearch = () => {
+        if(search !== ""){
+            nav(`/search?q=${search}`);
+        }
+    }
+    
+    return (
+        <div className={style.container}>
+            <input
+                value={search}
+                onKeyDown={onkeyDown}
+                onChange={onChangeSearch}
+                placeholder="검색어를 입력하세요...."
+            />
+            <button onClick={onClickSearch}>검색</button>
+        </div>
+    )
+}
+```
+
+
+
+---
+
+<br>
+- CountryList.jsx
+
+```jsx
+import Country from "../pages/Country";
+import CountryItem from "./CountryItem";
+import style from "./CountryList.module.css";
+
+export default function CountryList({ countries }) {
+    return (
+        <div className={style.container}>
+            {countries.map((country) => {
+                <CountryItem key={country.code} {...country}/>
+            })}
+        </div>
+    );
+}
+
+// 이부분 왜 쓰는지?
+CountryList.defaultProps = {
+    countries: [],
+};
+```
+
+
+---
+
+<br>
+- CountryItem.jsx
+
+```jsx
+import { useNavigate } from "react-router-dom";
+import style from "./CountryItem.module.css";
+
+export default function CountryItem({
+    code,
+    commonName,
+    flagEmoji,
+    flagImg,
+    population,
+    region,
+    capital
+}) {
+    const nav = useNavigate();
+    
+    const onClickItem = () => {
+        nav(`/country/${code}`);
+    };
+
+    // join 주의!! 수도가 여러개일 수도 있어서 구분자!
+    return (
+        <div onClick={onClickItem} className={style.container}>
+            <img className={style.flag_img} src={flagImg}/>
+            <div className={style.content}>
+                <div className={style.name}>
+                    {flagEmoji} {commonName}
+                </div>
+                <div>지역 : {region}</div>
+                <div>수도 : {capital.join(", ")}</div>
+                <div>인구 : {population}</div>
+            </div>
+            
+        </div>
+    )
+}
+```
+
+
+
+---
+
+<br>
+
+#### b. Search
+
+
+
+- Layout.jsx
+
+```jsx
+```
+
+---
+
+<br>
+- Home.jsx
+
+```jsx
+```
+
+---
+
+<br>
+- Search.jsx
+
+```jsx
+```
+
+---
+
+<br>
+- Country.jsx
+
+```jsx
+```
+
+
+
+
+
+
+
+
+---
+
+<br>
+
+
+#### c. Country
+
+
+- Layout.jsx
+
+```jsx
+```
+
+---
+
+<br>
+- Home.jsx
+
+```jsx
+```
+
+---
+
+<br>
+- Search.jsx
+
+```jsx
+```
+
+---
+
+<br>
+- Country.jsx
+
+```jsx
+```
+
+
+
+
+---
+
+<br><br>
+
+### 9) React : 배포하기
+
+#### a. Vercel
+
+```jsx 
+```
+
+
+
+---
+
+<br><br>
+
+# 12. next.js 
+
+### 1) SSR router
+
+#### a. getServerSideProps vs Component function
+
+- next.js에서 `getServerSideProps` 함수는 SSR 전용, 일반 `컴포넌트 함수`는 CSR 전용이라서 2가지를 혼용해서 사용할 수 있다.
+   - next.js에서 보통 `데이터를 만들어오는 곳`은 'SSR' 방식으로 사용하고, `화면에 보여주는 용도`에서는 'CSR' 방식으로 사용한다.
+
+---
+
+<br><br>
+
+#### b. useRouter vs context
+
+- `context` 객체는 서버측에서 API의 데이터를 사용할 때, 이용한다. 
+
+<br>
+- `useRouter` 메서드는 클라이언트측에서 API의 데이터를 사용할 때, 이용한다.
 
 
