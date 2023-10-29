@@ -1742,6 +1742,7 @@ export default function Layout({ children }) {
 - api.js
 	- API 설계
 	- API 요청을 따로 파일을 빼서 만들면 가독성이 증가한다!
+	- async + await 중요!!
 
 ```js
 import axios from "axios";
@@ -1871,7 +1872,8 @@ export default function Home() {
 
 - api.js
 	- API 호출 추가(인자 이용)
-	- 백틱에 리터럴 템플릿 형태로 사용!
+	- 검생 인자는 백틱에 템플릿 리터럴로 사용!
+	- async, await 중요!!
 
 ```jsx
 
@@ -1911,7 +1913,7 @@ export async function fetchSearchResults(q) {
 
 export async function fetchCountry(code) {
     try{
-        const response = axios.get(
+        const response = await axios.get(
             `https://naras-api.vercel.app/code/${code}`
         );
         return response.data;
@@ -2307,7 +2309,7 @@ CountryList.defaultProps = {
 
 <br>
 - CountryItem.jsx**
-	= API의 인자 전부 꺼내기!
+	- API의 인자 전부 꺼내기!
 
 ```jsx
 import { useNavigate } from "react-router-dom";
@@ -2358,6 +2360,8 @@ export default function CountryItem({
 
 - q값이 바뀌면, 업데이트로 된 q값으로 검색 진행!! 
 	- Search뿐만 아니라 Searchbar도 적용!
+
+<br><br>
 
 #### a. Search
 
@@ -2470,15 +2474,15 @@ export default function Searchbar( { q } ) {
 
 ### 10) 컴포넌트별 기능 구현 : Country
 
-- 1. 에러 발생 : 
+- a) 에러 발생 : 
 	- country가 undefined일 때, 발생하는 에러를 막고자 다음과 같이 해결!
 
 <br>
-- 2. 발생 이유** :
+- b) 발생 이유** :
 	- 'country' State의 초기 값이 undefined인 것도 이유이며, 비동기적으로 API가 호출되어 동작하므로 화면에 마운트되었을 때, 'fetchCountry' API가 아직 데이터를 불러오지 않은 상태일 수도 있다.
 
 <br>
-- 3. 해결 과정** : 
+- c) 해결 과정** : 
 	- 그러므로 'country' State에서 null 체크를 해준다.
 
 <br>
@@ -2489,6 +2493,7 @@ export default function Searchbar( { q } ) {
 - Country.jsx
 
 ```jsx
+
 import { useParams } from "react-router-dom"
 import { fetchCountry } from "../api";
 import { useEffect, useState } from "react";
@@ -2550,9 +2555,9 @@ export default function Country(){
 }
 ```
 
-<br><br>
-
 ---
+
+<br><br>
 
 #### b. 에러 해결
 
@@ -2563,15 +2568,38 @@ export default function Country(){
 
 <br>
 - 해결방법 1: 위의 컴포넌트는 부모 컴포넌트를 통해 props를 전달받아야 하는데 새로고침으로 값을 전달받이 못해undefined가 들어가서 그런 듯했다.
-	- input 태그의 value 속성에 || 연산자로 undefined일 때 공백을 지정해주었다.
+	- input 태그의 value 속성에 `||` 연산자로 `undefined`일 때 공백을 지정해주었다.
+
+```html
+<input
+    value={search || ""}
+    onKeyDown={onkeyDown}
+    onChange={onChangeSearch}
+    placeholder="검색어를 입력하세요...."
+/>
+```
+
+---
 
 <br>
+
 - 해결방법 2 : 위의 방식대로 진행하면, 에러는 없어지긴 했으나 인풋에 디폴트 값이 입력되어 않고 빈창이 떴다. 빈 input 태그가 아니라 디폴트값인 'KOR'이나 유저가 수정한 별명이 입력되어 있어야 하는 상황.
 	- 렌더링할 때, input 태그가 공백인 경우, 값을 넣어줄 수 있는 useEffect() 메서드 이용
 	- useEffect() 메서드로 변수에 초기값을 '[]'로 지정 
+	
+<br>
+
+```jsx
+useEffect(() => {
+	if(!country){
+		setCountry(country);
+	}
+}, []);
+```
+
 
 <br>
-- 결론 : React는 새로고침에 에러가 많이 발생한다. 
+- 결론 : React는 새로고침 시, 에러가 많이 발생한다. 
 
 
 ---
@@ -2580,11 +2608,120 @@ export default function Country(){
 
 ### 11) React : 배포하기
 
-#### a. Vercel
+#### a. 배포 준비
 
-```jsx 
+- 메타데이터를 이용하여 URL 공유시, 썸네일 변경
+
+<br>
+- index.html
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image" href="/favicon.ico" />
+    <meta 
+      name="viewport" 
+      content="width=device-width, initial-scale=1.0" 
+    />
+    <meta property="og:image" content="/thumbnail.png"/>
+    <meta property="og:title" content="NARAS"/>
+    <meta 
+      property="og:description"
+      content="전 세계 국가들의 정보를 확인하세요"
+    />
+    <title>Naras</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
 ```
 
+---
+
+<br><br>
+
+#### b. 배포 하기
+
+
+##### a) Vercel
+
+- next.js도 Vercel에서 만들어 운영 중이다.
+
+<br>
+- Vercel에서 프론트웹 개발에 관한 배포를 무료로 제공해준다.
+	- 보통은 프론트웹 개발에서 테스트용도로 사용한다. 
+
+<br>
+- 아이디 만들기 : 이메일이나 깃허브 이용
+
+---
+
+<br><br>
+
+
+##### b) 배포 과정 
+
+- 0) 터미널에서 vercel 설치 : `sudo npm i -g vercel`
+
+<br><br>
+
+- 1) 터미널에서 vercel에 로그인 : `vercel login`
+
+
+<br><br>
+
+- 2) 배포 하기 : `vercel --prod`
+
+```cli
+Vercel CLI 32.5.0
+? Set up and deploy “~/temp/reactStudy/basicReactPrj/section11”? [Y/n] y
+? Which scope do you want to deploy to? hunne-dev's projects
+? Link to existing project? [y/N] n
+? What’s your project’s name? naras-dev
+? In which directory is your code located? ./
+Local settings detected in vercel.json:
+Auto-detected Project Settings (Vite):
+- Build Command: vite build
+- Development Command: vite --port $PORT
+- Install Command: `yarn install`, `pnpm install`, `npm install`, or `bun install`
+- Output Directory: dist
+? Want to modify these settings? [y/N] n
+```
+
+<br><br>
+
+- 3) 배포 완료 :
+	- [배포된 Naras 프로젝트](https://naras-bfyh0eckw-hunne-devs-projects.vercel.app/)
+
+```cli
+ Linked to hunne-devs-projects/naras-dev (created .vercel and added it to .gitignore)
+🔍  Inspect: https://vercel.com/hunne-devs-projects/naras-dev/EMiNaBjjAHoHV9UVtcazmQenzWtK [1s]
+✅  Production: https://naras-bfyh0eckw-hunne-devs-projects.vercel.app [1s]
+```
+
+
+---
+
+<br><br>
+
+##### c) 배포 후, 404 에러에 대한 추가 설정
+
+- 이렇게 설정해야 SPA 방식에서도 클라우드를 이용하여 배포를 해도
+	- 웹 페이지가 모든 경로에서 제대로 동작한다.('/search', '/about', '/country')
+
+```json
+{
+    "rewrites" : [{ "source": "/{.*}", "destination": "/"}]
+}
+
+/* 이렇게 설정해야 SPA 방식에서도 클라우드를 이용하여 배포를 해도
+ 웹 페이지가 모든 경로에서 제대로 동작한다.('/search', '/about', '/country') */
+```
 
 
 ---
