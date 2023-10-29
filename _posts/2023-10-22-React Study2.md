@@ -2099,20 +2099,28 @@ export default AxiosMovie;
 
 <br><br>
 
-### 8) 각 컴포넌트별 기능 구현
+### 8) 컴포넌트별 기능 구현 : Home
 
 <br>
 
 
 #### a. Home
 
-- 현재까지는, index 페이지에서 Search bar에 나라 코드를 검색하면, search 페이지로 이동하여, 나라 코드에 관한 검색 결과 확인 가능 
-
-- 헤더 클릭시, index 페이지로 이동!
+- 현재까지는, index 페이지에서 Search bar에 '나라 코드'를 검색하면, search 페이지로 이동하여, '나라 코드'에 관한 검색 결과 확인 가능 
 
 <br>
+- 헤더 클릭시, index 페이지로 이동!(홈버튼 기능)
+
+<br>
+- index 페이지에서 모든 국가들 리스트 형식으로 이미지와 나라의 정보 확인!
+
+<br>
+- css 이용할 때, 주의!! : `""`가 아니라 `{}`로 css를 적용시킨다. 
+
+<br><br>
 
 - Layout.jsx
+	- 헤더 클릭시, index 페이지로 이동!(홈버튼)
 
 ```jsx
 import { useNavigate } from "react-router-dom";
@@ -2174,7 +2182,7 @@ export default function Home() {
     }, []);
 
     return (
-        <div className="style.container">
+        <div className={style.container}>
             <Searchbar />
             <CountryList countries={countries}/>
         </div>
@@ -2186,6 +2194,7 @@ export default function Home() {
 
 <br>
 - Search.jsx
+	- q값이 바뀌면, 업데이트로 된 q값으로 검색 진행
 
 ```jsx
 import { useEffect, useState } from "react";
@@ -2205,6 +2214,7 @@ export default function Search(){
         setCountries(data);
     };
 
+    // q값이 바뀌면, 업데이트로 된 q값으로 검색 진행
     useEffect(()=>{
         setInitData();
     }, [q]);
@@ -2219,6 +2229,7 @@ export default function Search(){
 
 <br>
 - Searchbar.jsx
+	- useNavigate에 템플릿 리터럴로 인자 받기!
 
 ```jsx
 import { useState } from "react";
@@ -2239,6 +2250,7 @@ export default function Searchbar() {
         }
     }
 
+    // useNavigate에 템플릿 리터럴로 인자 받기!
     const onClickSearch = () => {
         if(search !== ""){
             nav(`/search?q=${search}`);
@@ -2264,34 +2276,38 @@ export default function Searchbar() {
 ---
 
 <br>
-- CountryList.jsx
+- CountryList.jsx**
+	- countries가 전달되지 않거나 배열로 전달되지 않을 때, 값을 초기화해줘서 에러 해결!
+	- map을 이용 시, 괄호 주의!
 
 ```jsx
-import Country from "../pages/Country";
 import CountryItem from "./CountryItem";
 import style from "./CountryList.module.css";
 
 export default function CountryList({ countries }) {
     return (
         <div className={style.container}>
-            {countries.map((country) => {
-                <CountryItem key={country.code} {...country}/>
-            })}
+            {countries.map((country) => (
+                <CountryItem key={country.code} {...country} />
+            ))}
         </div>
     );
 }
 
-// 이부분 왜 쓰는지?
+// 이부분 왜 쓰는지? null 에러를 방지하기 위해서 사용한다.
+// countries가 전달되지 않거나 배열로 전달되지 않을 때, 값을 초기화해줘서 에러 해결!
 CountryList.defaultProps = {
     countries: [],
 };
+  
 ```
 
 
 ---
 
 <br>
-- CountryItem.jsx
+- CountryItem.jsx**
+	= API의 인자 전부 꺼내기!
 
 ```jsx
 import { useNavigate } from "react-router-dom";
@@ -2304,7 +2320,7 @@ export default function CountryItem({
     flagImg,
     population,
     region,
-    capital
+    capital,
 }) {
     const nav = useNavigate();
     
@@ -2312,10 +2328,11 @@ export default function CountryItem({
         nav(`/country/${code}`);
     };
 
-    // join 주의!! 수도가 여러개일 수도 있어서 구분자!
+    // ** API의 인자 전부 꺼내기!
+    // join 메서드 주의!! 수도가 여러 개일 수도 있어서 구분자!
     return (
         <div onClick={onClickItem} className={style.container}>
-            <img className={style.flag_img} src={flagImg}/>
+            <img className={style.flag_img} src={flagImg} />
             <div className={style.content}>
                 <div className={style.name}>
                     {flagEmoji} {commonName}
@@ -2324,9 +2341,8 @@ export default function CountryItem({
                 <div>수도 : {capital.join(", ")}</div>
                 <div>인구 : {population}</div>
             </div>
-            
         </div>
-    )
+    );
 }
 ```
 
@@ -2334,84 +2350,116 @@ export default function CountryItem({
 
 ---
 
-<br>
+<br><br>
 
-#### b. Search
-
-
-
-- Layout.jsx
-
-```jsx
-```
-
----
+### 9) 컴포넌트별 기능 구현 : Search
 
 <br>
-- Home.jsx
 
-```jsx
-```
+- q값이 바뀌면, 업데이트로 된 q값으로 검색 진행!! 
+	- Search뿐만 아니라 Searchbar도 적용!
 
----
+#### a. Search
 
-<br>
 - Search.jsx
+	- q값이 바뀌면, 업데이트로 된 q값으로 검색 진행
 
 ```jsx
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom"
+import { fetchSearchResults } from "../api";
+import style from "./Search.module.css";
+import Searchbar from "../components/Searchbar";
+import CountryList from "../components/CountryList";
+
+export default function Search(){
+    // useSearchParams를 이용하여 검색에 쓰이는 
+    // 쿼리스트링의 파라미터 값을 가져올 수 있다.
+    const [searchParams, setSearchParams] = useSearchParams();
+    const q = searchParams.get("q");
+
+    const [countries, setCountries] = useState([]);
+
+    const setInitData = async () => {
+        const data = await fetchSearchResults(q);
+        setCountries(data);
+    };
+
+    // q값이 바뀌면, 업데이트로 된 q값으로 검색 진행
+    useEffect(()=>{
+        setInitData();
+    }, [q]);
+
+    return (
+        <div className={style.container}>
+            <Searchbar q={q}/>
+            <div>
+                <b>{q}</b> 검색 결과
+            </div>
+            <CountryList countries={countries} />
+        </div>
+    );
+}
 ```
 
 ---
 
 <br>
-- Country.jsx
+- Searchbar.jsx
+	- Search 페이지로부터 넘겨받은 인자도 필요하다! 그 이유는 Searchbar 사용자가 사용하는 실제 페이지가 아니라 컴포넌트이기 때문이다. 
+	- 검색 시, useEffect가 필요하다. 검색인자인 q값이 변환함에 따라 업데이트 되어야 하기 때문에
+	- ** 주의 : q는 '구조분해할당'으로 받는다
+	
 
 ```jsx
+import { useEffect, useState } from "react";
+import style from "./Searchbar.module.css";
+import { useNavigate } from "react-router-dom";
+
+// ** 주의 : q는 구조분해할당으로 받는다
+export default function Searchbar( { q } ) {
+    const [search, setSearch] = useState(""); 
+    const nav = useNavigate();
+
+    // ** 검색 시, 필요! q값이 변환함에 업데이트 되어야 하기 때문에
+    useEffect(() => {
+        setSearch(q);
+    }, [q]);
+    
+    const onChangeSearch = (e) => {
+        setSearch(e.target.value);
+    }
+
+    const onkeyDown = (e) => {
+        if(e.keyCode === 13){
+            onClickSearch();
+        }
+    }
+
+    // useNavigate에 템플릿 리터럴로 인자 받기!
+    const onClickSearch = () => {
+        if(search !== ""){
+            nav(`/search?q=${search}`);
+        }
+    }
+
+    return (
+        <div className={style.container}>
+            <input
+                value={search}
+                onKeyDown={onkeyDown}
+                onChange={onChangeSearch}
+                placeholder="검색어를 입력하세요...."
+            />
+            <button onClick={onClickSearch}>검색</button>
+        </div>
+    )
+}
 ```
 
 
 
 
-
-
-
-
----
-
-<br>
-
-
-#### c. Country
-
-
-- Layout.jsx
-
-```jsx
-```
-
----
-
-<br>
-- Home.jsx
-
-```jsx
-```
-
----
-
-<br>
-- Search.jsx
-
-```jsx
-```
-
----
-
-<br>
-- Country.jsx
-
-```jsx
-```
 
 
 
@@ -2420,7 +2468,117 @@ export default function CountryItem({
 
 <br><br>
 
-### 9) React : 배포하기
+### 10) 컴포넌트별 기능 구현 : Country
+
+- 1. 에러 발생 : 
+	- country가 undefined일 때, 발생하는 에러를 막고자 다음과 같이 해결!
+
+<br>
+- 2. 발생 이유** :
+	- 'country' State의 초기 값이 undefined인 것도 이유이며, 비동기적으로 API가 호출되어 동작하므로 화면에 마운트되었을 때, 'fetchCountry' API가 아직 데이터를 불러오지 않은 상태일 수도 있다.
+
+<br>
+- 3. 해결 과정** : 
+	- 그러므로 'country' State에서 null 체크를 해준다.
+
+<br>
+
+#### a. Country
+
+
+- Country.jsx
+
+```jsx
+import { useParams } from "react-router-dom"
+import { fetchCountry } from "../api";
+import { useEffect, useState } from "react";
+import style from "./Country.module.css";
+
+export default function Country(){
+    const params = useParams();
+    const [country, setCountry] = useState();
+
+    const setInitData = async () => {
+        const data = await fetchCountry(params.code);
+        setCountry(data);
+    }
+    
+    useEffect (() => {
+        setInitData();
+    }, [params.code]);
+
+    // ** country가 undefined일 때, 발생하는 에러를 막고자 다음과 같이 해결!
+    // 'country' State의 초기 값이 undefined이며, 
+    // ** 비동기적으로 API가 동작하므로 마운트되었을 때, fetchCountry가 아직 데이터를 불러오지 않은 상태일 수도 있다.
+    if(!country) {
+        return <div>Loading ...</div>
+    }
+
+    return (
+        <div className={style.container}>
+            <div className={style.header}>
+                <div className={style.commonName}>
+                    {country.flagEmoji}&nbsp;{country.commonName}
+                </div>
+                <div className={style.officialName}>
+                    {country.officialName}
+                </div>
+            </div>
+            <img 
+                src={country.flagImg}
+                alt={`${country.commonName}의 국기 이미지입니다.`}
+            />
+            <div className={style.body}>
+                <div>
+                    <b>코드 :</b>&nbsp;{country.code}
+                </div>
+                <div>
+                    <b>수도 :</b>&nbsp;{country.capital.join(", ")}
+                </div>
+                <div>
+                    <b>지역 :</b>&nbsp;{country.region}
+                </div>
+                <div>
+                    <b>지도 :</b>&nbsp;
+                    <a target="_blank" href={country.googleMapURL}>
+                        {country.googleMapURL}
+                    </a>
+                </div>
+            </div>
+        </div>
+    );
+}
+```
+
+<br><br>
+
+---
+
+#### b. 에러 해결
+
+<br>
+
+##### a) Warning: A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component.
+
+
+<br>
+- 해결방법 1: 위의 컴포넌트는 부모 컴포넌트를 통해 props를 전달받아야 하는데 새로고침으로 값을 전달받이 못해undefined가 들어가서 그런 듯했다.
+	- input 태그의 value 속성에 || 연산자로 undefined일 때 공백을 지정해주었다.
+
+<br>
+- 해결방법 2 : 위의 방식대로 진행하면, 에러는 없어지긴 했으나 인풋에 디폴트 값이 입력되어 않고 빈창이 떴다. 빈 input 태그가 아니라 디폴트값인 'KOR'이나 유저가 수정한 별명이 입력되어 있어야 하는 상황.
+	- 렌더링할 때, input 태그가 공백인 경우, 값을 넣어줄 수 있는 useEffect() 메서드 이용
+	- useEffect() 메서드로 변수에 초기값을 '[]'로 지정 
+
+<br>
+- 결론 : React는 새로고침에 에러가 많이 발생한다. 
+
+
+---
+
+<br><br>
+
+### 11) React : 배포하기
 
 #### a. Vercel
 
