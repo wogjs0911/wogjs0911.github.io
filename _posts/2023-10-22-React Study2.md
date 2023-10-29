@@ -2696,7 +2696,7 @@ Auto-detected Project Settings (Vite):
 <br><br>
 
 - 3) 배포 완료 :
-	- [배포된 Naras 프로젝트](https://naras-bfyh0eckw-hunne-devs-projects.vercel.app/)
+	- [배포된 Naras 프로젝트](https://naras-k4gsjadcs-hunne-devs-projects.vercel.app/)
 
 ```cli
  Linked to hunne-devs-projects/naras-dev (created .vercel and added it to .gitignore)
@@ -2716,7 +2716,7 @@ Auto-detected Project Settings (Vite):
 
 ```json
 {
-    "rewrites" : [{ "source": "/{.*}", "destination": "/"}]
+    "rewrites" : [{ "source": "/(.*)", "destination": "/" }]
 }
 
 /* 이렇게 설정해야 SPA 방식에서도 클라우드를 이용하여 배포를 해도
