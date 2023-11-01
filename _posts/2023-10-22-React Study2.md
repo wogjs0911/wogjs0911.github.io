@@ -2002,6 +2002,10 @@ export default function Search(){
 
 - [fetch vs axios 참고 사이트](https://iridescent-zeal.tistory.com/221)
 
+- [axios: get,post options 객체 참고 사이트](https://inpa.tistory.com/entry/AXIOS-%F0%9F%93%9A-%EC%84%A4%EC%B9%98-%EC%82%AC%EC%9A%A9#axios_%EC%9A%94%EC%B2%ADrequest_%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0_%EC%98%B5%EC%85%98)
+
+- [axios: get + async-await header option 참고**](https://github.com/woowacourse-teams/2020-seller-lee-company/blob/develop/front/src/api/api.ts)
+
 <br>
 - 우선 `fetch()`는 url이 인자로 들어가고, axios는 url이 option 객체로 들어갑니다. 또한 fetch()는 body 프로퍼티를 사용하며 stringify()로 되어지고, axios는 data 프로퍼티를 사용합니다. 
 
