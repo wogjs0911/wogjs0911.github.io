@@ -220,7 +220,6 @@ defaults:
       pageview: true
   - scope:
       path: "assets/images"
-      image: true
 
       
       
