@@ -2728,28 +2728,3 @@ Auto-detected Project Settings (Vite):
 ```
 
 
----
-
-<br><br>
-
-# 12. next.js 
-
-### 1) SSR router
-
-#### a. getServerSideProps vs Component function
-
-- next.js에서 `getServerSideProps` 함수는 SSR 전용, 일반 `컴포넌트 함수`는 CSR 전용이라서 2가지를 혼용해서 사용할 수 있다.
-   - next.js에서 보통 `데이터를 만들어오는 곳`은 'SSR' 방식으로 사용하고, `화면에 보여주는 용도`에서는 'CSR' 방식으로 사용한다.
-
----
-
-<br><br>
-
-#### b. useRouter vs context
-
-- `context` 객체는 서버측에서 API의 데이터를 사용할 때, 이용한다. 
-
-<br>
-- `useRouter` 메서드는 클라이언트측에서 API의 데이터를 사용할 때, 이용한다.
-
-
