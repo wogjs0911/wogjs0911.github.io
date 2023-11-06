@@ -205,23 +205,247 @@ tags: springboot JPA Hibernate
 
 <br><br>
 
-# 6. 프록시 개념
+# 6. 프록시 개념**
 
-- 프록시 객체는 한 번만 초기화되며 원본 엔티티를 상속받는다!**
+### 1) 프록시를 사용하는 이유?
+
+- Member를 조회할 때, Team을 항상 같이 조회해야 하는지?
+
+<br> 
+- Member와 Team을 동시에 조회하는 경우라면 상관 없다.
+
+<br> 
+- 하지만, 어떤 비즈니스 로직에서는 Member만 조회하길 원한다면, Team을 항상 같이 불러내어 조회할 필요는 없다. 낭비가 심하다.
+
+<br> 
+- 따라서, JPA에서는 이러한 문제를 `지연로딩`과 `프록시`라는 개념으로 해결할 수 있어서 매우 중요한 개념이다.** 
+
+<br> 
+
+```java
+	Team team = new Team();
+	team.setName("team1");
+	entityManager.persist(team);
+	
+	Member member = new Member();
+	member.setName("member1");
+	member.setTeam(team);
+	entityManager.persist(member);
+	
+	entityManager.flush();
+	entityManager.clear();
+	            
+	Member findMember = entityManager.find(Member.class, member.getId());
+```
+
+---
+
+<br><br>  
+  
+### 2) 프록시 기본 개념
+
+- JPA에서는 `em.find()`뿐만 아니라 참조를 가져오는 `getReference()` 메서드가 있다.
 
 <br>
-- 기존의 테이블을 복사해다가 껍데기를 사용하는 경우
+
+#### a. `em.find()` vs `em.getReference()`**
+
+- `em.find()` : 
+	- DB를 통해서 실제 엔티티 객체 조회(일반적인 경우, 쿼리가 DB에 나간다.)
 
 <br>
-- `getReference()` : 프록시의 엔티티를 반환!
+- `getReference()` : 
+	- DB에 쿼리가 안 나가는데 객체가 조회가 되는 것이다.(특이한 경우, DB 조회를 미루는 가짜(프록시) 엔티티 객체 조회)
+	- 실제 username을 호출하는 과정에서 JPA가 DB에 쿼리를 날린다. 그래서 findMember에 값을 넣고 출력한다. 값을 넣는 과정에서는 더욱 복잡한 과정이 있다.
+	- `getReference()`로 만들어진 findMember를 Class 타입으로 호출해보면, Hibernate에서 만들어진 프록시 클래스(가짜 객체)로서 findMember가 호출된다.
 
 <br>
-- 기존의 영속성 컨텍스트에 엔티티가 있다면 그것을 반환한다.
+- 프록시 객체 개념** : 
+	- 기존의 테이블을 복사해다가 껍데기를 사용하는 경우이며 껍데기는 똑같은데 안에는 텅텅 빈 객체이다. 실제 클래스를 상속 받아서 만들어지므로 실제 클래스와 겉 모양이 같다.
+	- 내부에는 target 이라는 것이 있는데 진짜 Reference를 가르킨다. 이러한 target은 초기에 null 값으로 초기화되어 아무 것도 없다.
+	- 이러한 프록시 객체는 Hibernate가 내부적으로 프록시 라이브러리를 통해 만들어준다.
+	
+
+<br><br>
+- 실제 엔티티 생성
+
+```java
+	Member findMember = entityManager.find(Memeber.class, member.getId()); // 실제 엔티티 생성
+```
+
+<br><br>
+- 프록시 객체 생성** : 쿼리 안 나감**
+	- 프록시 객체를 활용하면 실제로 활용되기 전까지 DB 조회를 미룰 수 있다. 따라서, getReference만 호출하여 프록시 객체를 생성하면, DB에 쿼리는 안 나간다.
+
+```java
+	Member findMember = entityManager.getReference(Member.class, member.getId()); // 프록시 객체 생성
+```
+
+<br><br>
+- 프록시 객체 사용 : DB에 쿼리 나감 **
+	- 프록시 객체를 활용하면 실제로 활용되기 전까지 DB 조회를 미룰 수 있다. 따라서, getReference만 호출하여 프록시 객체를 생성하면, DB에 쿼리는 안 나간다.
+	- System.out.println에서 사용 시, DB에 쿼리가 나간다.
+
+```java
+	Member findMember = entityManager.getReference(Member.class, member.getId());
+	System.out.println("Class : " + findMember.getClass());
+	System.out.println("id : " + findMember.getId());
+	System.out.println("name : " + findMember.getName());
+```
+
+---
+
+<br><br>  
+  
+### 3) 프록시 특징*
+
+- 프록시 객체는 실제 객체의 참조(target)를 보관한다.
 
 <br>
-- 준영속 시, 프록시 조회 불가능하며 에러 발생한다.
+- 중요** : 프록시 객체를 호출하여 프록시 객체가 가지고 있는 getName() 메서드를 호출한다고 가정한다면, getName() 메서드는 프록시 객체의 내부에 있는 target이 가리키는 실제 엔티티 객체의 target에 있는 getName() 메서드를 대신 호출해준다. 
+	- 하지만, 처음에 프록시 객체에는 target이 없을 것이다. 왜냐하면, getName() 메서드의 결과값은 DB에 있는데 한 번도 조회한 적이 없기 때문이다.
+
+---
+
+<br><br>  
+  
+### 4) 프록시 객체의 초기화 과정**
+
+- a. 프록시 객체 생성(`getReference()`) :
+	- getReference() 메서드를 통해 Member의 프록시 객체를 가지고 온다.
+
+<br> 
+- b. getName() 요청 : 
+	- Member의 getName() 메서드를 호출하게 되는데, 초기에는 getName()를 가지고 있는 프록시 객체는 target이 없다.** 
+
+<br> 
+- c. 초기화 요청** : 
+	- JPA가 영속성 컨텍스트에 getName() 메서드를 요청한다.(초가화 요청) JPA가 진짜 Member 객체를 가지고 오라고 요청한다.**
+
+<br> 
+- d. DB 조회 및 실제 Entity 생성 : 
+	- 그렇다면, 영속성 컨텍스트가 DB를 조회하여 실제 Entity 객체를 생성 후 반환한다. 
+
+<br> 
+- e. target.getName() 연결 : 
+	- 그리고나서, 프록시 객체의 내부에 있는 `Member target`(실제 Member 변수)에 진짜 Entity 객체를 연결시켜 준다.**
+
+<br> 
+- 결론** : 
+	- 프록시 객체의 getName() 메서드를 호출하면, 프록시 객체의 target은 앞에서 연결된 진짜 Entity 객체의 getName() 메서드인 `Member에 있는 getName()` 메서드가 반환이 된다. 
+	- getName()을 이전에 호출했으면, 영속성 컨텍스트에 있기 때문에 더 이상 DB에서 호출할 필요는 없다.
+
+<br> 
+
+#### a) 프록시 객체의 초기화 정의** :
+
+- JPA가 영속성 컨텍스트에 요청하여 영속성 컨텍스트가 DB에서 Entity를 가져와서 진짜 Entity 객체를 생성하는 과정!!
 
 
+
+---
+
+<br><br>  
+  
+### 5) 프록시 객체 특징 및 주의점**
+ 
+- a. 프록시 객체는 한 번만 초기화되며 원본 엔티티를 상속받는다!**
+
+<br><br>
+
+- b. 프록시 객체가 실제 엔티티로 바뀌는 것이 아니라 실제 엔티티에 접근이 가능하다.**
+
+
+<br>
+
+- c-1. 객체 비교 1 : 기존의 영속성 컨텍스트에 엔티티가 있다면 그것을 반환한다.**
+	- ex) 먼저 Member 객체의 인스턴스로 member1을 영속성 컨텍스트에 요청했으면, 추후에 getReference로 프록시 객체를 member1 인스턴스를 또 만들어도 이미 영속성 컨텍스트에 member1이 있어서 초기에 만든 실제 Entity의 member1 인스턴스와 getReference로 만들어진 member1 인스턴스의 객체 타입은 같다. 
+	
+	
+```java
+	Member m1 = em.find(Member.class, member1.getId());
+	Member m2 = em.find(Member.class, member2.getId());
+	System.out.println("m1 == m2 : " + (m1.getClass() == m2.getClass())); // true
+
+```
+
+<br>
+
+```java
+	Member m1 = em.find(Member.class, member1.getId());
+	Member m2 = em.getReference(Member.class, member2.getId());
+	System.out.println("m1 == m2 : " + (m1.getClass() == m2.getClass())); // false
+```
+
+<br>	
+
+- c-2. 객체 비교 2 추가적인 개념** : 영속성 컨텍스트에 프록시가 이미 있는 경우, 무조건 해당 인스턴스에서는 프록시를 반환한다.(잘 안쓰이지만 알아두기!!)
+	- 우리가 개발할 때, 프록시던 아니던 상관 없도록 개발해야 한다.
+
+```java
+	Member member = new Member();
+	member.setName("member");
+	em.persist(member);
+	
+	em.flush();
+	em.clear();
+	
+	//영속성 컨텍스트에 찾는 엔티티가 있는 경우 엔티티를 반환한다.
+	Member findMember = em.find(Member.class, member.getId());
+	System.out.println(findMember.getClass()); //실제 엔티티 반환
+	
+	Member reference = em.getReference(Member.class, member.getId());
+	System.out.println(reference.getClass()); //실제 엔티티 반환
+	
+	em.clear();
+	
+	//프록시가 이미 있는 경우 프록시를 반환한다.**
+	Member reference2 = em.getReference(Member.class, member.getId());
+	System.out.println(reference2.getClass()); //프록시 반환
+	
+	Member findMember2 = em.find(Member.class, member.getId());
+	System.out.println(findMember2.getClass()); //프록시 반환
+```
+
+<br>	
+
+- c-3. 객체 비교 3 (중요**) : 
+	- JPA에서는 같은 인스턴스들의 '==' 비교에 대하여 같은 영속성 컨텍스트 안에서(같은 트랜잭션 레벨에서) 조회하면 항상 같다.
+	- JPA에서 제공해주는 개념이다.(한 트랜잭션 내에서는 실제 객체던 프록시 객체던 '==' 비교 시, 객체 타입이 항상 같다.) 
+
+
+<br><br>
+
+- d. JPA의 비즈니스 로직에서는 객체 비교 시, 어떤 비즈니스 로직의 메서드에서 인자로서, 객체가 프록시 객체로 넘어올지, 실제 객체로 넘어올지 모르기 때문에 타입 비교를 `==`으로 하면 안되고 `instance of`로 해야 한다.**
+
+```java
+	private static void isSame(Member m1, Member m2) {
+	  System.out.println("m1 : " + (m1 instanceof Member));
+	  System.out.println("m2 : " + (m2 instanceof Member));
+	}
+```
+
+<br><br>
+
+- e. 준영속 시, 프록시 조회 불가능하며 에러 발생한다.**
+	- `LazyInitialization Exception, No seesion` 에러가 발생한다. 실무에서 자주 접하는 에러!
+	- 더이상 영속성 컨텍스트로서 관리를 안하므로 해당 에러가 발생한다.
+	- 강제로 에러를 발생시키기 위해서는 em.detach(), em.close(), em.clear()시, 해당 에러 발생
+
+<br><br>
+
+- f. 강제 초기화 : JPA 표준은 강제 초기화가 없다. Hibernate에서 제공해주는 것이다.
+	- 대신, 강제 호출은 있다** : `member.getName()` 
+
+<br><br>	
+	
+- g. 프록시 초기화 여부 확인 : 
+	- `EntityManagerFactor.getPersistenceUnitUtil().isLoaded()`를 이용한다.
+	- ex) EntityManagerFactor.getPersistenceUnitUtil().isLoaded(findMember1);
+
+<br>
+
+- 최종 정리** : 즉시 로딩과 지연 로딩이 본 프록시 기능을 활용하여 구현된다.
 
 ---
 
