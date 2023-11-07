@@ -17,7 +17,7 @@ tags: springboot JPA Hibernate
 
 <br>
 
-### 2) queryDSL 사용하는 이유?**
+### 2) queryDSL 사용 이유?
 
 - 컴파일 단계에서 오류를 잡아줌
 
@@ -28,7 +28,7 @@ tags: springboot JPA Hibernate
 
 <br>
 
-### 3) spring을 사용하는 이유?**
+### 3) spring 사용하는 이유?
 
 - Bean -> IOC -> DI // filter, AOC, intercept
 
@@ -111,7 +111,7 @@ tags: springboot JPA Hibernate
 # 4. JPA 연관관계
 
 
-### 1) JPA 연관관계 핵심 개념**
+### 1) JPA 연관관계 개념**
 
 - 연관관계의 주인은 FK를 가진 객체이다. **
 
@@ -189,7 +189,7 @@ tags: springboot JPA Hibernate
 
 <br>
 
-### 3) 조인 전략 vs 싱글테이블 전략 
+### 3) 조인 vs 싱글테이블 전략 
 
 - 조인은 우리가 알고 있는 것
 
