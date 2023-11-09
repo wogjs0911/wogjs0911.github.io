@@ -2610,7 +2610,7 @@ useEffect(() => {
 
 <br><br>
 
-### 11) React : 배포하기
+# 11. React : 배포하기
 
 #### a. 배포 준비
 
@@ -2726,5 +2726,46 @@ Auto-detected Project Settings (Vite):
 /* 이렇게 설정해야 SPA 방식에서도 클라우드를 이용하여 배포를 해도
  웹 페이지가 모든 경로에서 제대로 동작한다.('/search', '/about', '/country') */
 ```
+
+
+
+
+
+---
+
+<br><br>
+
+# 12. React Query 
+
+### 1) React Query 개념 정리 
+
+- 기존에는 Redux를 이용했지만 Redux는 서버 통신에서 비동기 처리를 하기 위한 상태 관리 라이브러리가 아니라 전역 상태 관리 라이브러리라서 개발자가 모든 것글 구현해야해서 Redux-toolkit, Redux-saga를 이용해도 구조가 매우 복잡하고 코드량이 어마 무시하다.
+
+<br>
+- 따라서, React Query는 비동기 API 통신 시, Redux보다 코드 수를 줄여서 간단하게 서버 통신에 관한 상태관리가 가능하다.
+
+<br>
+- 중요** : 추가로 Redux처럼 전역 상태 관리도 가능하다!
+
+
+<br>
+- 따라서, Redux 대신 상태 관리 라이브러리로 선택 가능!! (kakao pay에서 채택)
+
+<br><br>>
+- [React Query를 사용하는 이유** : 참고](https://tech.kakaopay.com/post/react-query-1/)
+	- [React Query 공식문서 : 참고](https://tanstack.com/query/latest/docs/react/guides/window-focus-refetching?from=reactQueryV3&original=https%3A%2F%2Ftanstack.com%2Fquery%2Fv3%2Fdocs%2Fguides%2Fwindow-focus-refetching)
+	- [React Query 공식 문서 한글 번역 : 참고](https://velog.io/@familyman80/React-Query-%ED%95%9C%EA%B8%80-%EB%A9%94%EB%89%B4%EC%96%BC) 
+
+<br>
+- [React Query 프로젝트 적용** : 참고](https://github.com/woowacourse-teams/2022-review-duck/tree/main/frontend/src/apis)
+
+<br>
+- [React 프로젝트 도메인별로 디렉토리 리팩토링** : 참고](https://github.com/woowacourse-teams/2022-ternoko/tree/develop/frontend/src)
+
+
+
+
+
+
 
 
