@@ -2751,7 +2751,7 @@ Auto-detected Project Settings (Vite):
 <br>
 - 따라서, Redux 대신 상태 관리 라이브러리로 선택 가능!! (kakao pay에서 채택)
 
-<br><br>>
+<br><br>
 - [React Query를 사용하는 이유** : 참고](https://tech.kakaopay.com/post/react-query-1/)
 	- [React Query 공식문서 : 참고](https://tanstack.com/query/latest/docs/react/guides/window-focus-refetching?from=reactQueryV3&original=https%3A%2F%2Ftanstack.com%2Fquery%2Fv3%2Fdocs%2Fguides%2Fwindow-focus-refetching)
 	- [React Query 공식 문서 한글 번역 : 참고](https://velog.io/@familyman80/React-Query-%ED%95%9C%EA%B8%80-%EB%A9%94%EB%89%B4%EC%96%BC) 
