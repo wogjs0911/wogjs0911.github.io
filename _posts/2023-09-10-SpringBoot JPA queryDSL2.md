@@ -995,16 +995,57 @@ public class MemberRepositoryTest {
 
 ### 2) 사용자 정의 Repository 만들기 
 
-- 스프링 데이터 JPA와 Querydsl 테스트
-	- Querydsl 전용 기능인 회원 search를 작성할 수 없다.
-	- 따라서, 사용자 정의 Repository 필요!
+
+#### 0. 사용자 정의 Repository 사용하는 이유**
+
+- 간단한 정적코드와 같은 것은 Spring Data JPA에서 인터페이스로 만들면 된다.
 
 <br>
-- 중요! : 상속받거나 구현하는 관계 중요
+- 하지만, 동적 쿼리나 복잡한 쿼리 같은 경우는 QueryDsl에서 사용자 정의 Repository를 사용한다.
+
+<br>
+- Spring Data JPA는 인터페이스이기때문에 구현 코드를 넣으려면 사용자 정의 Repository를 사용해야한다.
 
 <br>
 
-#### a. 실습 코드 
+#### a. 사용자 정의 Repository 만드는 방법
+
+- 1) 클래스 MemberRepositoryImpl 만들기**
+	- 주의** : 클래스이름은은 기존 Repository + Impl을 붙여 생성
+
+<br>
+- 2) 즉, MemberRepository라는 사용자 정의 Repository는 Spring Data JPA가 상속받고 있는 인터페이스명 바로 뒤에 Impl 붙여서 생성해야 한다.
+
+<br>
+- 3) MemberRepositoryImpl 생성 후 인터페이스인 MemberRepositoryCustom 정의를 오버라이딩해서 사용한다.
+	- 팩토리 패턴이나 인터페이스를 사용하는 이유처럼 사용자 정의 Repository을 사용
+
+<br>
+- 4) MemberRepository에서 MemberRepositoryCustom을 상속받는다.
+
+---
+
+<br><br>
+
+#### b. 스프링 데이터 JPA와 Querydsl 테스트 과정
+
+- Querydsl 전용 기능인 회원 search를 작성할 수 없다.
+
+<br>
+- 따라서, 사용자 정의 Repository가 필요!
+
+<br>
+- 중요! : 상속받거나 구현하는 관계 중요!!
+
+<br>
+- 특정 화면에 특화된 쿼리일 때는 클래스만 바로 만들고 @Repository 어노테이션으로 빈을 만들고 바로 JPAQueryFactory를 인젝션해서 사용한다!
+
+
+---
+
+<br><br>
+
+#### c. 실습 코드 
 
 - MemberRepositoryCustom.java 인터페이스 생성
 
