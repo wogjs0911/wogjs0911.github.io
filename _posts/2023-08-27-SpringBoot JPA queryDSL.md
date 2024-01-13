@@ -1376,15 +1376,19 @@ String result = queryFactory
 
 ### 1) 프로젝션 결과 반환: 기본
 
-#### a. 프로젝션 개념 : 
+#### a. Projection 개념 : 
 
-- select 대상 지정
+- select 절에 대상을 지정하면, 원하는 값만 뽑아오는 것
+	- Projection 대상이 하나면 타입을 명확하게 지정할 수 있음
+	- Projection 대상이 둘 이상이면 타입을 명확하게 지정할 수 없으므로 튜플이나 DTO로 조회**
+	
+<br>
+- Repository 내부에서 데이터를 조회할 때, Entity 외의 값 ( ex) DTO )으로 편리하게 리턴받아 사용할 수 있도록 하기 위해서 튜플을 사용한다.
+	- 하지만, 튜플 타입은 queryDSL에서만 제공하는 타입이기 때문에 서비스 또는 API 계층인 Repository 외부에서는 사용할 수 없어서 다른 방식으로 DTO를 사용해야만 한다.**
 
-- 프로젝션 대상이 하나면 타입을 명확하게 지정할 수 있음
-
-- 프로젝션 대상이 둘 이상이면 튜플이나 DTO로 조회**
-	- Repository 내부에서 데이터를 조회할 때, Entity 외의 값 (ex, DTO)으로 편리하게 리턴받아 사용할 수 있도록 하기 위해서
-	- 튜플은 Repository 외부에서 사용할 수 없어야 한다.**
+<br>
+- 결론** : `queryDSL`에서 `DTO`를 사용한다면, 웬만하면 `Projection`을 사용하자! 영속성 컨텍스트 관리를 해야할지 항상 고려해야 하는가?
+	- DTO를 무조건 사용해야 한다. API에 직접 노출 시, 설계를 직접 보여주는 꼴이며, API 스펙 변경 시, 리소스가 많이 소요되고 원인을 알 수 없는 에러가 발생한다.(JPA 실무 활용 2편 참고)
 
 ---
 
@@ -1416,9 +1420,11 @@ import lombok.Data;
 
 <br>
 
-#### b. 먼저, JPA Native query 이용하여 조회 
+#### b. JPA Native query 이용하여 조회하는 방식
 
-- 먼저, 이렇게 Native query로 조회하고 이를 queryDSL 동적 쿼리로 변경하기
+- 다음 내용은 Native query나 JPQL로 조회하는 방식에서 이를 queryDSL 동적 쿼리로 변경하는 과정이다.
+	-  Native query나 JPQL을 이용하여 queryDSL을 이용하면, 항상 package 경로를 적어줘야 하는 번거로움과 생성자 방식만 사용할 수 있다는 제약이 있다.
+	- queryDsl을 사용하면 훨씬 편하고 안정적으로 DTO projection이 가능하다.
 
 ```java
 List<MemberDto> result = em.createQuery(
@@ -1433,11 +1439,11 @@ List<MemberDto> result = em.createQuery(
 
 ### 3) Querydsl 빈 생성(Bean population)**
 
-- 결과를 DTO 반환할 때, 사용**
+- 결과를 DTO 반환할 때, 사용하며 방식에서는 4가지 방식이 있다.**
 
 <br>
 
-#### a. 프로퍼티 접근 : setter
+#### a. 프로퍼티 접근 : setter 방식
 
 ```java
 List<MemberDto> result = queryFactory
@@ -1495,7 +1501,7 @@ List<UserDto> fetch = queryFactory
 #### c. 생성자 사용**
 
 - Projections에 constructor 사용하기
-	- 이것을 많이 사용한다.
+	- 이것을 가장 많이 사용한다.
 
 ```java
 List<MemberDto> result = queryFactory
@@ -1507,17 +1513,56 @@ List<MemberDto> result = queryFactory
 }
 ```
 
+<br>
+
+#### d. QueryProjection
+
+```java
+public class MemberDto {
+	private String username;
+	private int age;
+	
+	@QueryProjection
+	public MemberDto(String username, int age){
+		this.username = username;
+		this.age = age;
+	}
+
+}
+```
+
+<br>
+
+```java
+public void finMemberDtoByQueryProjection() {
+	List<MemberDto> result = queryFactory
+		.select(new QMemberDto(member.username, member.age))
+		.from(member)
+		.fetch();
+	}
+	
+	for(MemberDto memberDto : result) {
+		System.out.println("memeberDtop = " + memberDto);
+	}
+}
+```
+
+
 ---
 
 <br><br>
 
-### 4) @QueryProjection**
+### 4) @QueryProjection 추가 설명**
 
-- 컴파일러로 타입을 체크할 수 있으므로 가장 안전한 방법이다. 다만 DTO에 QueryDSL 어노테이션을 유지해야 하는 점과 DTO까지 Q 파일을 생성해야 하는 단점이 있다.
+- 컴파일러로 타입을 체크할 수 있으므로 가장 안전한 방법이다. 다만, DTO에 QueryDSL 어노테이션을 유지해야 하는 점과 DTO까지 Q 파일을 생성해야 하는 단점이 있다.
 	- 그래서, @QueryProjection은 종속적으로 결합된다. 그래서, 문제가 많다.
 
+<br>
+- 하지만, `엔티티로 직접 조회`할 때에는 `영속성 컨텍스트의 관리`를 받지만, `DTO로 조회`하게 되면 `영속성 컨텍스트에서 관리되지 않는다`.
 
 
+<br>
+- 따라서, 엔티티로 조회할 수 있는 경우 또는 `영속성 컨텍스트 내에서 관리`되어야 하는 경우에는 `엔티티로 조회` 하되, projection 또는 `성능 최적화가 필요한 경우`에는 `DTO projection`을 사용해 조회하면 된다.
 
 ---
 
