@@ -8,7 +8,7 @@ tags: docker docker-compose Vite React JPA queryDSL
 
 ### 1) 3Tier-Docker-Compose 사용기 
 
-- etirovaf의 초기 개발 환경 구조는 `Docker` 환경에서 `React(+ Vite)` + `SpringBoot` + `MySQL(MariaDB)`로서 `3tier-docker-compose`로서 개발 환경을 구성했다. 
+- etirovaf의 초기 개발 환경 구조는 `Docker` 환경에서 `React(+ Vite)` + `SpringBoot` + `MySQL(MariaDB)`으로 `3tier-docker-compose` 개발 환경을 구성했다. 
 
 <br>
 - 초기 프로젝트 설정에서 SpringBoot 프로젝트를 jar 파일로 만들기 위해 빌드를 하면 다음과 같은 에러가 발생한다.
@@ -114,7 +114,7 @@ ENTRYPOINT ["npm", "run", "dev"]
 <br><br>
 
 
-# 2. Front
+# 2. Frontend
 
 ### 1) Vite + React + Docker 사용기(+ 에러 해결)
 
