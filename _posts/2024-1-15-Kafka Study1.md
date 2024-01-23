@@ -357,7 +357,7 @@ tags: eventbroker messagebroker redis kafka Shrinking_ISR Replication partition 
 
 #### a. Producer 개념
 
-- 먼저, `Producer`에 대해서 알아보면 다음과 같다. `Producer`는 `partition`의 리더로 메시지를 전달하는 역할을 하게 되고요. 그리고 메시지를 전달할 때 특정 `partition` 또는 랜덤 `partition`으로 전송을 하게 된다.
+- 먼저, `Producer`에 대해서 알아보면 다음과 같다. `Producer`는 `partition`의 리더로 메시지를 전달하는 역할을 하게 된다. 그리고 메시지를 전달할 때 특정 `partition` 또는 랜덤 `partition`으로 전송을 하게 된다.
 
 <br>
 - 그리고 빠른 전송 속도가 보장이 되어야 효율성이 좋은 배치 처리가 가능하다. 그리고 설정을 통해서 배치 크기나 지연 시간 이런 것들이 조정이 가능하다.

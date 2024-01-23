@@ -108,6 +108,25 @@ COPY . .
 ENTRYPOINT ["npm", "run", "dev"] 
 ```
 
+---
+
+<br><br>
+
+
+### 2) 컨테이너 내부에서 사용할 계정의 권한 정의하는 방법
+
+- [Docker volume permission 문제 해결 과정 : 참고](https://sweethoneybee.tistory.com/28) 
+
+<br>
+- 도커 관리용으로 새로운 유저를 생성하고 docker 그룹에 넣어주고 VOLUME으로 지정되는 디렉토리를 내가 원하는 user가 owner가 되도록 직접 미리 mkdir 해서 디렉토리의 쓰기 권한도 해결!
+	- 하나의 커널로 관리되기에 UID로 매핑이 되는 것! 여기서, username은 편의상 사용하는 것이다.
+	- 그래서 [여기서](https://github.com/jinho-yoo-jack/wanted-preonboarding-challenge-backend-16/issues/1) docker-compose.yml에서 권한을 이런식으로 사용했다. 도커에서는 하나의 커널로 관리되기 때문이다.
+
+<br>	
+- 중요한 점이 username은 여기서 쓰이지 않고 uid가 쓰인다는 것이다. 도커 컨테이너를 서버에서 실행시킬 때, 여전히 하나의 커널만이 존재한다. 도커 컨테이너를 실행하고 있는 서버 내의 전체 uid, gid를 하나의 커널이 관리하고 있다는 것을 의미한다. 그러다보니 컨테이너들 내에서 같은 uid를 가진 다른 user를 가질 수 없다.
+
+<br>	
+- 일반적인 리눅스 내의 username(group name도 마찬가지)은 커널의 한 부분이 아니라 외부 툴에 의해서 관리되고 있기 때문이다(/etc/passwd, LDAP, Kerberos 등등). 그래서, 다른 컨테이너 내에서 같은 username을 가질 수는 있어도 같은 uid/gid에 대해서 다른 권한을 가질 수는 없다.
 
 ---
 
@@ -165,7 +184,29 @@ export default defineConfig({
 
 # 3. Backend
 
-### 1) docker-compose에서 SpringBoot 프로젝트 자동 build 설정
+
+### 1) JPA : Error creating bean with name 'entityManagerFactory' defined in class path resource 에러
+
+
+- 에러 로그 : `Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Unable to create requested service [org.hibernate.engine.jdbc.env.spi.JdbcEnvironment] due to: Unable to determine Dialect without JDBC metadata (please set 'jakarta.persistence.jdbc.url' for common cases or 'hibernate.dialect' when a custom Dialect implementation must be provided)`
+
+
+<br>
+- 일반적인 해결 방법 : [일반적인 경우의 해결 방법](https://stackoverflow.com/questions/56968183/error-creating-bean-with-name-entitymanagerfactory-defined-in-class-path-resou)
+	- import 패키지 문제(jdk 17이라서 jakarta로 변경할 것!)
+
+<br>
+- 내가 했던 해결 방법 : 나의 경우는 좀 특별했는데 `build.gradle`에 다음 의존성을 추가해주었다.
+	- `java_gradle`(`build.gradle`) : `implementation group: 'org.javassist', name: 'javassist', version: '3.15.0-GA'`
+	- `kotlin_gradle`(`build.gradle.kts`) : `implementation("org.javassist:javassist:3.15.0-GA")`
+	- [의존성 추가로 인한 해결 방법](https://sean-lets-go.tistory.com/18)
+
+---
+
+<br><br>
+
+
+### 2) docker-compose에서 SpringBoot 프로젝트 자동 build 설정
 
 #### a. 자동 build 설정을 프로젝트에 적용한 이유 : 
 
@@ -263,7 +304,7 @@ CMD [ "sh" , "entrypoint.sh" ]
 
 <br><br>
 
-### 2) JPA : org.hibernate.PersistentObjectException: detached entity passed to persist 에러
+### 3) JPA : org.hibernate.PersistentObjectException: detached entity passed to persist 에러
 
 - 에러 과정 : 구글링 결과는 연관관계에서 CascadeType.ALL 옵션과 관련된 문제로 해결하려고 했는데 해당 프로젝트에서는 관련 옵션이 존재하지 않아서 다른 방법을 찾아야 했다.
 
@@ -276,5 +317,9 @@ CMD [ "sh" , "entrypoint.sh" ]
 - [참고 사이트1](https://velog.io/@dev-kmson/org.hibernate.PersistentObjectException-detached-entity-passed-to-persist-%EC%97%90%EB%9F%AC)
 
 - [참고 사이트2](https://velog.io/@wnguswn7/Java-JPA-Detached-Entity-passed-to-persist-%EC%97%90%EB%9F%AC)
+
+
+
+
 
 
