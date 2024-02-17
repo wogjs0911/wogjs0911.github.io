@@ -11,7 +11,7 @@ tags: Strategy Observer Decorator Adapter PortAndAdapter Proxy Builder FactoryMe
 ### 1) 캡슐, 캡슐화
 
 - 캡슐** : 내부의 코드가 뭔지 알 필요가 없다. 즉, 인터페이스 개념
-	- 캡슐 밖에서는 캡슐안의 코드를 사용할 수 없게 해야 한다.(외부에서 영향을 주면, 에러가 발생한다.)
+	- 캡슐 밖에서는 캡슐 안의 코드를 사용할 수 없게 해야 한다.(외부에서 영향을 주면, 에러가 발생한다.)
 
 <br>
 - 캡슐화** : 비슷한 속성을 가진 클래스나 메서드 연결!
@@ -22,7 +22,7 @@ tags: Strategy Observer Decorator Adapter PortAndAdapter Proxy Builder FactoryMe
 
 <br><br>
 
-### 2) Strategy Pattern
+### 2) Strategy Pattern**
 
 <br>
 
@@ -55,7 +55,7 @@ tags: Strategy Observer Decorator Adapter PortAndAdapter Proxy Builder FactoryMe
 
 <br><br>
 
-### 3) Factory Pattern
+### 3) Factory Pattern**
 
 #### a. 설계 방향
 
@@ -91,7 +91,7 @@ tags: Strategy Observer Decorator Adapter PortAndAdapter Proxy Builder FactoryMe
 
 <br><br>
 
-# 2. Observer
+# 2. Observer**
 
 ### 1. 개념
 
@@ -132,6 +132,11 @@ tags: Strategy Observer Decorator Adapter PortAndAdapter Proxy Builder FactoryMe
 
 # 4. Adapter
 
+<br>
+
+### 1) 개념
+
+
 - 인터페이스를 다른 객체가 이해할 수 있도록 변환하는 특별한 객체를 말한다.
 
 <br>
@@ -144,8 +149,14 @@ tags: Strategy Observer Decorator Adapter PortAndAdapter Proxy Builder FactoryMe
 
 # 5. Port And Adapter
 
-- Port And Adapter 패턴은 주로 헥사고날 아키텍쳐에서 사용된다.
+<br>
 
+### 1) 개념
+
+
+- `Port And Adapter` 패턴은 주로 헥사고날 아키텍쳐에서 사용된다.
+
+<br>
 - 관심사 분리, 코어 중심 설계, 유연성 및 적응성이 필요한다. 도메인 모델 패턴에서 사용된다.
 
 
@@ -154,7 +165,7 @@ tags: Strategy Observer Decorator Adapter PortAndAdapter Proxy Builder FactoryMe
 <br><br>
 
 
-# 6. Builder
+# 6. Builder**
 
 <br>
 
@@ -173,12 +184,12 @@ tags: Strategy Observer Decorator Adapter PortAndAdapter Proxy Builder FactoryMe
 <br><br>
 
 
-# 7. Factory Method
+# 7. Factory Method**
 
 
 <br>
 
-### 1) `Factory Method Pattern` vs `Simple Factory Method Pattern` 차이
+### 1) `Factory Method Pattern` vs `Simple Factory Method Pattern`
 
 <br>
 - `Simple Factory Method` 패턴 : 
@@ -194,13 +205,23 @@ tags: Strategy Observer Decorator Adapter PortAndAdapter Proxy Builder FactoryMe
 
 ### 2) 설계 방법
 
-- Factory Method는 abstract나 interface로 생성되어 이를 상속받아서 런타임 시점에 넘겨받은 파라미터에 의해서 서브클래스가 결정되고 객체의 인스턴스(Product의 구현체)가 결정된다. 
+- `Factory Method`는 `abstract`나 `interface`로 생성되어 이를 상속받아서 런타임 시점에 넘겨받은 파라미터에 의해서 서브클래스가 결정되고 객체의 인스턴스(Product의 구현체)가 결정된다. 
 	- 이렇게 if-else 문의 복잡한 분기처리가 해결된다. enum 클래스를 이용하면 더 깔끔하다!!
 	
+<br>
+- 중요** : 공통된 기능으로 묶어서 설계하면, abstract를 사용하고 전부 사용하는 기능이 다르면 interface를 사용하여 설계한다.
+
+---
+
+<br><br>
 
 
+# 8. Singleton
 
+- 리소스를 많이 차지하는 역할을 하는 무거운 클래스일때 적합하다. 대표적으로 데이터베이스 연결 모듈을 예로 들 수 있다. DB에 접속하는 작업(I/O 바운드)은 그 자체로 무거운 작업에 속하며 또한 한번만 객체를 생성하고 돌려쓰면 되기 때문에 사용할 때마다 생성할 필요가 없다.
 
+<br>
+- Spring의 Bean이 Singleton으로 관리된다.
 
 
 
