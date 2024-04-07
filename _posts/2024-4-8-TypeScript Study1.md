@@ -10,7 +10,7 @@ tags: typescript
 
 ### 1) TypeScript 실행 순서
 
-- ![이미지](/assets/images/typescript/타입스크립트원리.png)
+- ![이미지](/assets/images/typescript/typescriptbase.png)
 
 <br>
 - 타입스크립트 코드의 컴파일 과정에 타입 검사가 포함되어 있기 때문에 타입 스크립트 코드를 컴파일 해서 생성한 자바스크립트 코드는 타입 검사를 통과한 자바스크립트 코드이다. 그러므로 타입 오류가 발생할 가능성이 낮은 안전한 자바스크립트 코드이다. 
@@ -30,8 +30,11 @@ tags: typescript
 	
 # 2. TypeScript 기본
 
-### 1) 타입 별칭 : 객체 -> 타입 별칭으로 java의 entity처럼 선언해놓고 사용한다.
+### 1) 타입 별칭
 
+- 객체 -> 타입 별칭으로 java의 entity처럼 선언해놓고 사용한다.
+
+<br>
 - 참고로 동일한 스코프에 동일한 이름의 타입 별칭을 선언하는 것은 불가능합니다. 마치 변수 선언과 유사합니다.
 
 ---
@@ -179,7 +182,7 @@ const user1 = {
 
 <br><br>
 	
-#### c. Enum
+### 2) Enum
 
 - enum은 컴파일 결과 객체가 된다. enum은 컴파일될 때 다른 타입들 처럼 사라지지 않고 자바스크립트 객체로 변화된다. 따라서 우리가 위에서 했던 것 처럼 값으로 사용할 수 있는 것이다.
 
@@ -398,7 +401,7 @@ a = anyVar;
 # 3. TypeScript 이해**
 
 
-### 0) TS가 문법이 아니라 이해해야하는 이유?
+### 0) TS가 문법 공부뿐만 아니라 이해를 해야하는 이유?
 
 - [TS 공식 문법 요약 pdf](https://www.typescriptlang.org/cheatsheets)
 
@@ -975,7 +978,7 @@ let arr = [1, "string"];
 
 <br><br>
 
-### 7) 타입 단언
+### 6) 타입 단언
 
 - 원래 아래 코드에서 빈 객체는 Person 타입이 아니므로 오류가 발생하게 된다. 
 
@@ -1218,7 +1221,7 @@ function login(user: User) {
 
 - String Literal 타입의 tag 프로퍼티를 각각 추가
 
-```
+```typescript
 type Admin = {
   tag: "ADMIN";
   name: string;
@@ -1262,6 +1265,7 @@ function login(user: User) {
 - switch를 이용해 더 직관적으로 변경할 수도 있습니다
 
 ```typescript
+
 function login(user: User) {
   switch (user.tag) {
     case "ADMIN": {
