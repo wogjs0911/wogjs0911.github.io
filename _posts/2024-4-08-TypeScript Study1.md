@@ -814,15 +814,19 @@ let union4: Union1 = { // ❌
 - number 타입과 string 타입은 서로 교집합을 공유하지 않는 서로소 집합이므로 변수 variable의 타입은 결국 never 타입으로 추론된다.
 
 <br>
+
 - 대다수의 기본 타입들 간에는 서로 공유하는 교집합이 없기 때문에 이런 인터섹션 타입은 보통 객체 타입들에 자주 사용된다. 
  
 
 ```typescript
+
 let variable: number & string; 
 // never 타입으로 추론된다
+
 ```
 
-<br>
+<br><br>
+
 - Intersection 타입과 객체 타입 정의하는 법
 
 ```typescript
@@ -843,17 +847,21 @@ let intersection1: Intersection = {
   name: "",
   color: "",
   language: "",
-}; ```
+};
+
+
+```
 
 ---
 
 <br><br>
 
-#### 6) 타입 추론
+### 6) 타입 추론
 
 - 타입스크립트는 타입이 정의되어 있지 않은 변수의 타입을 자동으로 추론한다.
 
 <br>
+
 - 변수의 타입을 자동으로 추론
 
 ```typescript
@@ -874,11 +882,11 @@ function func(param){ // 오류
 
 <br><br>
 
-##### a. 타입 추론이 가능한 상황들 : 
+#### a. 타입 추론이 가능한 상황들 : 
 
 <br>
 
-###### a) 변수 선언
+##### a) 변수 선언
 
 ```typescript
 let a = 10;
@@ -900,7 +908,7 @@ let c = {
 
 <br><br>
 
-###### b) 구조 분해 할당
+##### b) 구조 분해 할당
 
 ```typescript
 let { id, name, profile } = c;
@@ -910,7 +918,7 @@ let [one, two, three] = [1, "hello", true];
 
 <br><br>
 
-###### c) 함수의 반환값
+##### c) 함수의 반환값
 
 ```typescript
 function func() {
@@ -921,7 +929,7 @@ function func() {
 
 <br><br>
 
-###### d) 기본값이 설정된 매개변수
+##### d) 기본값이 설정된 매개변수
 
 ```typescript
 function func(message = "hello") {
@@ -933,7 +941,7 @@ function func(message = "hello") {
 
 <br><br>
 
-##### b. 주의해야 할 상황들 : 
+#### b. 주의해야 할 상황들 : 
 
 <br>
 
@@ -986,7 +994,7 @@ let arr = [1, "string"];
 
 <br><br>
 
-### 6) 타입 단언
+### 7) 타입 단언
 
 - 원래 아래 코드에서 빈 객체는 Person 타입이 아니므로 오류가 발생하게 된다. 
 
@@ -1039,24 +1047,22 @@ let num3 = 10 as string;  // ❌
 ```
 
 
----
-
 <br><br>
 
 #### b. 다중 단언 
-
+ 
 - 그러나 이렇게 단언하는 것은 매우 좋지 않은 방식이다. 타입 단언은 실제로 그 값을 해당 타입의 값으로 바꾸는 것이 아니라 단순 눈속임에 불과하다. 따라서 이렇게 값을 이렇게 슈퍼-서브 관계를 갖지 않는 타입으로 단언하면 오류가 발생할 확률이 매우 높아진다.
 
 ```typescript
 let num3 = 10 as unknown as string;
 ```
 
+<br><br>
 
 
+#### c. const 단언
 
-* d. const 단언
-
-	- 특정 값을 const 타입으로 단언하면 마치 변수를 const로 선언한 것 과 비슷하게 타입이 변경된다.
+- 특정 값을 const 타입으로 단언하면 마치 변수를 const로 선언한 것과 비슷하게 타입이 변경된다.
 
 ```typescript
 let num4 = 10 as const;
@@ -1072,8 +1078,12 @@ let cat = {
 
 
 
-* e. Non Null 단언
-	- Non Null 단언은 지금까지 살펴본 값 as 타입 형태를 따르지 않는 단언이다. 값 뒤에 느낌표(`!`) 를 붙여주면 이 값이 undefined이거나 null이 아닐것으로 단언할 수 있다.
+<br><br>
+
+
+#### d. Non Null 단언
+
+- Non Null 단언은 지금까지 살펴본 값 as 타입 형태를 따르지 않는 단언이다. 값 뒤에 느낌표(`!`) 를 붙여주면 이 값이 undefined이거나 null이 아닐것으로 단언할 수 있다.
 
 ```typescript
 type Post = {
@@ -1095,7 +1105,7 @@ const len: number = post.author!.length;
 
 <br><br>
 
-### 7) 타입 좁히기 
+### 8) 타입 좁히기 
 
 - 매개변수 value의 타입이 `number | string` 이므로 함수 내부에서 다음과 같이 value가 number 타입이거나 string 타입일 것으로 기대하고 메서드를 사용하려고 하면 오류가 발생한다.
 
@@ -1173,7 +1183,7 @@ function func(value: number | string | Date | null | Person) {
 
 <br><br>
 
-### 8) 서로소 유니온 타입
+### 9) 서로소 유니온 타입
 
 - 교집합이 없는 타입들 즉 서로소 관계에 있는 타입들을 모아 만든 유니온 타입
 
@@ -1315,7 +1325,7 @@ function func(a: number, b: number): number {
 <br>
 
 ```typescript
-// 함수의 반환값 타입은 자동으로 추론되기 때문에 다음과 같이 생량 가능
+// 함수의 반환값 타입은 자동으로 추론되기 때문에 다음과 같이 생략 가능
 function func(a: number, b: number) {
   return a + b;
 }
@@ -1370,7 +1380,7 @@ introduce(1); // 오류
 
 ### c. 선택적 매개변수 설정**
 
-- 매개변수의 이름뒤에 물음표(?)를 붙여주면 선택적 매개변수가 되어 생략이 가능, 주의할 점은 선택적 매개변수는 필수 매개변수 앞에 올 수 없다. 반드시 뒤에 배치!!
+- 매개변수의 이름 뒤에 물음표(`?`)를 붙여주면 선택적 매개변수가 되어 생략이 가능, 주의할 점은 선택적 매개변수는 필수 매개변수 앞에 올 수 없다. 반드시 뒤에 배치!!
 
 ```typescript
 function introduce(name = "이정환", tall?: number) {
@@ -1385,7 +1395,7 @@ introduce("이정환");
 
 <br><br>
 - 중요** :
-	-  all 같은 선택적 매개변수의 타입은 자동으로 undefined와 유니온 된 타입으로 추론된다. 따라서 tall의 타입은 현재 `number | undefined`이 된다. 그러므로 이 값이 number 타입의 값일 거라고 기대하고 사용하려면 다음과 같이 타입 좁히기가 필요!!
+	-  tall 같은 선택적 매개변수의 타입은 자동으로 undefined와 유니온 된 타입으로 추론된다. 따라서 tall의 타입은 현재 `number | undefined`이 된다. 그러므로 이 값이 number 타입의 값일 거라고 기대하고 사용하려면 다음과 같이 타입 좁히기가 필요!!
 
 ```typescript
 function introduce(name = "이정환", tall?: number) {
@@ -1644,7 +1654,7 @@ func2 = func1; // ❌
 <br><br>
 
 
-## 3. 함수 오버로딩
+## 3) 함수 오버로딩
 
 - 하나의 함수를 매개변수의 개수나 타입에 따라 다르게 동작하도록 만드는 문법
 
@@ -1699,7 +1709,7 @@ func(1, 2, 3);  // ✅ 버전 3 - 오버로드 시그니쳐
 
 <br><br>
 
-## 4. 사용자 정의 타입가드
+## 4) 사용자 정의 타입가드
 
 - 사용자 정의 타입가드 : 참 또는 거짓을 반환하는 함수를 이용해 우리 입맛대로 타입 가드를 만들 수 있도록 도와주는 것
 
@@ -1744,7 +1754,7 @@ function warning(animal: Animal) {
 - isDog 함수는 매개변수로 받은 값이 Dog 타입이라면 true 아니라면 false를 반환한다. 
 
 <br>
-- 이 때 반환값의 타입으로 `animal as Dog` 를 정의하면, 이 함수가 true를 반환하면 조건문 내부에서는 이 값이 Dog 타입임을 보장한다는 의미가 된다. 
+- 이 때 반환값의 타입으로 `animal is Dog` 를 정의하면, 이 함수가 true를 반환하면 조건문 내부에서는 이 값이 Dog 타입임을 보장한다는 의미가 된다. 
 
 <br>
 - 따라서, warning 함수에서 isDog 함수를 호출해 매개변수의 값이 Dog 타입인지 확인하고 타입을 좁힐 수 있다
@@ -1780,391 +1790,33 @@ function warning(animal: Animal) {
 }
 ```
 
----
-
 <br><br>
-
-# 5. 인터페이스
-
-## 0) 인터페이스 개념
-
-- `타입 별칭`과 동일하게 타입에 이름을 지어주는 또 다른 문법!!
-
-```typescript
-interface Person {
-  name: string;
-  age: number;
-}
-```
-
-<br>
-- 인터페이스를 타입 주석과 함께 사용해 변수의 타입을 정의
-
-```typescript
-
-const person: Person = {
-  name: "이정환",
-  age : 27
-};
-```
-
----
-
-<br><br>
-
-### a. 선택적 프로퍼티
-
-```typescript
-interface Person {
-  name: string;
-  age?: number;
-}
-
-const person: Person = {
-  name: "이정환",
-  // age: 27,
-};
-```
-
----
-
-<br><br>
-
-### b. 읽기 전용 프로퍼티
-
-```typescript
-interface Person {
-  readonly name: string;
-  age?: number;
-}
-
-const person: Person = {
-  name: "이정환",
-  // age: 27,
-};
-
-person.name = '홍길동' // ❌
-```
-
----
-
-<br><br>
-
-### c. 메서드 타입 정의하기
-
-#### a) '함수 타입 표현식' 이용하는 방법
-
-```typescript
-interface Person {
-  readonly name: string;
-  age?: number;
-  sayHi: () => void;;
-}
-```
-
-<br><br>
-
-#### b) '호출 시그니쳐' 이용하는 방법
-
-```typescript
-interface Person {
-  readonly name: string;
-  age?: number;
-  sayHi: () => void;;
-}
-```
-
----
-
-<br><br>
-
-### d. 메서드 오버로딩
-
-- 호출 시그니처를 이용해 메서드의 타입을 정의하면 오버로딩 구현이 가능(함수 타입 표현식은 불가능**)
-
-```typescript
-interface Person {
-  readonly name: string;
-  age?: number;
-  sayHi(): void;
-  sayHi(a: number): void;
-  sayHi(a: number, b: number): void;
-}
-```
 
 
 ---
 
-<br><br>
 
-### e. 하이브리드 타입
 
-- 인터페이스 또한 함수이자 일반 객체인 '하이브리드 타입'으로도 정의 가능!!
 
-```typescript
-interface Func2 {
-  (a: number): string;
-  b: boolean;
-}
 
-const func: Func2 = (a) => "hello";
-func.b = true;
-```
 
----
 
-<br><br>
 
-### e. 주의할 점**
 
-- `타입 별칭`에서는 Union이나 Intersection 타입을 정의할 수 있었던 반면 `인터페이스`에서는 정의할 수 없다.
 
-```typescript
-type Type1 = number | string;
-type Type2 = number & string;
 
-interface Person {
-  name: string;
-  age: number;
-} | number // ❌
-```
 
-<br>
-- `인터페이스`로 만든 타입을 Union 또는 Intersection으로 이용해야 한다면 `타입 별칭`과 함께 사용하거나 타입 주석에서 직접 사용해야 한다.
 
-```typescript
-type Type1 = number | string | Person;
-type Type2 = number & string & Person;
 
-const person: Person & string = {
-  name: "이정환",
-  age: 27,
-};
-```
 
 
----
 
-<br><br>
 
-## 1) 인터페이스 확장하기
 
-### a. 인터페이스 확장**
 
-- 하나의 인터페이스를 다른 인터페이스들이 상속받아 중복된 프로퍼티를 정의하지 않도록 도와주는 것
 
-<br>
-- `interface 타입이름 extends 확장_할_타입이름` 형태로 extends 뒤에 확장할 타입의 이름을 정의하면 해당 타입에 정의된 모든 프로퍼티를 다 가지고 오게 된다. 
 
-<br>
-- 예시 1 : Dog, Cat, Chicken 타입은 모두 Animal 타입을 확장하는 타입이기 때문에 name, age 프로퍼티를 갖게 된다.
-	
 
-```typescript
-interface Dog {
-  name: string;
-  ages: number; // 수정
-  isBark: boolean;
-}
-
-interface Cat {
-  name: string;
-  ages: number; // 수정
-  isScratch: boolean;
-}
-
-interface Chicken {
-  name: string;
-  ages: number; // 수정
-  isFly: boolean;
-}
-```
-
-<br><br>
-
-```typescript
-
-interface Animal {
-  name: string;
-  color: string;
-}
-
-interface Dog extends Animal {
-  breed: string;
-}
-
-interface Cat extends Animal {
-  isScratch: boolean;
-}
-
-interface Chicken extends Animal {
-  isFly: boolean;
-}
-```
-
----
-
-<br><br>
-
-- 예시 2 : 아래 코드처럼 확장 대상 타입인 Animal은 Dog 타입의 슈퍼타입이다.
-
-```typescript
-interface Animal {
-  name: string;
-  color: string;
-}
-
-interface Dog extends Animal {
-  breed: string;
-}
-
-(...)
-
-const dog: Dog = {
-  name: "돌돌이",
-  color: "brown",
-  breed: "진도",
-};
-```
-
----
-
-<br><br>
-
-### b. 프로퍼티 재 정의하기
-
-- 확장과 동시에 프로퍼티의 타입을 재 정의 하는 것 또한 가능
-
-```typescript
-interface Animal {
-  name: string;
-  color: string;
-}
-
-interface Dog extends Animal {
-  name: "doldol"; // 타입 재 정의
-  breed: string;
-}
-```
-
-<br>
-
-- 주의 사항** : 프로퍼티를 재 정의할 때, 원본 타입을 `A`, 재 정의된 타입을 `B`라고 하면 반드시 `A`가 `B`의 슈퍼 타입이 되도록 재정의 해야 한다.
-
-```typescript
-interface Animal {
-  name: string;
-  color: string;
-}
-
-interface Dog extends Animal {
-  name: number; // ❌
-  breed: string;
-}
-```
-
-
----
-
-<br><br>
-
-### c. 타입 별칭을 확장하기**
-
-- `인터페이스`는 `인터페이스` 뿐만 아니라 `타입 별칭`으로 정의된 객체도 확장
-
-```typescript
-type Animal = {
-  name: string;
-  color: string;
-};
-
-interface Dog extends Animal {
-  breed: string;
-}
-```
-
----
-
-<br><br>
-
-### d. 다중 확장**
-
-- 여러개의 인터페이스를 확장하는 것 또한 가능하다.
-	- Java에서는 단일 상속만 가능했다.
-
-```typescript
-interface DogCat extends Dog, Cat {}
-
-const dogCat: DogCat = {
-  name: "",
-  color: "",
-  breed: "",
-  isScratch: true,
-};
-```
-
-
----
-
-<br><br>
-
-## 2) 인터페이스 선언 합치기
-
-### a. 선언 합침**
-
-- 개념** : `타입 별칭`은 동일한 스코프 내에 중복된 이름으로 선언할 수 없는 반면 `인터페이스`는 가능하다.
-
-<br>
-- 이유** : 중복된 이름의 인터페이스 선언은 결국 모두 하나로 합쳐지기 때문이다.
-	- 아래 코드에 선언한 Person 인터페이스들을 결국 합쳐져 다음과 같은 인터페이스가 된다.
-
-```typescript
-interface Person {
-  name: string;
-}
-
-interface Person { // ✅
-  age: number;
-}
-```
-
-<br>
-- 결론** : 동일한 이름의 인터페이스들이 합쳐지는 것을 `선언 합침`(Declaration Merging)이라고 부른다.
-
-```typescript
-interface Person {
-  name: string;
-}
-
-interface Person {
-  age: number;
-}
-
-const person: Person = {
-  name: "이정환",
-  age: 27,
-};
-```
-
----
-
-<br><br>
-
-### b. 주의할 점
-
-- 아래 코드처럼, 동일한 이름의 인터페이스들이 동일한 이름의 프로퍼티를 서로 다른 타입으로 정의한다면 오류가 발생!
-	- 동일한 프로퍼티의 타입을 다르게 정의한 상황을 ‘충돌’ 이라고 표현하며 선언 합침에서 이런 충돌은 허용되지 않는다.
-
-```typescript
-interface Person {
-  name: string;
-}
-
-interface Person {
-  name: number;
-  age: number;
-}
-```
 
 
 
