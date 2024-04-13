@@ -1,7 +1,7 @@
 ---
 key: /2024/04/10/TypeScriptStudy2.html
 title: TypeScript - TypeScript Study2
-tags: typescript
+tags: typescript interface class generic promise keyof typeof infer
 --- 
 
 
@@ -136,7 +136,7 @@ func.b = true;
 
 <br><br>
 
-### e. 주의할 점**
+### f. 주의할 점**
 
 - `타입 별칭`에서는 Union이나 Intersection 타입을 정의할 수 있었던 반면 `인터페이스`에서는 정의할 수 없다.
 
@@ -868,7 +868,7 @@ class Employee {
 <br><br>
 
 
-## 3) 인터페이스를 구현하는 클래스
+## 3) 인터페이스 구현하는 클래스
 
 - 타입스크립트의 인터페이스는 클래스의 설계도 역할이 가능하다, 인터페이스를 이용해 클래스에 어떤 필드들이 존재하고, 어떤 메서드가 존재하는지 정의할 수 있다.-
 <br>
@@ -1010,7 +1010,7 @@ let num = func(10);
 
 ## 1) 타입 변수 응용하기
 
-### a. 제너릭 타입 변수 2개 사용기
+### a. 제너릭 타입 변수 2개 사용
 
 - 2개의 타입 변수가 필요한 상황이라면, T, U 처럼 2개의 타입 변수를 사용해도 된다.
 	- `T`는 String 타입으로 `U`는 Number 타입으로 추론!!
@@ -1114,12 +1114,147 @@ getLength(null);             // ❌
 
 ## 2) map, forEach 메서드 타입 정의하기
 
+### a. JS에서 Map
+
+- 원본 배열의 각 요소에 콜백함수를 수행하고 반환된 값들을 모아 새로운 배열로 만들어 반환
+
+```javascript
+
+const arr = [1, 2, 3];
+const newArr = arr.map((it) => it * 2);
+// [2, 4, 6]
+
+```
+
+---
+
+<br><br>
+
+### b. TS에서 Map
+
+- 원본 배열의 각 요소에 콜백함수를 수행하고 반환된 값들을 모아 새로운 배열로 만들어 반환
+
+```typescript
+function map(arr: unknown[], callback: (item: unknown) => unknown): unknown[] {}
+```
+
+---
+
+<br><br>
+
+### c. TS에서 Map 제너릭
+
+- 제너릭 함수 선언부
+
+```typescript
+function map<T>(arr: T[], callback: (item: T) => T): T[] {}
+```
 
 
+<br><br>
+
+- 제너릭 함수 내부구현부
 
 
+```typescript
+function map<T>(arr: T[], callback: (item: T) => T): T[] {
+  let result = [];
+  for (let i = 0; i < arr.length; i++) {
+    result.push(callback(arr[i]));
+  }
+  return result;
+}
+```
+
+<br><br>
+
+- 제너릭 함수 호출부
+
+```typescript
+const arr = [1, 2, 3];
+
+function map<T>(arr: T[], callback: (item: T) => T): T[] {
+  (...)
+}
+
+map(arr, (it) => it * 2);
+// number[] 타입의 배열을 반환
+// 결과 : [2, 4, 6]
+```
 
 
+---
+
+<br><br>
+
+### d. TS에서 Map 문제점 
+
+- 문제 상황 : 아래 코드처럼 콜백함수가 모든 배열 요소를 String 타입으로 변환하도록 수정하면, 문제 발생
+	- 인수로 전달되는 배열의 타입 변수 T에는 number 타입이 할당되었기 때문에 콜백 함수의 반환값 타입도 number 타입이 되어야 하기 때문!!
+
+```typescript
+
+const arr = [1, 2, 3];
+
+function map<T>(arr: T[], callback: (item: T) => T): T[] {
+  (...)
+}
+
+map(arr, (it) => it.toString()); // ❌
+
+```
+
+<br><br>
+
+- 문제 해결 방법** : 
+	- 타입 변수를 하나 더 추가해서 원본 배열의 타입과 새롭게 반환하는 배열의 타입을 다르게 설정!!
+
+```typescript
+
+const arr = [1, 2, 3];
+
+function map<T, U>(arr: T[], callback: (item: T) => U): U[] {
+  (...)
+}
+
+map(arr, (it) => it.toString());
+// string[] 타입의 배열을 반환
+// 결과 : ["1", "2", "3"]
+
+```
+
+---
+
+<br><br>
+
+### e. JS에서 ForEach
+
+```typescript
+const arr2 = [1, 2, 3];
+
+arr2.forEach((it) => console.log(it));
+// 출력 : 1, 2, 3
+```
+
+---
+
+<br><br>
+
+### e. TS에서 ForEach**
+
+- Map과 동일하게 2개의 매개변수를 받는다.
+
+<br>
+- 첫번째 매개변수 `arr`에는 순회 대상 배열을 제공받고 두번째 매개변수 `callback`에는 모든 배열 요소에 수행할 함수를 제공 받는다. 
+	- Map 메서드의 타입 정의와는 달리 forEach 메서드는 반환값이 없는 메서드이므로 콜백 함수의 반환값 타입을 void로 정의한다!!
+
+```typescript
+function forEach<T>(arr: T[], callback: (item: T) => void) {
+  for (let i = 0; i < arr.length; i++) {
+    callback(arr[i]);
+  }
+}
+```
 
 ---
 
@@ -1127,12 +1262,54 @@ getLength(null);             // ❌
 
 ## 3) 제네릭 인터페이스, 제너릭 타입 별칭
 
+- 제네릭은 인터페이스에도 적용할 수 있다. 인터페이스에 타입 변수를 선언해 사용하면 된다.
 
+<br>
+- 주의** : 
+	- 제네릭 인터페이스는 제네릭 함수와는 달리 변수의 타입으로 정의할 때, 반드시 꺽쇠와 함께 타입 변수에 할당할 타입을 명시해주어야 한다. 
+	- 그 이유는 제네릭 함수는 매개변수에 제공되는 값의 타입을 기준으로 타입 변수의 타입을 추론할 수 있지만 인터페이스는 마땅히 추론할 수 있는 값이 없기 때문아다. 
 
+```typescript
 
+let keyPair: KeyPair<string, number> = {
+  key: "key",
+  value: 0,
+};
 
+let keyPair2: KeyPair<boolean, string[]> = {
+  key: true,
+  value: ["1"],
+};
 
+```
 
+<br><br>
+
+### a. 인덱스 시그니쳐와 함께 사용하기
+
+- 제네릭 인터페이스는 인덱스 시그니쳐와 함께 사용하면, 기존보다 훨씬 더 유연한 객체 타입을 정의할 수 있다.
+
+```typescript
+
+interface Map<V> {
+  [key: string]: V;
+}
+
+let stringMap: Map<string> = {
+  key: "value",
+};
+
+let booleanMap: Map<boolean> = {
+  key: true,
+};
+```
+
+<br>
+- 인덱스 시그니처 설명** : 
+	- 한개의 타입 변수 V를 갖는 제네릭 인터페이스 Map을 정의했다. 이 인터페이스는 인덱스 시그니쳐로 key의 타입은 string, value의 타입은 V인 모든 객체 타입을 포함하는 타입이다. 
+	- 변수 stringMap의 타입을 Map<string> 으로 정의했다. 따라서 V가 string 타입이 되어 이 변수의 타입은 key는 string이고 value는 string인 모든 프로퍼티를 포함하는 객체 타입으로 정의된다.
+	- 변수 booleanMap의 타입을 Map<boolean> 으로 정의했다. 따라서 V가 boolean 타입이 되어 이 변수의 타입은 key는 string이고 value는 boolean인 모든 프로퍼티를 포함하는 객체 타입으로 정의된다.
+ 
 
 
 
@@ -1142,8 +1319,105 @@ getLength(null);             // ❌
 
 ## 4) 제네릭 클래스
 
+### a. 제네릭 없는 TS 클래스
+
+- 기존 클래스인 `NumberList` 뿐만 아니라 `StringList` 클래스 하나 더 필요하다면 제네릭 없이는 새로운 클래스를 하나 더 만들어줘야 한다.
+	- 매우 비효율적이다. 모든 리스트에 메서드가 새롭게 추가된다거나 동작이 수정되는 경우라도 생각하면 벌써 끔찍하다. 따라서, 제네릭 클래스를 사용해 여러 타입의 리스트를 생성할 수 있는 범용적을 클래스를 정의하자!!
+
+```typescript
+class NumberList {
+  constructor(private list: number[]) {}
+
+	push(data: number) {
+    this.list.push(data);
+  }
+
+  pop() {
+    return this.list.pop();
+  }
+
+  print() {
+    console.log(this.list);
+  }
+}
+
+const numberList = new NumberList([1, 2, 3]);
+```
+
+<br><br>
+
+```typescript
+class NumberList {
+  constructor(private list: number[]) {}
+	(...)
+}
+
+class StringList {
+  constructor(private list: string[]) {}
+
+	push(data: string) {
+    this.list.push(data);
+  }
+
+  pop() {
+    return this.list.pop();
+  }
+
+  print() {
+    console.log(this.list);
+  }
+}
+
+const numberList = new NumberList([1, 2, 3]);
+const numberList = new StringList(["1", "2", "3"]);
+```
+
+---
+
+<br><br>
+
+### b. 제네릭 있는 TS 클래스
+
+- 클래스는 생성자를 통해 타입 변수의 타입을 추론할 수 있기 때문에 생성자에 인수로 전달하는 값이 있을 경우 타입 변수에 할당할 타입을 생략해도 된다.
+
+```typescript
+
+class List<T> {
+  constructor(private list: T[]) {}
+
+  push(data: T) {
+    this.list.push(data);
+  }
+
+  pop() {
+    return this.list.pop();
+  }
+
+  print() {
+    console.log(this.list);
+  }
+}
+
+const numberList = new List([1, 2, 3]);
+const stringList = new List(["1", "2"]);
+
+```
+
+<br><br>
+
+- 만약 타입변수의 타입을 직접 설정하고 싶다면 다음과 같이 하면 된다.
 
 
+```typescript
+class List<T> {
+  constructor(private list: T[]) {}
+
+  (...)
+}
+
+const numberList = new List<number>([1, 2, 3]);	// 이렇게 설정!!
+const stringList = new List<string>(["1", "2"]);	// 이렇게 설정!!
+```
 
 
 
