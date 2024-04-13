@@ -1230,17 +1230,19 @@ map(arr, (it) => it.toString());
 ### e. JS에서 ForEach
 
 ```typescript
+
 const arr2 = [1, 2, 3];
 
 arr2.forEach((it) => console.log(it));
 // 출력 : 1, 2, 3
+
 ```
 
 ---
 
 <br><br>
 
-### e. TS에서 ForEach**
+### f. TS에서 ForEach**
 
 - Map과 동일하게 2개의 매개변수를 받는다.
 
@@ -1283,6 +1285,8 @@ let keyPair2: KeyPair<boolean, string[]> = {
 
 ```
 
+---
+
 <br><br>
 
 ### a. 인덱스 시그니쳐와 함께 사용하기
@@ -1305,12 +1309,135 @@ let booleanMap: Map<boolean> = {
 ```
 
 <br>
-- 인덱스 시그니처 설명** : 
-	- 한개의 타입 변수 V를 갖는 제네릭 인터페이스 Map을 정의했다. 이 인터페이스는 인덱스 시그니쳐로 key의 타입은 string, value의 타입은 V인 모든 객체 타입을 포함하는 타입이다. 
-	- 변수 stringMap의 타입을 Map<string> 으로 정의했다. 따라서 V가 string 타입이 되어 이 변수의 타입은 key는 string이고 value는 string인 모든 프로퍼티를 포함하는 객체 타입으로 정의된다.
-	- 변수 booleanMap의 타입을 Map<boolean> 으로 정의했다. 따라서 V가 boolean 타입이 되어 이 변수의 타입은 key는 string이고 value는 boolean인 모든 프로퍼티를 포함하는 객체 타입으로 정의된다.
- 
 
+#### a) 인덱스 시그니처 사용 설명** : V로 범용적이거나 String이나 Boolean 같이 타입 제한적으로 객체 타입을 정의하여 사용할 수 있다.
+
+- 한개의 타입 변수 V를 갖는 제네릭 인터페이스 Map을 정의했다. 이 인터페이스는 인덱스 시그니쳐로 key의 타입은 string, value의 타입은 V인 모든 객체 타입을 포함하는 타입이다. 
+
+<br>
+- 변수 stringMap의 타입을 Map<string> 으로 정의했다. 따라서 V가 string 타입이 되어 이 변수의 타입은 key는 string이고 value는 string인 모든 프로퍼티를 포함하는 객체 타입으로 정의된다.
+
+<br>
+- 변수 booleanMap의 타입을 Map<boolean> 으로 정의했다. 따라서 V가 boolean 타입이 되어 이 변수의 타입은 key는 string이고 value는 boolean인 모든 프로퍼티를 포함하는 객체 타입으로 정의된다.
+
+
+---
+
+<br><br>
+
+### b. 제네릭 타입 별칭
+
+
+```typescript
+
+type Map2<V> = {
+  [key: string]: V;
+};
+
+let stringMap2: Map2<string> = {
+  key: "string",
+};
+```
+
+---
+
+<br><br>
+
+### c. 제네릭 인터페이스 활용 예
+
+- 수정 전 코드** :
+	- 학생일수도 개발자일 수도 있는 User 타입을 정의!!
+	- 학생만 할 수 있는 기능이 점점 많아진다고 가정하면, 매번 기능을 만들기 위해 함수를 선언할 때 마다 조건문을 이용해 타입을 좁혀야 하기 때문에 결국 매우 불편하다. 게다가 타입을 좁히는 코드는 중복 코드라서 비효율적이다!!
+
+```typescript
+
+interface Student {
+  type: "student";
+  school: string;
+}
+
+interface Developer {
+  type: "developer";
+  skill: string;
+}
+
+interface User {
+  name: string;
+  profile: Student | Developer;
+}
+
+function goToSchool(user: User<Student>) {
+  if (user.profile.type !== "student") {
+    console.log("잘 못 오셨습니다");
+    return;
+  }
+
+  const school = user.profile.school;
+  console.log(`${school}로 등교 완료`);
+}
+
+const developerUser: User = {
+  name: "이정환",
+  profile: {
+    type: "developer",
+    skill: "typescript",
+  },
+};
+
+const studentUser: User = {
+  name: "홍길동",
+  profile: {
+    type: "student",
+    school: "가톨릭대학교",
+  },
+};
+```
+
+<br><br>
+
+- 수정 후 코드** : 
+	- `goToSchool` 함수의 매개변수 타입을 `User<Student>` 처럼 정의해 학생 유저만 이 함수의 인수로 전달하도록 제한할 수 있다.
+	- 결과적으로 함수 내부에서 타입을 좁힐 필요가 없어져서 코드가 훨씬 간결해진다!!
+
+```typescript
+
+interface Student {
+  type: "student";
+  school: string;
+}
+
+interface Developer {
+  type: "developer";
+  skill: string;
+}
+
+interface User<T> {
+  name: string;
+  profile: T;
+}
+
+function goToSchool(user: User<Student>) {
+  const school = user.profile.school;
+  console.log(`${school}로 등교 완료`);
+}
+
+const developerUser: User<Developer> = {
+  name: "이정환",
+  profile: {
+    type: "developer",
+    skill: "TypeScript",
+  },
+};
+
+const studentUser: User<Student> = {
+  name: "홍길동",
+  profile: {
+    type: "student",
+    school: "가톨릭대학교",
+  },
+};
+
+```
 
 
 ---
@@ -1420,16 +1547,111 @@ const stringList = new List<string>(["1", "2"]);	// 이렇게 설정!!
 ```
 
 
-
-
-
-
-
 ---
 
 <br><br>
 
 ## 5) 프로미스와 제너릭
+
+### a. JS Promise 개념 복습
+
+-  JavaScript에서 비동기 작업을 대표하는 객체다. 한 작업이 완료될 때까지 기다렸다가, 그 결과에 따라 성공(`resolve`) 또는 실패(`reject`)를 처리한다. 
+	- 왜냐하면 Promise는 비동기 작업의 최종 결과를 나타내기 때문이다.
+
+<br>
+- Promise를 사용하면, 비동기 작업을 순차적으로 또는 병렬로 처리하는 것이 가능해진다. 이는 코드의 가독성과 유지보수성을 크게 향상시킨다.
+
+<br><br>
+
+#### a) Async/Await의 도입 
+
+- Promise가 비동기 코드를 다루는 강력한 도구지만, 여전히 `.then()`과 `.catch()`의 연속 사용은 코드를 어렵게 만들 수 있다. 
+	- 이 문제를 해결하기 위해 ES6에서는 `async/await` 문법이 도입되었다.
+
+<br>
+- `async/await`은 Promise 기반 로직을 보다 쉽게 작성할 수 있게 해주는 문법적 설탕(syntactic sugar)이다. 
+	- 중요** : 이 문법을 사용하면 비동기 코드를 동기 코드처럼 순차적으로 작성할 수 있기 때문이다!!
+
+<br>
+- 함수 앞에 `async`를 붙이면 해당 함수는 Promise를 반환하게 되며, 함수 내부에서는 `await` 키워드를 사용하여 비동기 작업의 완료를 기다릴 수 있다. 
+	- 이 방법을 통해, 비동기 작업의 결과를 변수에 할당하고, 에러 처리를 `try/catch` 문으로 할 수 있다.(`b. Promise 사용하기`에서 Promise 예시 코드 확인!!)
+
+---
+
+<br><br>
+
+### b. Promise 사용하기
+
+- Promise는 제네릭 클래스로 구현되어 있다. 새로운 Promise를 생성할 때, 타입 변수에 할당할 타입을 직접 설정해 주면 해당 타입이 바로 resolve 결과값의 타입!!
+
+<br>
+- reject 함수에 인수로 전달하는 값인 실패의 결과값 타입은 정의할 수 없다. `reject` 함수는 `unknown` 타입으로 고정되어 있기 때문에 `catch` 메서드에서 사용하려면 타입 좁히기를 통해 안전하게 사용하는걸 권장!!
+
+```typescript
+
+const promise = new Promise<number>((resolve, reject) => {
+  setTimeout(() => {
+    // 결과값 : 20
+    resolve(20);
+  }, 3000);
+});
+
+promise.then((response) => {
+  // response는 number 타입
+  console.log(response);
+});
+
+promise.catch((error) => {
+  if (typeof error === "string") {
+    console.log(error);
+  }
+});
+
+```
+
+---
+
+<br><br>
+
+### c. Promise 반환 타입**
+
+- Promise 객체를 반환한다면, 함수의 반환값 타입
+
+```typescript
+function fetchPost() {
+  return new Promise<Post>((resolve, reject) => {
+    setTimeout(() => {
+      resolve({
+        id: 1,
+        title: "게시글 제목",
+        content: "게시글 본문",
+      });
+    }, 3000);
+  });
+}
+```
+
+<br>
+- 직관적으로 반환값 타입을 직접 명시!!
+
+```typescript
+function fetchPost(): Promise<Post> {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve({
+        id: 1,
+        title: "게시글 제목",
+        content: "게시글 본문",
+      });
+    }, 3000);
+  });
+}
+```
+
+
+
+
+
 
 
 ---
