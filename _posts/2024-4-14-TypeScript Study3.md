@@ -276,6 +276,274 @@ type Tup3 = Tup[number]
 
 ```
 
+---
+
+<br><br>
+
+## 2) keyof & typeof 연산자
+
+<br>
+
+### a. Keyof 연산자
+
+- 객체 타입으로부터 프로퍼티의 모든 key들을 `String Literal` Union 타입으로 추출하는 연산자
+
+<br>
+
+- 중요** : key의 타입을 `name | age`로 정의했는데 Person 타입에 새로운 프로퍼티가 추가되거나 수정될 때 마다 이 타입도 계속 바꿔줘야 한다. 이럴 때, Keyof 연산자를 이용하면 좋다!!
+
+```typescript
+interface Person {
+  name: string;
+  age: number;
+  location: string; // 추가
+}
+
+function getPropertyKey(person: Person, key: keyof Person) {
+  return person[key];
+}
+
+const person: Person = {
+  name: "이정환",
+  age: 27,
+};
+```
+
+---
+
+<br><br>
+
+### b. Typeof와 Keyof 함께 사용하기
+
+- `typeof` 연산자는 자바스크립트에서 특정 값의 타입을 문자열로 반환하는 연산자였다. 그러나 타입을 정의할 때, 사용하면 특정 변수의 타입을 추론하는 기능!!
+
+```typescript
+
+type Person = typeof person;
+// 결과
+// {name: string, age: number, location:string}
+
+(...)
+
+```
+
+<br>
+
+- 이런 특징을 이용하면 keyof 연산자를 다음과 같이 사용할 수 있다.(여기는 다시 공부하기!!)
+
+```typescript
+
+(...)
+
+function getPropertyKey(person: Person, key: keyof typeof person) {
+  return person[key];
+}
+
+const person: Person = {
+  name: "이정환",
+  age: 27,
+};
+
+```
+
+
+
+---
+
+<br><br>
+
+## 3) 맵드 타입
+
+### a. 문제 상황
+
+- 기존의 객체 타입을 기반으로 새로운 객체 타입을 만드는 타입 조작 기능!!
+
+```typescript
+
+interface User {
+  id: number;
+  name: string;
+  age: number;
+}
+
+function fetchUser(): User {
+  (...)
+}
+
+function updateUser(user: User) {
+  // ... 유저 정보 수정 기능
+}
+```
+
+
+<br><br>
+
+- 그런데, updateUser 함수의 매개변수 타입이 User 타입으로 되어 있어서 수정하고 싶은 프로퍼티만 골라서 보낼 수 없는 상황이다.
+
+```typescript
+
+interface User {
+  id: number;
+  name: string;
+  age: number;
+}
+
+function fetchUser(): User {
+  (...)
+}
+
+function updateUser(user: User) {
+  // ... 유저 정보 수정 기능
+}
+
+updateUser({ // ❌
+  age: 25
+});
+```
+
+<br><br>
+
+- 어쩔 수 없이 다음과 같이 새로운 타입을 만들어 주어야 한다.
+
+<br>
+- 하지만, 아래 코드는 User 타입과 PartialUser 타입이 지금 서로 중복된 프로퍼티를 정의하고 있다. 중복은 언제나 좋지 않다. 따라서, 이럴 때 `맵드 타입`을 이용하면 좋다!!
+
+
+```typescript
+
+interface User {
+  id: number;
+  name: string;
+  age: number;
+}
+
+type PartialUser = {
+  id?: number;
+  name?: string;
+  age?: number;
+}
+
+(...)
+
+function updateUser(user: PartialUser) {
+  // ... 유저 정보 수정 기능
+}
+
+updateUser({ // ✅
+  age: 25
+});
+```
+
+---
+
+<br><br>
+
+### b. 해결 상황
+
+- `맵드 타입`을 이용하면 간단한 한줄의 코드 만으로 중복 없이 기존 타입을 변환할 수 있다.
+
+```typescript
+
+interface User {
+  id: number;
+  name: string;
+  age: number;
+}
+
+type PartialUser = {
+  [key in "id" | "name" | "age"]?: User[key];
+};
+
+(...)
+```
+
+<br>
+
+```typescript
+// 맵드 타입 문법 해석하기
+{
+  id?: number;
+  name?: string;
+  age?: number;
+}
+```
+
+---
+
+<br><br>
+
+### c. keyof 업그레이드**
+
+
+```typescript
+
+interface User {
+  id: number;
+  name: string;
+  age: number;
+}
+
+type PartialUser = {
+  [key in keyof User]?: User[key];
+};
+
+(...)
+```
+
+
+
+---
+
+<br><br>
+
+### d. 읽기 전용 프토퍼티(맵드 타입)
+
+- 맵드 타입을 이용해 모든 프로퍼티가 읽기 전용 프로퍼티가 된 타입!!
+
+```typescript
+
+interface User {
+  id: number;
+  name: string;
+  age: number;
+}
+
+type PartialUser = {
+  [key in keyof User]?: User[key];
+};
+
+type ReadonlyUser = {
+  readonly [key in keyof User]: User[key];
+};
+
+(...)
+```
+
+---
+
+<br><br>
+
+## 4) 템플릿 리터럴 타입
+
+- `템플릿 리터럴`을 이용해 특정 패턴을 갖는 String 타입을 만드는 기능!!(가장 단순한 기능)
+
+
+```typescript
+
+type Color = "red" | "black" | "green";
+type Animal = "dog" | "cat" | "chicken";
+
+type ColoredAnimal = `red-dog` | 'red-cat' | 'red-chicken' | 'black-dog' ... ;
+```
+
+<br><br>
+
+- `Color`나 `Animal` 타입에 String Literal 타입이 추가되어 경우의 수가 많아질 수록 `ColoredAnimal` 타입에 추가해야하는 타입이 점점 많아지게 된다. 이럴 때, 템플릿 리터럴 타입을 이용하면 좋다.
+
+
+```typescript
+type ColoredAnimal = `${Color}-${Animal}`;
+```
 
 
 
