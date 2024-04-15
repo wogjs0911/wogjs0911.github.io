@@ -1615,7 +1615,7 @@ promise.catch((error) => {
 
 ### c. Promise 반환 타입**
 
-- Promise 객체를 반환한다면, 함수의 반환값 타입
+- Promise 객체를 반환한다면, 아래 예시처럼 함수의 반환값 타입에서 지정된다.
 
 ```typescript
 function fetchPost() {
@@ -1632,7 +1632,7 @@ function fetchPost() {
 ```
 
 <br>
-- 직관적으로 반환값 타입을 직접 명시!!
+- 직관적으로 반환값 타입을 직접 명시하는 것도 아래 코드처럼 바로 직접 명시가 가능하다!!
 
 ```typescript
 function fetchPost(): Promise<Post> {
