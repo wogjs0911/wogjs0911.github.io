@@ -188,7 +188,7 @@ function printAuthorInfo(author: Post["author"]['id']) {
 
 <br><br>
 
-### d. 배열 요소의 타입 추출하기 :
+### d. 배열 요소의 타입 추출
 
 - 초기 배열 타입 선언 : 
 	- `[];` 가 포함되어 있다.
@@ -251,7 +251,7 @@ const post: PostList[0] = {
 
 <br><br>
 
-### e. 튜플의 요소 타입 추출하기 :
+### e. 튜플의 요소 타입 추출
 
 - 튜플의 각 요소들의 타입 또한 인덱스드 엑세스 타입으로 쉽게 추출!!
 
@@ -313,7 +313,7 @@ const person: Person = {
 
 <br><br>
 
-### b. Typeof와 Keyof 함께 사용하기
+### b. typeof, keyof 함께 사용
 
 - `typeof` 연산자는 자바스크립트에서 특정 값의 타입을 문자열로 반환하는 연산자였다. 그러나 타입을 정의할 때, 사용하면 특정 변수의 타입을 추론하는 기능!!
 
@@ -543,6 +543,298 @@ type ColoredAnimal = `red-dog` | 'red-cat' | 'red-chicken' | 'black-dog' ... ;
 
 ```typescript
 type ColoredAnimal = `${Color}-${Animal}`;
+```
+
+
+---
+
+# 9. 조건부 타입**
+
+## 0) 조건부 타입
+
+- extends와 삼항 연산자를 이용해 조건에 따라 각각 다른 타입을 정의하도록 돕는 문법
+
+```typescript
+
+type A = number extends string ? number : string;
+
+```
+
+
+<br>
+- 조건부 타입은 제네릭과 함께 사용할 때, 그 위력이 극대화!!
+	- 아래 예시처럼 타입변수에 Number 타입이 할당되면 String 타입을 반환하고 그렇지 않다면 Number 타입을 반환하는 조건부 타입
+
+```typescript
+
+type StringNumberSwitch<T> = T extends number ? string : number;
+
+let varA: StringNumberSwitch<number>;
+// string
+
+let varB: StringNumberSwitch<string>;
+// number
+
+```
+
+---
+
+<br><br>
+
+### a. 조건부 타입 예시
+
+
+<br>
+
+- 매개변수로 String 타입의 값을 제공받아 공백을 제거한 다음 반환하는 함수
+
+```typescript
+
+function removeSpaces(text: string) {
+  return text.replaceAll(" ", "");
+}
+
+let result = removeSpaces("hi im winterlood");
+
+```
+
+<br>
+
+- 함수 내부에서 text의 타입은 String이 아닐 수 있기 때문에 오류가 발생해서 타입을 좁혀 사용해야 한다.
+
+```typescript
+
+function removeSpaces(text: string | undefined | null) {
+  if (typeof text === "string") {
+    return text.replaceAll(" ", "");
+  } else {
+    return undefined;
+  }
+} 
+
+let result = removeSpaces("hi im winterlood");
+// string | undefined
+```
+
+<br>
+
+- 조건부 타입을 이용해 인수로 전달된 값의 타입이 String이면 반환값 타입도 String이고 아니라면 반환값 타입을 undefined 으로 만들어 주면 된다.
+	- 타입변수 T를 추가하고 매개변수의 타입을 T로 정의한 다음 반환값의 타입을 `T extends string ? string : undefined` 으로 수정
+
+```typescript
+
+function removeSpaces<T>(text: T): T extends string ? string : undefined {
+  if (typeof text === "string") {
+    return text.replaceAll(" ", ""); // ❌
+  } else {
+    return undefined; // ❌
+  }
+} 
+
+let result = removeSpaces("hi im winterlood");
+// string
+
+let result2 = removeSpaces(undefined);
+// undefined
+```
+
+
+<br>
+
+- 그런데, 다음 코드에서 any로 단언하는것은 별로 좋지 못하다고 배운 적 있다. 첫 번째 return 문에서 string이 아닌 타입의 값을 반환 해도 오류를 감지하지 못한다.
+
+```typescript
+function removeSpaces<T>(text: T): T extends string ? string : undefined {
+  if (typeof text === "string") {
+    return 0 as any; // 문제 감지 못함
+  } else {
+    return undefined as any;
+  }
+}
+
+let result = removeSpaces("hi im winterlood");
+// string
+
+let result2 = removeSpaces(undefined);
+// undefined
+```
+
+<br>
+
+- 그래서, 타입 단언보다는 함수 오버로딩을 이용하는게 더 좋다. 오버로드 시그니쳐의 조건부 타입은 구현 시그니쳐 내부에서 추론이 가능!!
+
+```typescript
+function removeSpaces<T>(text: T): T extends string ? string : undefined;
+function removeSpaces(text: any) {
+  if (typeof text === "string") {
+    return text.replaceAll(" ", "");
+  } else {
+    return undefined;
+  }
+}
+
+let result = removeSpaces("hi im winterlood");
+// string
+
+let result2 = removeSpaces(undefined);
+// undefined
+```
+
+---
+
+<br><br>
+
+## 1) 분산적인 조건부 타입
+
+- 변수 a의 타입은 조건식이 참이되어 string으로 정의되고 변수 b의 타입은 조건식이 거짓이 되어 number 타입으로 정의
+
+
+```typescript
+
+type StringNumberSwitch<T> = T extends number ? string : number;
+
+let a: StringNumberSwitch<number>;
+
+let b: StringNumberSwitch<string>;
+```
+
+
+
+<br>
+
+- 타입 변수에 Union 타입을 할당
+
+<br>
+
+- 변수 c는 `string | number` 타입으로 정의
+	- 조건부 타입의 타입 변수에 Union 타입을 할당하면 분산적인 조건부 타입으로 조건부 타입이 업그레이드 되기 때문!!
+	
+<br>
+- 타입 변수에 할당한 Union 타입 내부의 모든 타입이 분리됩니다. 따라서 `StringNuberSwitch<number | string>` 타입은 다음과 같이 분산됩니다.
+	- `StringNumberSwitch<number>`
+	- `StringNumberSwitch<string>`
+
+<br>
+- 그리고 다음으로 분산된 각 타입의 결과를 모아 다시 Union 타입으로 묶습니다.
+	- 결과 : `number | string`
+
+
+```typescript
+
+type StringNumberSwitch<T> = T extends number ? string : number;
+
+(...)
+
+let c: StringNumberSwitch<number | string>;
+// string | number
+
+```
+
+
+---
+
+<br><br>
+
+### a. Exclude 조건부 타입 구현하기
+
+- 분산적인 조건부 타입의 특징을 이용하면 매우 다양한 타입을 정의!!
+	- Union 타입으로부터 특정 타입만 제거하는 Exclude(제외하다) 타입!!
+	
+
+#### a) 분석 과정
+
+- 1. Union 타입이 분리된다.
+	- `Exclude<number, string>`
+	- `Exclude<string, string>`
+	- `Exclude<boolean, string>`
+
+<br>	
+- 2. 각 분리된 타입을 모두 계산한다.
+	- T = `number`, U = `string` 일 때 `number extends string` 은 거짓이므로 결과는 `number`
+	- T = `string`, U = `string` 일 때 `string extends string` 은 참이므로 결과는 `never`
+	- T = `boolean`, U = `string` 일 때 `boolean extends string` 은 거짓이므로 결과는 `boolean`
+
+<br>	
+- 3. 계산된 타입들을 모두 Union으로 묶는다
+	- 결과 : `number | never | boolean`
+
+<br>
+- 4. 최종적으로 타입 A는 `number | boolean` 타입
+
+```typescript
+
+type Exclude<T, U> = T extends U ? never : T;
+
+type A = Exclude<number | string | boolean, string>;
+
+```
+
+---
+
+<br><br>
+
+## 2) infer
+
+- 조건부 타입 내에서 특정 타입을 추론하는 문법
+	- 특정 함수 타입에서 반환값의 타입만 추출하는 특수한 조건부 타입인 `ReturnType`을 만들 때, 이용할 수 있다.
+	- `T extends () => infer R`에서 `infer R`은 이 조건식을 참이 되도록 만들 수 있는 최적의 R 타입을 추론하라는 의미!!
+	
+<br><br>
+
+### a. infer 분석
+
+- 타입 변수 T에 함수 타입 FuncA가 할당된다.
+
+<br>
+- T는 `() ⇒ string` 이 된다.
+
+<br>
+- 조건부 타입의 조건식은 다음 형태가 된다  `() ⇒ string extends () ⇒ infer R ? R : never`
+
+<br>
+- 조건식을 참으로 만드는 R 타입을 추론한다. 그 결과 R은 `string`이 된다.
+
+<br>
+- 추론이 가능하면 이 조건식을 참으로 판단한다. 따라서, 결과는 `string`이 된다.
+	- 추론이 불가능하다면 조건식을 거짓으로 판단!
+
+
+```typescript
+
+type ReturnType<T> = T extends () => infer R ? R : never;
+
+type FuncA = () => string;
+
+type FuncB = () => number;
+
+type A = ReturnType<FuncA>;
+// string
+
+type B = ReturnType<FuncB>;
+// number
+
+type C = ReturnType<number>;
+// 조건식을 만족하는 R추론 불가능
+// never
+
+```
+
+<br><br>
+
+- Promise의 resolve 타입을 infer를 이용해 추출하는 예!!
+
+```typescript
+
+type PromiseUnpack<T> = T extends Promise<infer R> ? R : never;
+// 1. T는 프로미스 타입이어야 한다.
+// 2. 프로미스 타입의 결과값 타입을 반환해야 한다.
+
+type PromiseA = PromiseUnpack<Promise<number>>;
+// number
+
+type PromiseB = PromiseUnpack<Promise<string>>;
+// string
+
 ```
 
 
