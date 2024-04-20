@@ -548,7 +548,11 @@ type ColoredAnimal = `${Color}-${Animal}`;
 
 ---
 
+<br><br>
+
 # 9. 조건부 타입**
+
+<br>
 
 ## 0) 조건부 타입
 
@@ -735,7 +739,7 @@ let c: StringNumberSwitch<number | string>;
 
 <br><br>
 
-### a. Exclude 조건부 타입 구현하기
+### a. Exclude 조건부 타입
 
 - 분산적인 조건부 타입의 특징을 이용하면 매우 다양한 타입을 정의!!
 	- Union 타입으로부터 특정 타입만 제거하는 Exclude(제외하다) 타입!!
@@ -743,23 +747,23 @@ let c: StringNumberSwitch<number | string>;
 
 #### a) 분석 과정
 
-- 1. Union 타입이 분리된다.
+- (a). Union 타입이 분리된다.
 	- `Exclude<number, string>`
 	- `Exclude<string, string>`
 	- `Exclude<boolean, string>`
 
 <br>	
-- 2. 각 분리된 타입을 모두 계산한다.
+- (b). 각 분리된 타입을 모두 계산한다.
 	- T = `number`, U = `string` 일 때 `number extends string` 은 거짓이므로 결과는 `number`
 	- T = `string`, U = `string` 일 때 `string extends string` 은 참이므로 결과는 `never`
 	- T = `boolean`, U = `string` 일 때 `boolean extends string` 은 거짓이므로 결과는 `boolean`
 
 <br>	
-- 3. 계산된 타입들을 모두 Union으로 묶는다
+- (c). 계산된 타입들을 모두 Union으로 묶는다
 	- 결과 : `number | never | boolean`
 
 <br>
-- 4. 최종적으로 타입 A는 `number | boolean` 타입
+- (d). 최종적으로 타입 A는 `number | boolean` 타입
 
 ```typescript
 
@@ -783,19 +787,19 @@ type A = Exclude<number | string | boolean, string>;
 
 ### a. infer 분석
 
-- 타입 변수 T에 함수 타입 FuncA가 할당된다.
+- (a). 타입 변수 T에 함수 타입 FuncA가 할당된다.
 
 <br>
-- T는 `() ⇒ string` 이 된다.
+- (b). T는 `() ⇒ string` 이 된다.
 
 <br>
-- 조건부 타입의 조건식은 다음 형태가 된다  `() ⇒ string extends () ⇒ infer R ? R : never`
+- (c). 조건부 타입의 조건식은 다음 형태가 된다  `() ⇒ string extends () ⇒ infer R ? R : never`
 
 <br>
-- 조건식을 참으로 만드는 R 타입을 추론한다. 그 결과 R은 `string`이 된다.
+- (d). 조건식을 참으로 만드는 R 타입을 추론한다. 그 결과 R은 `string`이 된다.
 
 <br>
-- 추론이 가능하면 이 조건식을 참으로 판단한다. 따라서, 결과는 `string`이 된다.
+- (e). 추론이 가능하면 이 조건식을 참으로 판단한다. 따라서, 결과는 `string`이 된다.
 	- 추론이 불가능하다면 조건식을 거짓으로 판단!
 
 
@@ -838,12 +842,404 @@ type PromiseB = PromiseUnpack<Promise<string>>;
 ```
 
 
+---
+
+<br><br>
+
+# 10. 유틸리티 타입
+
+<br>
+
+## 0. 유틸리티 타입 소개
+
+- 타입스크립트가 자체적으로 제공하는 특수한 타입들이다. 
+
+<br>
+- 지금까지 배웠던 제네릭, 맵드 타입, 조건부 타입 등의 타입 조작 기능을 이용해 실무에서 자주 사용되는 유용한 타입들을 모아 놓은 것!!
+
+<br>
+- [유틸리티 타입 : 공식 문서](https://www.typescriptlang.org/docs/handbook/utility-types.html)
+
+
+<br><br>
+
+### a. 유틸리티 타입 예시
+
+<br>
+
+- `Readonly<T>`와 같은 유틸리티 타입을 이용해 특정 객체 타입의 모든 프로퍼티를 읽기 전용 프로퍼티로 변환!
+
+```typescript
+
+interface Person {
+  name : string;
+  age : number;
+}
+
+const person : Readonly<Person> ={
+  name : "이정환",
+  age : 27
+}
+
+person.name = ''
+// ❌ name은 Readonly 프로퍼티입니다.
+```
+
+
+<br>
+
+- `Partial<T>` 유틸리티 타입을 이용해 특정 객체 타입의 모든 프로퍼티를 선택적 프로퍼티로 변환하는 것도 가능!
+
+```typescript
+
+interface Person {
+  name: string;
+  age: number;
+}
+
+const person: Partial<Person> = {
+  name: "이정환",
+};
+```
 
 
 
 
 
+---
 
+<br><br>
+
+## 1. Partial, Required, Readonly
+
+<br>
+
+### 1) Partial<T>
+
+- Partial<T> 타입은 타입 변수 T로 전달한 객체 타입의 모든 프로퍼티를 다 선택적 프로퍼티로 변환
+
+```typescript
+
+interface Post {
+  title: string;
+  tags: string[];
+  content: string;
+  thumbnailURL?: string;
+}
+
+const draft: Partial<Post> = {
+  title: "제목 나중에 짓자",
+  content: "초안...",
+};
+```
+
+<br><br>
+
+#### a. Partial<T> 구현하기
+
+- T에 할당된 객체 타입의 모든 프로퍼티를 선택적 프로퍼티로 바꿔줘야 한다. 기존 객체 타입을 다른 타입으로 변환하는 타입은 맵드 타입이라서 맵드 타입을 다음과 같이 수정!!
+
+```typescript
+
+type Partial<T> = {
+  [key in keyof T]?: T[key];
+};
+```
+
+
+---
+
+<br><br>
+
+### 2) Required<T>
+
+- Required<Post>는 Post 타입의 모든 프로퍼티가 필수 프로퍼티로 변환된 객체 타입이다. 따라서, 위 코드처럼 thumbnailURL 프로퍼티를 생략하면 이제 오류가 발생하게 된다.
+
+```typescript
+interface Post {
+  title: string;
+  tags: string[];
+  content: string;
+  thumbnailURL?: string;
+}
+
+(...)
+
+const withThumbnailPost: Required<Post> = { // ❌
+  title: "한입 타스 후기",
+  tags: ["ts"],
+  content: "",
+  // thumbnailURL: "https://...",
+};
+```
+
+
+<br><br>
+
+#### a. Required<T> 타입 구현하기
+
+- 모든 프로퍼티를 필수 프로퍼티로 만든다는 말은 반대로 바꿔보면 모든 프로퍼티에서 ‘선택적’ 이라는 기능을 제거하는 것과 같다. 
+
+<br>
+- 따라서 다음과 같이 `-?`를 프로퍼티 이름 뒤에 붙여주면 된다.
+
+
+```typescript
+type Required<T> = {
+  [key in keyof T]-?: T[key];
+};
+```
+
+
+---
+
+<br><br>
+
+### 3) Readonly<T>
+
+- `Readonly<Post>`는 Post 타입의 모든 프로퍼티를 `readonly`(읽기 전용) 프로퍼티로 변환한다. 
+
+<br>
+- 따라서, 점표기법을 이용해 특정 프로퍼티의 값을 수정하려고 하면 오류를 발생시킨다.
+
+```typescript
+interface Post {
+  title: string;
+  tags: string[];
+  content: string;
+  thumbnailURL?: string;
+}
+
+(...)
+
+const readonlyPost: Readonly<Post> = {
+  title: "보호된 게시글입니다.",
+  tags: [],
+  content: "",
+};
+
+readonlyPost.content = '해킹당함'; // ❌
+```
+
+<br><br>
+
+#### a. Readonly<T> 구현하기
+
+```typescript
+type Readonly<T> = {
+  readonly [key in keyof T]: T[key];
+};
+```
+
+
+
+---
+
+<br><br>
+
+## 2. Record, Pick, Omit
+
+
+<br>
+
+### 1) Record<T>
+
+- Record 타입은 K에는 `“large” | “medium” |  “small”`이 할당되었으므로 large, medium, small 프로퍼티가 있는 객체 타입을 정의한다. 
+
+<br>
+- 그리고 각 프로퍼티 value의 타입은 V에 할당한 `{ url : stirng }` 이 된다.
+
+```typescript
+
+type Thumbnail = Record<
+  "large" | "medium" | "small",
+  { url: string }
+>;
+
+```
+
+<br>
+
+#### a. Record<T> 직접 구현
+
+- Record 타입은 다음과 같이 구현할 수 있다.
+
+```typescript
+type Record<K extends keyof any, V> = {
+  [key in K]: V;
+};
+```
+
+
+---
+
+<br><br>
+
+### 2) Pick<T>
+
+- 특정 객체 타입으로부터 특정 프로퍼티 만을 골라내는 그런 타입!!
+
+```typescript
+interface Post {
+  title: string;
+  tags: string[];
+  content: string;
+  thumbnailURL?: string;
+}
+
+(...)
+
+const legacyPost: Pick<Post, "title" | "content"> = {
+  title: "",
+  content: "",
+};
+// 추출된 타입 : { title : string; content : string }
+```
+
+
+<br>
+
+#### a. Pick<T> 직접 구현
+
+- T로 부터 K 프로퍼티만 뽑아낸 객체 타입을 만들어야 하므로 일단 맵드 타입으로 정의!!
+
+```typescript
+type Pick<T, K> = {
+  [key in K]: T[key];
+};
+```
+
+<br>
+- K가 T의 key로만 이루어진 String Literal Union 타입임을 보장
+
+```typescript
+type Pick<T, K extends keyof T> = {
+  [key in K]: T[key];
+};
+```
+
+
+
+
+
+---
+
+<br><br>
+
+### 3) Omit<T>
+
+
+- 특정 객체 타입으로부터 특정 프로퍼티 만을 제거하는 타입
+
+<br>
+- Omit을 이용해 Post 타입으로부터 title 프로퍼티를 제거한 타입으로 변수의 타입을 정의해 주면 된다.
+
+```typescript
+const noTitlePost: Omit<Post, "title"> = {
+  content: "",
+  tags: [],
+  thumbnailURL: "",
+};
+```
+
+
+<br>
+
+#### a. Omit<T> 직접 구현
+
+- `keyof T`는`‘title’ | ‘content’ | ‘tags’ | ‘thumbnailURL’`이므로 `Pick<T, Exclude<keyof T, K>>`은 `Pick<Post, Exclude<'title' | 'content' | 'tags' | 'thumbnailURL' , 'title>>` 이 된다.
+
+<br>
+- `Pick<Post, 'content' | 'tags' | 'thumbnailURL'>` : 그럼 결과는 Post에서 `content, tags, thubmnailURL` 프로퍼티만 존재하는 객체 타입이 된다. 따라서, K에 전달한 ‘title’이 제거된 타입을 얻을 수 있다.
+
+```typescript
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+```
+
+
+
+
+---
+
+<br><br>
+
+## 3. Exclude, Extract, ReturnType
+
+
+<br>
+
+### 1) Exclude<T>
+
+
+- Exclude 타입은 다음과 같이 T로부터 U를 제거하는 타입!!
+
+```typescript
+type A = Exclude<string | boolean, string>;
+// boolean
+```
+
+<br>
+
+#### a. Exclude<T> 직접 구현
+
+```typescript
+
+type Exlcude<T, U> = T extends U ? never : T;
+```
+
+
+---
+
+<br><br>
+
+### 2) Extract<T>
+
+- Extract 타입은 다음과 같이 T로 부터 U를 추출하는 타입!!
+
+```typescript
+type B = Extract<string | boolean, boolean>;
+// boolean
+```
+
+
+<br>
+
+#### a. Extract<T> 직접 구현
+
+```typescript
+type Extract<T, U> = T extends U ? T : never;
+```
+
+
+---
+
+<br><br>
+
+### 3) ReturnType<T>
+
+- `ReturnType`은 타입변수 T에 할당된 함수 타입의 반환값 타입을 추출하는 타입
+
+```typescript
+type ReturnType<T extends (...args: any) => any> = T extends (
+  ...agrs: any
+) => infer R
+  ? R
+  : never;
+
+function funcA() {
+  return "hello";
+}
+
+function funcB() {
+  return 10;
+}
+
+type ReturnA = ReturnType<typeof funcA>;
+// string
+
+type ReturnB = ReturnType<typeof funcB>;
+// number
+```
 
 
 
