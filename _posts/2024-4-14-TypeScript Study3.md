@@ -910,11 +910,11 @@ const person: Partial<Person> = {
 
 <br><br>
 
-## 1. Partial, Required, Readonly
+## 1) Partial, Required, Readonly
 
 <br>
 
-### 1) Partial<T>
+### a. Partial<T>
 
 - Partial<T> 타입은 타입 변수 T로 전달한 객체 타입의 모든 프로퍼티를 다 선택적 프로퍼티로 변환
 
@@ -935,7 +935,7 @@ const draft: Partial<Post> = {
 
 <br><br>
 
-#### a. Partial<T> 구현하기
+#### a) Partial<T> 구현하기
 
 - T에 할당된 객체 타입의 모든 프로퍼티를 선택적 프로퍼티로 바꿔줘야 한다. 기존 객체 타입을 다른 타입으로 변환하는 타입은 맵드 타입이라서 맵드 타입을 다음과 같이 수정!!
 
@@ -951,7 +951,7 @@ type Partial<T> = {
 
 <br><br>
 
-### 2) Required<T>
+### b. Required<T>
 
 - Required<Post>는 Post 타입의 모든 프로퍼티가 필수 프로퍼티로 변환된 객체 타입이다. 따라서, 위 코드처럼 thumbnailURL 프로퍼티를 생략하면 이제 오류가 발생하게 된다.
 
@@ -976,7 +976,7 @@ const withThumbnailPost: Required<Post> = { // ❌
 
 <br><br>
 
-#### a. Required<T> 타입 구현하기
+#### a) Required<T> 타입 구현하기
 
 - 모든 프로퍼티를 필수 프로퍼티로 만든다는 말은 반대로 바꿔보면 모든 프로퍼티에서 ‘선택적’ 이라는 기능을 제거하는 것과 같다. 
 
@@ -995,7 +995,7 @@ type Required<T> = {
 
 <br><br>
 
-### 3) Readonly<T>
+### c. Readonly<T>
 
 - `Readonly<Post>`는 Post 타입의 모든 프로퍼티를 `readonly`(읽기 전용) 프로퍼티로 변환한다. 
 
@@ -1023,7 +1023,7 @@ readonlyPost.content = '해킹당함'; // ❌
 
 <br><br>
 
-#### a. Readonly<T> 구현하기
+#### a) Readonly<T> 구현하기
 
 ```typescript
 type Readonly<T> = {
@@ -1037,12 +1037,12 @@ type Readonly<T> = {
 
 <br><br>
 
-## 2. Record, Pick, Omit
+## 2) Record, Pick, Omit
 
 
 <br>
 
-### 1) Record<T>
+### a. Record<T>
 
 - Record 타입은 K에는 `“large” | “medium” |  “small”`이 할당되었으므로 large, medium, small 프로퍼티가 있는 객체 타입을 정의한다. 
 
@@ -1060,7 +1060,7 @@ type Thumbnail = Record<
 
 <br>
 
-#### a. Record<T> 직접 구현
+#### a) Record<T> 직접 구현
 
 - Record 타입은 다음과 같이 구현할 수 있다.
 
@@ -1075,7 +1075,7 @@ type Record<K extends keyof any, V> = {
 
 <br><br>
 
-### 2) Pick<T>
+### b. Pick<T>
 
 - 특정 객체 타입으로부터 특정 프로퍼티 만을 골라내는 그런 타입!!
 
@@ -1099,7 +1099,7 @@ const legacyPost: Pick<Post, "title" | "content"> = {
 
 <br>
 
-#### a. Pick<T> 직접 구현
+#### a) Pick<T> 직접 구현
 
 - T로 부터 K 프로퍼티만 뽑아낸 객체 타입을 만들어야 하므로 일단 맵드 타입으로 정의!!
 
@@ -1126,7 +1126,7 @@ type Pick<T, K extends keyof T> = {
 
 <br><br>
 
-### 3) Omit<T>
+### c. Omit<T>
 
 
 - 특정 객체 타입으로부터 특정 프로퍼티 만을 제거하는 타입
@@ -1145,7 +1145,7 @@ const noTitlePost: Omit<Post, "title"> = {
 
 <br>
 
-#### a. Omit<T> 직접 구현
+#### a) Omit<T> 직접 구현
 
 - `keyof T`는`‘title’ | ‘content’ | ‘tags’ | ‘thumbnailURL’`이므로 `Pick<T, Exclude<keyof T, K>>`은 `Pick<Post, Exclude<'title' | 'content' | 'tags' | 'thumbnailURL' , 'title>>` 이 된다.
 
@@ -1163,12 +1163,12 @@ type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 <br><br>
 
-## 3. Exclude, Extract, ReturnType
+## 3) Exclude, Extract, ReturnType
 
 
 <br>
 
-### 1) Exclude<T>
+### a. Exclude<T>
 
 
 - Exclude 타입은 다음과 같이 T로부터 U를 제거하는 타입!!
@@ -1180,7 +1180,7 @@ type A = Exclude<string | boolean, string>;
 
 <br>
 
-#### a. Exclude<T> 직접 구현
+#### a) Exclude<T> 직접 구현
 
 ```typescript
 
@@ -1192,7 +1192,7 @@ type Exlcude<T, U> = T extends U ? never : T;
 
 <br><br>
 
-### 2) Extract<T>
+### b. Extract<T>
 
 - Extract 타입은 다음과 같이 T로 부터 U를 추출하는 타입!!
 
@@ -1204,7 +1204,7 @@ type B = Extract<string | boolean, boolean>;
 
 <br>
 
-#### a. Extract<T> 직접 구현
+#### a) Extract<T> 직접 구현
 
 ```typescript
 type Extract<T, U> = T extends U ? T : never;
@@ -1215,7 +1215,7 @@ type Extract<T, U> = T extends U ? T : never;
 
 <br><br>
 
-### 3) ReturnType<T>
+### c. ReturnType<T>
 
 - `ReturnType`은 타입변수 T에 할당된 함수 타입의 반환값 타입을 추출하는 타입
 
