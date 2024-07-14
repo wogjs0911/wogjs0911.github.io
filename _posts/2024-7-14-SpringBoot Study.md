@@ -2101,36 +2101,36 @@ public class OsEnv {
 <br>
 #### a. 일반적인 예시 코드 :
     
-    ```java
-    package hello;
-    
-    import jakarta.annotation.PostConstruct;
-    import lombok.extern.slf4j.Slf4j;
-    import org.springframework.core.env.Environment;
-    import org.springframework.stereotype.Component;
-    
-    @Slf4j
-    @Component
-    public class EnvironmentCheck {
-    
-        private final Environment env;
-    
-        public EnvironmentCheck(Environment env) {
-            this.env = env;
-        }
-    
-        @PostConstruct
-        public void init() {
-            String url = env.getProperty("url");
-            String username = env.getProperty("username");
-            String password = env.getProperty("password");
-            log.info("env url={}", url);
-            log.info("env username url={}", username);
-            log.info("env password url={}", password);
-        }
+```java
+package hello;
+
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+public class EnvironmentCheck {
+
+    private final Environment env;
+
+    public EnvironmentCheck(Environment env) {
+        this.env = env;
     }
-    
-    ```
+
+    @PostConstruct
+    public void init() {
+        String url = env.getProperty("url");
+        String username = env.getProperty("username");
+        String password = env.getProperty("password");
+        log.info("env url={}", url);
+        log.info("env username url={}", username);
+        log.info("env password url={}", password);
+    }
+}
+
+```
     
 <br><br>
 
@@ -2139,17 +2139,17 @@ public class OsEnv {
 
 ##### 1. Jasypt 라이브러리 설치 후 `application.yml` 설정
     
-    ```yaml
-    jasypt.encryptor.password=your_encryption_password  # 암호화에 사용할 비밀번호
-    spring.datasource.password=ENC(encrypted_password)  # 암호화된 비밀번호
-    ```
+```yaml
+jasypt.encryptor.password=your_encryption_password  # 암호화에 사용할 비밀번호
+spring.datasource.password=ENC(encrypted_password)  # 암호화된 비밀번호
+```
     
 ##### 2. `Jasypt CLI` 또는 `온라인 도구`를 사용하여 비밀번호를 암호화
     
-    ```bash
-    # Jasypt CLI 사용 예시
-    ./jasypt-spring-boot-3.0.5.jar stringEncryptor input="your_original_password" password=your_encryption_password
-    ```
+```bash
+# Jasypt CLI 사용 예시
+./jasypt-spring-boot-3.0.5.jar stringEncryptor input="your_original_password" password=your_encryption_password
+```
     
 ##### 3. 복호화된 값 사용
     
@@ -2175,7 +2175,7 @@ public class MyApplication {
         }
     }
     
-    ```
+```
         
     
 
@@ -2206,34 +2206,34 @@ public class MyApplication {
 
 #### d. `Kubernetes` Secret `Environment`  사용 예시 :
     
-    ```yaml
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: my-secret
-    type: Opaque
-    data:
-      my.secret: "SGVsbG8gZnJvbSBTZWNyZXQh"  # Base64 encoded "Hello from Secret!"
-    ```
-    
-    ```java
-    @SpringBootApplication
-    public class MyApplication {
-    
-        @Autowired
-        private Environment env;
-    
-        public static void main(String[] args) {
-            SpringApplication.run(MyApplication.class, args);
-        }
-    
-        @Value("${my.secret}")
-        private String mySecret;
-    
-        // ... (mySecret 사용)
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+type: Opaque
+data:
+  my.secret: "SGVsbG8gZnJvbSBTZWNyZXQh"  # Base64 encoded "Hello from Secret!"
+```
+
+```java
+@SpringBootApplication
+public class MyApplication {
+
+    @Autowired
+    private Environment env;
+
+    public static void main(String[] args) {
+        SpringApplication.run(MyApplication.class, args);
     }
-    
-    ```
+
+    @Value("${my.secret}")
+    private String mySecret;
+
+    // ... (mySecret 사용)
+}
+
+```
     
 
 <br><br>
@@ -2246,56 +2246,56 @@ public class MyApplication {
 
 ##### a) 의존성 추가
     
-    ```groovy
-    dependencies {
-        implementation("org.springframework.cloud:spring-cloud-starter-vault-config")
-    }
-    
-    ```
+```groovy
+dependencies {
+    implementation("org.springframework.cloud:spring-cloud-starter-vault-config")
+}
+
+```
     
 <br>
 
 
 ##### b) bootstrap.yml 설정:
     
-    ```yaml
-    spring:
-      cloud:
-        vault:
-          uri: http://your-vault-server:8200  # Vault 서버 주소
-          authentication: TOKEN  # 인증 방식 (TOKEN, APPROLE, AWS_IAM 등)
-          token: your-vault-token  # Vault 토큰 (인증 방식에 따라 다름)
-          kv:                # Key-Value 시크릿 엔진 설정
-            enabled: true
-            backend: secret/  # Secret 저장 경로
-            default-context: application  # 기본 Context
-          aws:
-            role: my-aws-role  # AWS IAM Role (Vault 인증에 사용)
-            enabled: true
-    
-    ```
+```yaml
+spring:
+  cloud:
+    vault:
+      uri: http://your-vault-server:8200  # Vault 서버 주소
+      authentication: TOKEN  # 인증 방식 (TOKEN, APPROLE, AWS_IAM 등)
+      token: your-vault-token  # Vault 토큰 (인증 방식에 따라 다름)
+      kv:                # Key-Value 시크릿 엔진 설정
+        enabled: true
+        backend: secret/  # Secret 저장 경로
+        default-context: application  # 기본 Context
+      aws:
+        role: my-aws-role  # AWS IAM Role (Vault 인증에 사용)
+        enabled: true
+
+```
     
 <br>
 
 ##### c) application.yml
     
-    ```java
-    spring:
-      datasource:
-        url: jdbc:mysql://your_database_host:3306/your_database_name
-        username: ${vault.database.username}
-        password: ${vault.database.password}
-    
-    app:
-      api-key: ${vault.api.key}
-    
-    cloud:
-      aws:
-        credentials:
-          accessKey: ${vault.aws.access-key-id}
-          secretKey: ${vault.aws.secret-access-key}
-    
-    ```
+```java
+spring:
+  datasource:
+    url: jdbc:mysql://your_database_host:3306/your_database_name
+    username: ${vault.database.username}
+    password: ${vault.database.password}
+
+app:
+  api-key: ${vault.api.key}
+
+cloud:
+  aws:
+    credentials:
+      accessKey: ${vault.aws.access-key-id}
+      secretKey: ${vault.aws.secret-access-key}
+
+```
     
 - Spring Cloud Vault는 애플리케이션 시작 시, `bootstrap.yml`에 설정된 정보를 이용하여 Vault에 접속하고, `application.yml`에서 참조하는 값을 가져와 자동으로 주입한다.
 
@@ -2313,14 +2313,16 @@ public class MyApplication {
 <br><br>
 
 #### c. AWS Credential Key 저장 (`Vault CLI`):
-    - [Spring Vault : SpringBoot 3.0에서 설정법](https://velog.io/@daoh98/Spring-Vault%EB%9E%80-SpringBoot-3.0-%EC%84%A4%EC%A0%95%EB%B2%95)
-        - 클래스별로 구성 속성을 활성화하거나 구성 요소 검색과 유사한 방식으로 작동하는 구성 속성 검색을 활성화할 수 있다.
-        
-    - [vault cli 명령어 공식문서](https://developer.hashicorp.com/vault/docs/commands)
-    
-    ```bash
-    vault kv put secret/application aws.accessKeyId=YOUR_AWS_ACCESS_KEY_ID aws.secretKey=YOUR_AWS_SECRET_ACCESS_KEY
-    ```
+
+- [Spring Vault : SpringBoot 3.0에서 설정법](https://velog.io/@daoh98/Spring-Vault%EB%9E%80-SpringBoot-3.0-%EC%84%A4%EC%A0%95%EB%B2%95)
+	- 클래스별로 구성 속성을 활성화하거나 구성 요소 검색과 유사한 방식으로 작동하는 구성 속성 검색을 활성화할 수 있다.
+
+<br>    
+- [vault cli 명령어 공식문서](https://developer.hashicorp.com/vault/docs/commands)
+
+```bash
+vault kv put secret/application aws.accessKeyId=YOUR_AWS_ACCESS_KEY_ID aws.secretKey=YOUR_AWS_SECRET_ACCESS_KEY
+```
     
 ---
 
@@ -2328,64 +2330,68 @@ public class MyApplication {
 
 ##### d) 예시 : 애플리케이션 코드
     
-    ```groovy
-    @SpringBootApplication
-    public class MyApplication {
-    
-        @Autowired
-        private Environment env;
-    
-        // ...
-    
-        @Bean
-        public AWSCredentialsProvider awsCredentialsProvider() {
-            return new AWSStaticCredentialsProvider( // Environment를 통해 Vault에서 가져온 AWS credential key를 사용하여 AWSCredentialsProvider를 생성.
-                new BasicAWSCredentials(env.getProperty("aws.access-key-id"), env.getProperty("aws.secret-access-key"))
-            );
-        }
+```groovy
+@SpringBootApplication
+public class MyApplication {
+
+    @Autowired
+    private Environment env;
+
+    // ...
+
+    @Bean
+    public AWSCredentialsProvider awsCredentialsProvider() {
+        return new AWSStaticCredentialsProvider( // Environment를 통해 Vault에서 가져온 AWS credential key를 사용하여 AWSCredentialsProvider를 생성.
+            new BasicAWSCredentials(env.getProperty("aws.access-key-id"), env.getProperty("aws.secret-access-key"))
+        );
     }
-    
-    ```
-    
-    ```java
-    @Service
-    public class MyService {
-    
-        @Value("${app.api-key}")
-        private String apiKey;
-    
-        @Autowired
-        private AWSCredentialsProvider awsCredentialsProvider;
-    
-        // ...
-    
-        public void doSomething() {
-            // apiKey를 사용하여 API 호출 등 작업 수행
-            AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                    .withCredentials(awsCredentialsProvider)
-                    .withRegion(Regions.AP_NORTHEAST_2)
-                    .build();
-        }
+}
+
+```
+
+```java
+@Service
+public class MyService {
+
+    @Value("${app.api-key}")
+    private String apiKey;
+
+    @Autowired
+    private AWSCredentialsProvider awsCredentialsProvider;
+
+    // ...
+
+    public void doSomething() {
+        // apiKey를 사용하여 API 호출 등 작업 수행
+        AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                .withCredentials(awsCredentialsProvider)
+                .withRegion(Regions.AP_NORTHEAST_2)
+                .build();
     }
-    
-    ```
+}
+
+```
     
 ---
 
 <br><br>
 
 ##### e) 주의 점 :
-	- 실제 운영 환경에서는 Vault 토큰 관리에 주의!
-	- `bootstrap.yml` 파일은 Vault `서버 정보`, `인증 방식`, `저장 경로` 등 Vault 관련 설정 정보를 담고 있습니다.
-		- Spring Boot 애플리케이션은 실행 시, `bootstrap.yml` 파일을 먼저 읽어 Vault 설정을 로드하고, 이후 `application.yml` 를 읽어 애플리케이션 설정을 로드한다.
+
+- 실제 운영 환경에서는 Vault 토큰 관리에 주의!
+
+- `bootstrap.yml` 파일은 Vault `서버 정보`, `인증 방식`, `저장 경로` 등 Vault 관련 설정 정보를 담고 있습니다.
+	- Spring Boot 애플리케이션은 실행 시, `bootstrap.yml` 파일을 먼저 읽어 Vault 설정을 로드하고, 이후 `application.yml` 를 읽어 애플리케이션 설정을 로드한다.
         
 ---
 
 <br><br>
 
 ##### f) 참고 사이트 :
-    - [SpringCloud + Vault 공식 문서](https://cloud.spring.io/spring-cloud-vault/reference/html/#vault.config.backends.aws)
-    - [Spring Cloud 마이크로서비스에서 Vault를 이용한 아키텍쳐 고민](https://ssdragon.tistory.com/164)
+
+- [SpringCloud + Vault 공식 문서](https://cloud.spring.io/spring-cloud-vault/reference/html/#vault.config.backends.aws)
+
+- [Spring Cloud 마이크로서비스에서 Vault를 이용한 아키텍쳐 고민](https://ssdragon.tistory.com/164)
 
 ---
 
@@ -2393,17 +2399,22 @@ public class MyApplication {
 
 ##### g) `Vault` 외에도 정보를 안전하게 저장하고 관리할 수 있는 다양한 서비스들 :
     
-    **1. `AWS` Secrets Manager**
-    
-    **2. `Azure` Key Vault**
-    
-    **3. `Google` Cloud Secret Manager**
-    
-    **4. `Hashicorp` Consul**
-    
-    **5. CyberArk Conjur**
-    
-    **6. Doppler**
+- 1. `AWS` Secrets Manager
+
+<br>
+- 2. `Azure` Key Vault
+
+<br>
+- 3. `Google` Cloud Secret Manager
+
+<br>
+- 4. `Hashicorp` Consul
+
+<br>
+- 5. CyberArk Conjur
+
+<br>
+- 6. Doppler
     
 
 ---
@@ -2831,35 +2842,35 @@ spring:
 - 기본 주입 방식은 `자바빈` 프로퍼티 방식이다. `Getter` , `Setter` 가 필요하다. (롬복의 `@Data` 에 의해 자동 생성된다.)
         
         
-        ```java
-        package hello.datasource;
-        
-        import lombok.Data;
-        import org.springframework.boot.context.properties.ConfigurationProperties;
-        
-        import java.time.Duration;
-        import java.util.ArrayList;
-        import java.util.List;
-        
-        @Data
-        @ConfigurationProperties("my.datasource")
-        public class MyDataSourcePropertiesV1 {
-        
-            private String url;
-            private String username;
-            private String password;
-            private Etc etc;
-        
-            @Data
-            public static class Etc {
-                private int maxConnection;
-                private Duration timeout;
-                private List<String> options = new ArrayList<>();
-            }
-        
-        }
-        
-        ```
+```java
+package hello.datasource;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@ConfigurationProperties("my.datasource")
+public class MyDataSourcePropertiesV1 {
+
+    private String url;
+    private String username;
+    private String password;
+    private Etc etc;
+
+    @Data
+    public static class Etc {
+        private int maxConnection;
+        private Duration timeout;
+        private List<String> options = new ArrayList<>();
+    }
+
+}
+
+```
         
 
 <br><br>
@@ -2906,13 +2917,14 @@ spring:
 <br><br>
 
 #### c. `@ConfigurationPropertiesScan` 사용법 :
-    - `@ConfigurationProperties` 를 특정 범위로 자동 등록할 때는 `@ConfigurationPropertiesScan` 을 사용
-    
-    ```java
-    @SpringBootApplication
-    @ConfigurationPropertiesScan({ "com.example.app", "com.example.another" })
-    public class MyApplication {}
-    ```
+
+- `@ConfigurationProperties` 를 특정 범위로 자동 등록할 때는 `@ConfigurationPropertiesScan` 을 사용
+
+```java
+@SpringBootApplication
+@ConfigurationPropertiesScan({ "com.example.app", "com.example.another" })
+public class MyApplication {}
+```
 
 ---
 
@@ -2927,49 +2939,49 @@ spring:
 
 #### a. `@ConfigurationProperties` 에서 생성자로 사용하는 예제 :
     
-    ```java
-    package hello.datasource;
-    
-    import lombok.Data;
-    import lombok.Getter;
-    import org.springframework.boot.context.properties.ConfigurationProperties;
-    import org.springframework.boot.context.properties.bind.ConstructorBinding;
-    import org.springframework.boot.context.properties.bind.DefaultValue;
-    
-    import java.time.Duration;
-    import java.util.ArrayList;
-    import java.util.List;
-    
+```java
+package hello.datasource;
+
+import lombok.Data;
+import lombok.Getter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@ConfigurationProperties("my.datasource")
+public class MyDataSourcePropertiesV2 {
+
+    private String url;
+    private String username;
+    private String password;
+    private Etc etc;
+
+    public MyDataSourcePropertiesV2(String url, String username, String password, @DefaultValue Etc etc) {
+        this.url = url;
+        this.username = username;
+        this.password = password;
+        this.etc = etc;
+    }
+
     @Getter
-    @ConfigurationProperties("my.datasource")
-    public class MyDataSourcePropertiesV2 {
-    
-        private String url;
-        private String username;
-        private String password;
-        private Etc etc;
-    
-        public MyDataSourcePropertiesV2(String url, String username, String password, @DefaultValue Etc etc) {
-            this.url = url;
-            this.username = username;
-            this.password = password;
-            this.etc = etc;
-        }
-    
-        @Getter
-        public static class Etc {
-            private int maxConnection;
-            private Duration timeout;
-            private List<String> options;
-    
-            public Etc(int maxConnection, Duration timeout, @DefaultValue("DEFAULT") List<String> options) {
-                this.maxConnection = maxConnection;
-                this.timeout = timeout;
-                this.options = options;
-            }
+    public static class Etc {
+        private int maxConnection;
+        private Duration timeout;
+        private List<String> options;
+
+        public Etc(int maxConnection, Duration timeout, @DefaultValue("DEFAULT") List<String> options) {
+            this.maxConnection = maxConnection;
+            this.timeout = timeout;
+            this.options = options;
         }
     }
-    ```
+}
+```
     
 ---
 
@@ -3740,48 +3752,48 @@ management:
 <br>        
 - git 정보 추가 : `build.gradle` 에 다음 내용 추가
         
-        ```groovy
-        plugins {
-        
-        	...
-        	id "com.gorylenko.gradle-git-properties" version "2.4.1" //git info
-        
-        }
-        ```
-        
-        ```makefile
-        # 위의 build.gradle 설정 후 빌드하면, 
-        # build 폴더안에 'resources/main/git.properties' 파일이 생성
-        
-        git.branch=main
-        git.build.host=kim
-        git.build.user.email=zipkyh@mail.com
-        git.build.user.name=holyeye
-        git.build.version=0.0.1-SNAPSHOT
-        git.closest.tag.commit.count=
-        git.closest.tag.name=
-        git.commit.id=754bc78744107b6423352018e46367f5091b181e
-        git.commit.id.abbrev=754bc78
-        git.commit.id.describe=
-        git.commit.message.full=fitst commit\n
-        git.commit.message.short=fitst commit
-        git.commit.time=2023-01-01T00\:00\:00+0900
-        git.commit.user.email=zipkyh@mail.com
-        git.commit.user.name=holyeye
-        git.dirty=false
-        git.remote.origin.url=
-        git.tags=
-        git.total.commit.count=1 
-        ```
-        
-        ```makefile
-        # git에 관하여 더 자세한 정보를 보고 싶다면 application.yml에 다음 옵션 적용!
-        
-        management:
-          info:
-            git:
-              mode: "full"
-        ```
+```groovy
+plugins {
+
+	...
+	id "com.gorylenko.gradle-git-properties" version "2.4.1" //git info
+
+}
+```
+
+```makefile
+# 위의 build.gradle 설정 후 빌드하면, 
+# build 폴더안에 'resources/main/git.properties' 파일이 생성
+
+git.branch=main
+git.build.host=kim
+git.build.user.email=zipkyh@mail.com
+git.build.user.name=holyeye
+git.build.version=0.0.1-SNAPSHOT
+git.closest.tag.commit.count=
+git.closest.tag.name=
+git.commit.id=754bc78744107b6423352018e46367f5091b181e
+git.commit.id.abbrev=754bc78
+git.commit.id.describe=
+git.commit.message.full=fitst commit\n
+git.commit.message.short=fitst commit
+git.commit.time=2023-01-01T00\:00\:00+0900
+git.commit.user.email=zipkyh@mail.com
+git.commit.user.name=holyeye
+git.dirty=false
+git.remote.origin.url=
+git.tags=
+git.total.commit.count=1 
+```
+
+```makefile
+# git에 관하여 더 자세한 정보를 보고 싶다면 application.yml에 다음 옵션 적용!
+
+management:
+  info:
+    git:
+      mode: "full"
+```
 
 ---
         
