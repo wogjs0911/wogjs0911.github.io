@@ -1,4 +1,4 @@
----
+	---
 key: /2024/07/14/SpringBootStudy.html
 title: SpringBoot - SpringBoot Study
 tags: springboot
@@ -491,7 +491,7 @@ public class EmbedTomcatSpringMain {
 <br><br>
 
 
-# 8. 편리한 `부트 클래스`
+# 8. 편리한 부트 클래스
 
 ## 1) 직접 만드는 스프링부트 내부 동작!
 
@@ -641,6 +641,8 @@ class ServletWebServerApplicationContextFactory implements ApplicationContextFac
     - `AotDetector` 클래스는 소스코드는 다음과 같다.
         - `AotDetector` 클래스에서 `NativeDetector` 클래스를 사용한다.
 
+<br>
+
 ```java
 package org.springframework.aot;
 
@@ -688,10 +690,11 @@ public abstract class AotDetector {
 <br><br>
 
 
-### i `NativeDetector`
+#### i `NativeDetector`
 
 - SpringBoot 3.0.1 버전부터 도입된 `NativeDetector` 클래스는 **`GraalVM Native Image`** 환경을 감지하는 역할을 수행!
 
+<br>
 - [`GraalVM Native Image`](https://docs.spring.io/spring-boot/docs/current/reference/html/native-image.html)는 컴파일된 Java 애플리케이션을 미리 처리하여 생성할 수 있는 독립형 실행 파일입니다. `Native Image`는 일반적으로 JVM 이미지보다 메모리 공간이 더 작고 더 빠르게 시작된다.
 	- `GraalVM 네이티브 이미지`는 Java 애플리케이션을 배포하고 실행하는 새로운 방법을 제공한다. Java Virtual Machine에 비해 네이티브 이미지는 더 작은 메모리 공간과 훨씬 더 빠른 시작 시간으로 실행될 수 있다.
         - 이는 컨테이너 이미지를 사용하여 배포되는 애플리케이션에 매우 적합하며 `FaaS(Function as a Service)` 플랫폼과 결합할 때 특히 흥미롭다.
@@ -704,7 +707,8 @@ public abstract class AotDetector {
         - 애플리케이션 클래스 경로는 빌드 시 고정되며 변경할 수 없다.
         - `Lazy Class Loading`이 없으며, 실행 파일에 포함된 모든 것이 시작 시 메모리에 로드된다.
         - 완전히 지원되지 않는 Java 애플리케이션의 일부 측면에는 몇 가지 제한사항이 있다
-    
+
+<br>    
 - **`NativeDetector` 클래스를 사용 시, `이점`!!****
     - **Native Image 환경에 맞게 `최적화된 코드` 실행 :**
         - Native Image 환경에서만 사용 가능한 기능들을 활용하여 `애플리케이션 성능을 향상`시킬 수 있다.
@@ -718,20 +722,22 @@ public abstract class AotDetector {
 <br><br>
 
 
-### ii. `AOT vs JIT` : `AotDetector`
+#### ii. `AOT vs JIT` : `AotDetector`
 
 - Spring boot의 최신 버전인 3.0.1 버전부터 도입된 새롭게 추가된 `AOT` 컴파일에 대해서 기존 `JIT` 컴파일과 비교해보자!
 
+<br>
 - `JIT(Just-in-Time)` :
     - 자바는 코드를 실행하기 위해서는 바이트코드로 컴파일하는 과정과 바이트코드를 `인터프리트`하는 과정을 거쳐야 하기 때문에 `컴파일 과정만` 필요한 다른 프로그래밍 언어보다 느리다. 거기에 더하여 인터프리터는 컴파일러보다 느리기 때문에 성능 문제기 발생할 수밖에 없었다. 이러한 문제를 해결하기 위함으로 JIT이 등장!
     - 컴파일 방식 : `애플리케이션 실행 중에` 바이트코드를 `실시간으로` 네이티브 코드로 변환!
     
 
+<br>
 - `AOT(Ahead-of-Time)`:
     - 컴파일 방식 : `애플리케이션 실행 전에` 바이트코드를 네이티브 코드로 `미리 변환`!
 
  
-
+<br>
 - AOT, JIT의 적합한 사용 상황
     - **`AOT` :**
         - 빠른 부팅 속도와 최소한의 메모리 사용량이 중요한 클라우드 기반 마이크로서비스
@@ -742,6 +748,7 @@ public abstract class AotDetector {
         - 빠른 개발 및 디버깅 속도가 중요한 애플리케이션
         - 최고의 실행 성능이 요구되는 애플리케이션
 
+<br>
 - **`결론` :**
     - `AOT`와 `JIT`는 각각 장단점이 있으며, 상황에 따라 적합한 방식을 선택!
     - 빠른 부팅 속도, 최소한의 메모리 사용량, 향상된 보안을 원하는 경우 `AOT`가 적합!
@@ -809,7 +816,7 @@ public abstract class AotDetector {
 <br><br>
 
 
-### i. `WebServer`
+#### i. `WebServer`
 
 - SpringBoot에서 웹 서버를 구성하고 실행하는 데 필요한 다양한 클래스와 인터페이스를 제공한다. 웹 서버의 기본 기능을 정의하며, SpringBoot에서 제공하는 다양한 구현체를 통해 실제 서버 실행을 담당.
 
@@ -879,10 +886,11 @@ public interface WebServer {
 <br><br>
 
 
-### ii. `customizeConnector`
+#### ii. `customizeConnector`
 
 - **Tomcat 서버 커넥터를 사용자 정의**하는 데 사용된다. 즉, Tomcat 서버의 네트워킹 설정, 보안 설정, 연결 제한 등 다양한 설정들을 원하는대로 변경할 수 있도록 지원한다.
 
+<br>
 - 매개변수 :
     - **포트 번호:** `connector.setPort(portNumber)`
     - **최대 연결 수:** `connector.setMaxConnections(maxConnections)`
@@ -890,6 +898,7 @@ public interface WebServer {
     - **SSL 설정:** `connector.setSsl(sslContext)`
     - **HTTP/2 설정:** `connector.setProtocol("HTTP/2")`
 
+<br>
 - `customizeConnector` 메서드를 사용하는 예시 :
     - Tomcat 서버 커넥터 설정 변경
 
@@ -926,8 +935,10 @@ public class MyApplication {
 
 ```
 
+<br>
 - `Gemini`에게 추가 질문 : `customizeConnector 메서드를 이용해서 스프링부트 프로젝트가 On되는 부팅 시간이나 서버 연결 상태를 개선할 수 있을까?`
 
+<br>
 - **답변 : `customizeConnector` 메서드를 이용한 부팅 시간 및 서버 연결 상태 개선 가능성 분석**
     - `customizeConnector` 메서드는 Tomcat 서버 커넥터를 사용자 정의하는 데 활용되는 강력한 도구이지만, **직접적으로 부팅 시간이나 서버 연결 상태를 개선하는 데 사용하기에는 한계가 있습니다.**
     
@@ -972,16 +983,18 @@ public class MyApplication {
 
 # 9. 자동구성(`Auto Configuration`)
 
-## 1) 스프링 부트의 자동 구성
+### 1) 스프링 부트의 자동 구성
 
 - 등장배경 : 1가지의 라이브러리를 `여러 곳`에서 `사용`할 수 있도록 `라이브러리 설정`하기!
     - 외부 라이브러리를 직접 만들고 또 그것을 프로젝트에 라이브러리로 불러서 적용해보았다.
     - 그런데 라이브러리를 사용하는 클라이언트 개발자 입장을 생각해보면, `라이브러리 내부에 있는 어떤 빈을 등록해야하는지 알아야` 하고, 그것을 또 `하나하나 빈으로 등록`해야 한다. 지금처럼 간단한 라이브러리가 아니라 `초기 설정이 복잡하다면 사용자 입장`에서는 상당히 귀찮은 작업이 될 수 있다.
     - 이런 부분을 `자동으로 처리(라이브러리)`해주는 것이 바로 `스프링 부트 자동 구성(Auto Configuration)`이다.
 
+<br>
 - `JdbcTemplate`, `DataSource` , `TransactionManager`등 모두 스프링 부트가 자동 구성
 을 제공해서 자동으로 스프링 빈으로 등록
 
+<br>
 - 예시 : JdbcTemplateConfiguration를 자동 설정 해주는 `JdbcTemplateAutoConfiguration`
 
 ```java
@@ -1040,23 +1053,29 @@ public @interface AutoConfiguration {
 때문에 DataSource 를 자동으로 등록해주는 DataSourceAutoConfiguration 다음에 실행
 하도록 설정되어 있다.
 
+<br>
 - `@ConditionalOnClass({ DataSource.class, JdbcTemplate.class })`
     - `IF 문`과 유사한 기능을 제공한다. 이런 클래스가 있는 경우에만 설정이 동작한다. 
     는 설정들이 모두 무효화 되고, 빈도 등록되지 않는다.
     - `@ConditionalXxx` 시리즈가 있다. 자동 구성의 핵심!
     - `JdbcTemplate` 은 DataSource , JdbcTemplate 라는 클래스가 있어야 동작할 수 있다.
 
+<br>
 - `@Import` : 스프링에서 자바 설정을 추가할 때 사용한다.
 
+<br>
 - 스프링 부트의 자동 구성 기능 예시
     - `JdbcTemplateAutoConfiguration` : JdbcTemplate
     - `DataSourceAutoConfiguration` : DataSource
     - `DataSourceTransactionManagerAutoConfiguration` : TransactionManager
     - [스프링 공식 문서 : 자동구성 기능 예시](https://docs.spring.io/spring-boot/docs/current/reference/html/auto-configuration-classes.html)
     
+<br>    
 - `Auto Configuration`은 주로 다음 두 용어로 번역됌.
     - `자동 설정`
     - `자동 구성`
+
+<br>
 - 따라서, 스프링 부트가 제공하는 자동 구성 기능을 이해하려면 다음 두 가지 개념을 이해해야 한다.
     - `@Conditional` : 특정 조건에 맞을 때 설정이 동작하도록 한다.
     - `@AutoConfiguration` : 자동 구성이 어떻게 동작하는지 내부 원리 이해
@@ -1067,7 +1086,7 @@ public @interface AutoConfiguration {
 <br><br>
 
 
-## 2) 스프링 부트의 자동 구성 기능 설명
+### 2) 스프링 부트의 자동 구성 기능 설명
 
 - `@Conditional(MemoryCondition.class)`
     - 이제 MemoryConfig 의 적용 여부는 `@Conditional` 에 지정한 `MemoryCondition 의 조건`에 따라 달라진다.
@@ -1075,9 +1094,11 @@ public @interface AutoConfiguration {
         - MemoryCondition 의 실행결과가 `false` 이면 MemoryConfig 는 `무효화` 된다. 그래서,
         memoryController , memoryFinder `빈은 등록되지 않는다.`
 
+<br>
 - `@ConditionalOnXxx`
     - 스프링은 @Conditional 과 관련해서 `개발자가 편리하게 사용`할 수 있도록 수 많은 [@ConditionalOnXxx](https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html#features.developing-auto-configuration.condition-annotations) 를 제공한다.
 
+<br>
 - `@ConditionalOnClass` , `@ConditionalOnMissingClass`
     - 클래스가 있는 경우 동작한다. 나머지는 그 반대
 - `@ConditionalOnBean` , `@ConditionalOnMissingBean`
@@ -1098,13 +1119,14 @@ public @interface AutoConfiguration {
 <br><br>
 
 
-## 3) 스프링 부트의 자동 구성으로 라이브러리 설정
+### 3) 스프링 부트의 자동 구성으로 라이브러리 설정
 
 - `memory=on` 조건을 만족할 때만 실행!
     - `VM options` : `-Dmemory=on` 를 사용한다!!
 
 ![Untitled](/assets/images/springbootstudy/Untitled6.png)
 
+<br>
 - 실습 코드 :
     
     ```java
@@ -1188,6 +1210,7 @@ public @interface AutoConfiguration {
     ```
     
 
+<br>
 - 자동구성 대상 지정
     - 파일 생성
         - 스프링이 기본으로 제공해주는 자동구성 대상 지정 설정
@@ -1206,7 +1229,7 @@ public @interface AutoConfiguration {
             memory.MemoryAutoConfig
             ```
             
-
+<br>
 - 스프링 부트 자동 구성이 `동작하는 원리`
     - `@SpringBootApplication` → `@EnableAutoConfiguration` → `@Import(AutoConfigurationImportSelector.class)`
         - 참고 코드 : `JdbcTemplateAutoConfiguration`로 예시
@@ -1252,9 +1275,7 @@ public @interface AutoConfiguration {
 
 <br><br>
 
-    
-
-## 4) `ImportSelector`
+### 4) `ImportSelector`
 
 - `@Import` : 설정 정보를 추가하는 방법은 정적인 방법과 동적인 방법이 존재!
     - 정적인 방법 :
@@ -1793,12 +1814,14 @@ public @interface AutoConfiguration {
             ```
             
 
+<br>
 - **AutoConfigurationImportSelector 클래스의 작동 방식:**
     1. 스프링 부트 애플리케이션이 시작될 때 `AutoConfigurationImportSelector` 클래스의 `selectImports` 메서드가 `호출`됩니다.
     2. `selectImports` 메서드는 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 디렉터리에 있는 모든 자동 구성 클래스를 `스캔`합니다.
     3. 각 자동 구성 클래스에 대해 `@Conditional` 애노테이션을 사용하여 정의된 `조건을 검사`합니다.
     4. 조건을 충족하는 자동 구성 클래스들은 `Configuration` 클래스로 로드되고, 해당 클래스에 정의된 빈들이 스프링 컨테이너에 `등록`됩니다.
 
+<br>
 - **AutoConfigurationImportSelector 클래스의 `장점`:**
     - 개발자의 코드 작성량 감소
         - 기존에는 라이브러리 설정 시, 라이브러리 내부의 빈을 일일이 찾아서 빈등록을 해줬어야 했다.
@@ -1812,7 +1835,7 @@ public @interface AutoConfiguration {
 
 # 10. 외부설정과 프로필 1
 
-## 1) `외부 설정` 개념 :
+### 1) `외부 설정` 개념 :
 
 - `하나의 애플리케이션`을 `여러 다른 환경에서 사용`해야 할 때, 해당 개념이 사용된다.
 - 예를 들어, 애플리케이션이 개발DB에 접근하려면 [`dev.db.com`](http://dev.db.com/) 이라는 url 정보가 필요한데, 운영DB에 접근하려면 [`prod.db.com`](http://prod.db.com/) 이라는 서로 다른 url을 사용해야 한다.
@@ -1822,7 +1845,7 @@ public @interface AutoConfiguration {
 <br><br>
 
 
-## 2) 외부 설정 시 `문제점` :
+### 2) 외부 설정 시 `문제점` :
 
 - 환경에 따라 `변하는 설정값`을 애플리케이션 `내부에 포함`하는 경우 :
     - 환경에 따라서 `빌드를 여러번` 해야 한다!
@@ -1835,7 +1858,7 @@ public @interface AutoConfiguration {
 
     
 
-## 3) 외부 설정의 해당 문제점의 `해결 방법` :
+### 3) 외부 설정의 해당 문제점의 `해결 방법` :
 
 - `실행 시점`에 `외부 설정값을 주입!`
     - 배포 환경과 `무관`하게 `하나의 빌드 결과물`을 만든다. 여기서는 `app.jar` 를 빌드한다. 이 `안에는 설정값을 두지 않는다.`
@@ -1847,7 +1870,7 @@ public @interface AutoConfiguration {
 <br><br>
 
 
-## 4) `결론`
+### 4) `결론`
 
 - **유지보수하기 좋은 애플리케이션 개발의 가장 기본 원칙은 변하는 것과 변하지 않는 것을 분리하는 것이다.**
     - 유지보수하기 좋은 애플리케이션을 개발하는 단순하면서도 중요한 원칙은 `변하는 것과 변하지 않는 것을 분리`하는 것이다. 각 환경에 따라 변하는 외부 설정값은 분리하고, 변하지 않는 코드와 빌드 결과물은 유지했다. 덕분에 빌드 과정을 줄이고, 환경에 따른 유연성을 확보하게 되었다.
@@ -1856,7 +1879,7 @@ public @interface AutoConfiguration {
 <br><br>
 
 
-## 5) 외부 설정을 `애플리케이션에 전달`하는 방법
+### 5) 외부 설정을 `애플리케이션에 전달`하는 방법
 
 - 애플리케이션을 실행할 때, 필요한 설정값을 외부에서 어떻게 불러와서 애플리케이션에 전달하는 방법
 
@@ -1876,7 +1899,7 @@ public @interface AutoConfiguration {
 <br><br>
 
   
-### 1. 외부 설정 - `OS 환경 변수`
+#### a. 외부 설정 - `OS 환경 변수`
     - 명령어 :
         - 윈도우 OS: `set`
         - MAC, 리눅스 OS: `printenv`
@@ -2073,7 +2096,7 @@ public @interface AutoConfiguration {
 
 
 <br>
-- a. 일반적인 예시 코드 :
+#### a. 일반적인 예시 코드 :
     
     ```java
     package hello;
@@ -2109,75 +2132,76 @@ public @interface AutoConfiguration {
 <br><br>
 
 
-- b. `Jasypt` +  Spring Boot에서  `Environment`  사용 예시 :
-    - 1. Jasypt 라이브러리 설치 후 `application.yml` 설정
-        
-        ```yaml
-        jasypt.encryptor.password=your_encryption_password  # 암호화에 사용할 비밀번호
-        spring.datasource.password=ENC(encrypted_password)  # 암호화된 비밀번호
-        ```
-        
-    - 2. `Jasypt CLI` 또는 `온라인 도구`를 사용하여 비밀번호를 암호화
-        
-        ```bash
-        # Jasypt CLI 사용 예시
-        ./jasypt-spring-boot-3.0.5.jar stringEncryptor input="your_original_password" password=your_encryption_password
-        ```
-        
-    - 3. 복호화된 값 사용
-        
-        ```java
-        @SpringBootApplication
-        public class MyApplication {
-        
-            @Autowired
-            private Environment env;
-        
-            public static void main(String[] args) {
-                SpringApplication.run(MyApplication.class, args);
-            }
-        
-            @Bean
-            public DataSource dataSource() {
-                DriverManagerDataSource dataSource = new DriverManagerDataSource();
-                dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-                dataSource.setUrl("jdbc:mysql://localhost:3306/mydatabase");
-                dataSource.setUsername("root");
-                dataSource.setPassword(env.getProperty("spring.datasource.password")); // 복호화된 비밀번호 사용
-                return dataSource;
-            }
+#### b. `Jasypt` +  Spring Boot에서  `Environment`  사용 예시 :
+
+##### 1. Jasypt 라이브러리 설치 후 `application.yml` 설정
+    
+    ```yaml
+    jasypt.encryptor.password=your_encryption_password  # 암호화에 사용할 비밀번호
+    spring.datasource.password=ENC(encrypted_password)  # 암호화된 비밀번호
+    ```
+    
+##### 2. `Jasypt CLI` 또는 `온라인 도구`를 사용하여 비밀번호를 암호화
+    
+    ```bash
+    # Jasypt CLI 사용 예시
+    ./jasypt-spring-boot-3.0.5.jar stringEncryptor input="your_original_password" password=your_encryption_password
+    ```
+    
+##### 3. 복호화된 값 사용
+    
+```java
+@SpringBootApplication
+public class MyApplication {
+
+    @Autowired
+    private Environment env;
+
+    public static void main(String[] args) {
+        SpringApplication.run(MyApplication.class, args);
+    }
+
+    @Bean
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/mydatabase");
+        dataSource.setUsername("root");
+            dataSource.setPassword(env.getProperty("spring.datasource.password")); // 복호화된 비밀번호 사용
+            return dataSource;
         }
-        
-        ```
+    }
+    
+    ```
         
     
 
-- c. `AWS Credential Key`(Spring Cloud `Vault` 활용) `Environment`  사용 예시 :
+#### c. `AWS Credential Key`(Spring Cloud `Vault` 활용) `Environment`  사용 예시 :
     
-    ```java
-    @SpringBootApplication
-    public class MyApplication {
-    
-        @Autowired
-        private Environment env;
-    
-        public static void main(String[] args) {
-            SpringApplication.run(MyApplication.class, args);
-        }
-    
-        @Bean
-        public AWSCredentialsProvider awsCredentialsProvider() {
-            return new AWSStaticCredentialsProvider(
-                new BasicAWSCredentials(env.getProperty("aws.accessKeyId"), env.getProperty("aws.secretKey"))
-            );
-        }
+```java
+@SpringBootApplication
+public class MyApplication {
+
+    @Autowired
+    private Environment env;
+
+    public static void main(String[] args) {
+        SpringApplication.run(MyApplication.class, args);
     }
-    ```
+
+    @Bean
+    public AWSCredentialsProvider awsCredentialsProvider() {
+        return new AWSStaticCredentialsProvider(
+            new BasicAWSCredentials(env.getProperty("aws.accessKeyId"), env.getProperty("aws.secretKey"))
+        );
+    }
+}
+```
 
 
 <br><br>
 
-- d. `Kubernetes` Secret `Environment`  사용 예시 :
+#### d. `Kubernetes` Secret `Environment`  사용 예시 :
     
     ```yaml
     apiVersion: v1
@@ -2211,13 +2235,13 @@ public @interface AutoConfiguration {
 
 <br><br>
 
-- e. 추가 공부 : `Spring Cloud Vault`
+#### e. 추가 공부 : `Spring Cloud Vault`
     - HashiCorp `Vault`와 Spring 애플리케이션을 통합하는 `Spring Cloud` 프로젝트이다. Vault는 `민감한 데이터`(`암호`, `API 키`, `인증서` 등)를 안전하게 `저장`하고 `관리`하는 도구로, Spring Cloud Vault를 사용하면 Spring 애플리케이션에서 Vault에 저장된 데이터를 쉽게 가져와 사용할 수 있다.
 
 <br>
 
 
-- a) 의존성 추가
+##### a) 의존성 추가
     
     ```groovy
     dependencies {
@@ -2229,7 +2253,7 @@ public @interface AutoConfiguration {
 <br>
 
 
-- b) bootstrap.yml 설정:
+##### b) bootstrap.yml 설정:
     
     ```yaml
     spring:
@@ -2250,7 +2274,7 @@ public @interface AutoConfiguration {
     
 <br>
 
-- c) application.yml
+##### c) application.yml
     
     ```java
     spring:
@@ -2271,15 +2295,21 @@ public @interface AutoConfiguration {
     ```
     
 - Spring Cloud Vault는 애플리케이션 시작 시, `bootstrap.yml`에 설정된 정보를 이용하여 Vault에 접속하고, `application.yml`에서 참조하는 값을 가져와 자동으로 주입한다.
+
+<br>
 - Vault 관련 설정은 `bootstrap.yml`에 설정하고, Vault에서 가져온 값을 사용하는 애플리케이션 설정은 `application.yml`에 넣는 것이 권장된다. 이렇게 하면 설정 파일의 역할이 명확해지고 관리가 용이하다.
+
+<br>
 - `${vault.key}` 형식으로 Vault에 저장된 값을 참조한다.
+
+<br>
 - 위 예시에서는 데이터베이스 연결 정보 (`spring.datasource.username`, `spring.datasource.password`), API 키 (`app.api-key`), AWS 자격 증명 (`cloud.aws.credentials.accessKey`, `cloud.aws.credentials.secretKey`)을 Vault에서 가져와 사용하고 있다.
 
 ---
 
 <br><br>
 
-- c) AWS Credential Key 저장 (`Vault CLI`):
+#### c. AWS Credential Key 저장 (`Vault CLI`):
     - [Spring Vault : SpringBoot 3.0에서 설정법](https://velog.io/@daoh98/Spring-Vault%EB%9E%80-SpringBoot-3.0-%EC%84%A4%EC%A0%95%EB%B2%95)
         - 클래스별로 구성 속성을 활성화하거나 구성 요소 검색과 유사한 방식으로 작동하는 구성 속성 검색을 활성화할 수 있다.
         
@@ -2293,7 +2323,7 @@ public @interface AutoConfiguration {
 
 <br><br>
 
-- d) 예시 : 애플리케이션 코드
+##### d) 예시 : 애플리케이션 코드
     
     ```groovy
     @SpringBootApplication
@@ -2341,15 +2371,16 @@ public @interface AutoConfiguration {
 
 <br><br>
 
-- e) 주의 점 :
-    - 실제 운영 환경에서는 Vault 토큰 관리에 주의!
-    - `bootstrap.yml` 파일은 Vault `서버 정보`, `인증 방식`, `저장 경로` 등 Vault 관련 설정 정보를 담고 있습니다.
-        - Spring Boot 애플리케이션은 실행 시, `bootstrap.yml` 파일을 먼저 읽어 Vault 설정을 로드하고, 이후 `application.yml` 를 읽어 애플리케이션 설정을 로드한다.
+##### e) 주의 점 :
+	- 실제 운영 환경에서는 Vault 토큰 관리에 주의!
+	- `bootstrap.yml` 파일은 Vault `서버 정보`, `인증 방식`, `저장 경로` 등 Vault 관련 설정 정보를 담고 있습니다.
+		- Spring Boot 애플리케이션은 실행 시, `bootstrap.yml` 파일을 먼저 읽어 Vault 설정을 로드하고, 이후 `application.yml` 를 읽어 애플리케이션 설정을 로드한다.
+        
 ---
 
 <br><br>
 
-- f) 참고 사이트 :
+##### f) 참고 사이트 :
     - [SpringCloud + Vault 공식 문서](https://cloud.spring.io/spring-cloud-vault/reference/html/#vault.config.backends.aws)
     - [Spring Cloud 마이크로서비스에서 Vault를 이용한 아키텍쳐 고민](https://ssdragon.tistory.com/164)
 
@@ -2357,7 +2388,7 @@ public @interface AutoConfiguration {
 
 <br><br>
 
-- g) `Vault` 외에도 정보를 안전하게 저장하고 관리할 수 있는 다양한 서비스들 :
+##### g) `Vault` 외에도 정보를 안전하게 저장하고 관리할 수 있는 다양한 서비스들 :
     
     **1. `AWS` Secrets Manager**
     
@@ -2381,6 +2412,7 @@ public @interface AutoConfiguration {
 
 - `OS 환경 변수`, `자바 시스템 속성`, `커맨드 라인 옵션 인수`는 사용해야 하는 값이 늘어날 수 록 사용하기가 불편해진다. `실무`에서는 `수십개의 설정값을 사용하기 때문에`관리가 어렵다.
 
+<br>
 - 이러한 문제점의 해결 방법으로는 `설정값을 파일에 넣어서 관리하는 방법`이 있다. 그리고, `애플리케이션 로딩` 시점에 해당 파일을 읽어들이면 된다. 그 중에서도 `.properties` 라는 파일은 `key=value` 형식을 사용해서 설정값을 관리하기에 `아주 적합`하다.
 
 ![Untitled](/assets/images/springbootstudy/Untitled15.png)
@@ -2594,7 +2626,7 @@ spring:
 
 # 11. 외부설정과 프로필 2
 
-## 1) `Environment` 사용기 :
+### 1) `Environment` 사용기 :
 
 - 스프링에서 `Environment` 를 직접 주입받고, `env.getProperty(key)` 를 통해서 값을 꺼내는 과정을 반복해야 한다는 점이 `단점`이라서 `@Value`를 이용하여 외부 설정값을 주입 받도록 하자!
 
@@ -2652,11 +2684,13 @@ spring:
 <br><br>
     
 
-## 2) `@Value` 사용기 :
+### 2) `@Value` 사용기 :
 
 - 애플리케이션을 실행하면 `application.yml` 파일의 설정 값이 `@Value`를 통해 주입되어 데이터베이스 연결에 사용된다.
 - 외부 설정값을 `편리하게 주입`받을 수 있다.
 
+
+<br>
 - Spring 애플리케이션 `@Value` 예시 1 :
     - application.yml 설정 :
         
@@ -2706,6 +2740,7 @@ spring:
     ```
     
 
+<br>
 - Spring 애플리케이션 `@Value` 예시 2 :
     - `@Value` 는 `필드`에 사용할 수도 있고, `파라미터`에 사용할 수도 있다.
     
@@ -2779,14 +2814,18 @@ spring:
 <br><br>
 
 
-## 3) `@ConfigurationProperties` 사용기 :
+### 3) `@ConfigurationProperties` 사용기 :
 
 - 스프링은 `외부 설정의 묶음 정보`를 `객체로 변환`하는 기능을 제공한다. 이것을 `타입 안전한 설정 속성` 이라 한다.
 
-- a. `@ConfigurationProperties` 설정하는 방법 :
-    - `@ConfigurationProperties` 이 있으면 외부 설정을 주입 받는 객체라는 뜻이다. 여기에 외부 설정
-    KEY의 묶음 시작점인 `my.datasource` 를 적어준다.
-    - 기본 주입 방식은 `자바빈` 프로퍼티 방식이다. `Getter` , `Setter` 가 필요하다. (롬복의 `@Data` 에 의해 자동 생성된다.)
+<br>
+
+#### a. `@ConfigurationProperties` 설정하는 방법 :
+
+- `@ConfigurationProperties` 이 있으면 외부 설정을 주입 받는 객체라는 뜻이다. 여기에 외부 설정 KEY의 묶음 시작점인 `my.datasource` 를 적어준다.
+
+<br>
+- 기본 주입 방식은 `자바빈` 프로퍼티 방식이다. `Getter` , `Setter` 가 필요하다. (롬복의 `@Data` 에 의해 자동 생성된다.)
         
         
         ```java
@@ -2822,10 +2861,10 @@ spring:
 
 <br><br>
 
-- b. `@ConfigurationProperties` 실제로 사용하는 방법 :
-    - `@EnableConfigurationProperties(MyDataSourcePropertiesV1.class)`
-        - 스프링에게 사용할 `@ConfigurationProperties` 를 지정해주어야 한다. 이렇게 하면 해당 클래
-        스는 `스프링 빈`으로 등록되고, 필요한 곳에서 주입 받아서 사용할 수 있다.
+#### b. `@ConfigurationProperties` 실제로 사용하는 방법 :
+
+- `@EnableConfigurationProperties(MyDataSourcePropertiesV1.class)`
+	- 스프링에게 사용할 `@ConfigurationProperties` 를 지정해주어야 한다. 이렇게 하면 해당 클래스는 `스프링 빈`으로 등록되고, 필요한 곳에서 주입 받아서 사용할 수 있다.
     
     ```java
     package hello.config;
@@ -2863,7 +2902,7 @@ spring:
 
 <br><br>
 
-- c. `@ConfigurationPropertiesScan` 사용법 :
+#### c. `@ConfigurationPropertiesScan` 사용법 :
     - `@ConfigurationProperties` 를 특정 범위로 자동 등록할 때는 `@ConfigurationPropertiesScan` 을 사용
     
     ```java
@@ -2876,13 +2915,14 @@ spring:
 
 <br><br>
 
-## 4) `@ConfigurationProperties` 생성자
+### 4) `@ConfigurationProperties` 생성자
 
 - `@ConfigurationProperties` 는 `Getter`, `Setter`를 사용하는 자바빈 프로퍼티 방식이 아니라 `생성자`를 통해서 객체를 만드는 기능도 지원!
-    - `Setter` 를 제거하고 대신에 `생성자`를 사용하면 중간에 데이터를 변경하는 실수를 근본적으로 방
-    지할 수 있다.
+	- `Setter` 를 제거하고 대신에 `생성자`를 사용하면 중간에 데이터를 변경하는 실수를 근본적으로 방지할 수 있다.
 
-- a. `@ConfigurationProperties` 에서 생성자로 사용하는 예제 :
+<br>
+
+#### a. `@ConfigurationProperties` 에서 생성자로 사용하는 예제 :
     
     ```java
     package hello.datasource;
@@ -2932,13 +2972,15 @@ spring:
 
 <br><br>  
 
-## 5) `@ConfigurationProperties` 검증
+### 5) `@ConfigurationProperties` 검증
 
 - 최대 커넥션 숫자는 `최소 1 최대 999` 라는 `범위`를 가져야 한다면 어떻게 검증할 수 있을까? `이메일을 외부 설정에 입력`했는데, 만약 `이메일 형식에 맞지 않는다면` 어떻게 `검증`할 수 있을까?
 
+<br>
+
 - 자바에서는 자바 빈 검증기(`java bean validation`) 이용하기!
-    - 1) build.gradle에 `spring-boot-starter-validation` 종속성 추가
-    - 2) `@ConfigurationProperties` 설정에 `@Validated` 를 추가하기!
+	- 1) build.gradle에 `spring-boot-starter-validation` 종속성 추가
+	- 2) `@ConfigurationProperties` 설정에 `@Validated` 를 추가하기!
     
     ```java
     package hello.datasource;
@@ -2997,18 +3039,23 @@ spring:
     
     ```
     
+<br>
 
-- a. ConfigurationProperties 장점
-    - 외부 설정을 객체로 편리하게 변환해서 사용할 수 있다.
-    - 외부 설정의 계층을 객체로 편리하게 표현할 수 있다.
-    - 외부 설정을 타입 안전하게 사용할 수 있다.
-    - 검증기를 적용할 수 있다
+#### a. ConfigurationProperties 장점
+
+- 외부 설정을 객체로 편리하게 변환해서 사용할 수 있다.
+
+- 외부 설정의 계층을 객체로 편리하게 표현할 수 있다.
+
+- 외부 설정을 타입 안전하게 사용할 수 있다.
+
+- 검증기를 적용할 수 있다
 
 ---
 
 <br><br>
 
-## 6)  `application.yml` 설정
+### 6)  `application.yml` 설정
 
 - `yml` 은 `---` dash( - ) 3개를 사용해서 `논리 파일`을 `구분`한다.
 - `spring.config.active.on-profile` 을 사용해서 `프로필`을 적용할 수 있다.
@@ -3058,9 +3105,11 @@ my:
 
 <br><br>
 
-## 7)  `@Profile`
+### 7)  `@Profile`
 
-- a.`@Profile` 을 사용하면 각 환경 별로 외부 설정 값을 분리하는 것을 넘어서, 등록되는 스프링 빈도 분리 가능!
+<br>
+
+#### a.`@Profile` 을 사용하면 각 환경 별로 외부 설정 값을 분리하는 것을 넘어서, 등록되는 스프링 빈도 분리 가능!
 
 - `@Profile`  스프링 소스코드 :
     
@@ -3213,9 +3262,10 @@ my:
     }
     
     ```
-    
 
-- b. 결제 기능을 붙여야 하는데, 로컬 개발 환경에서는 실제 결제가 발생하면 문제가 되니 가짜 결제 기능이 있는 스프링 빈을 등록하고, 운영 환경에서는 실제 결제 기능을 제공하는 스프링 빈을 등록한다고 가정!
+<br><br>    
+
+#### b. 결제 기능을 붙여야 하는데, 로컬 개발 환경에서는 실제 결제가 발생하면 문제가 되니 가짜 결제 기능이 있는 스프링 빈을 등록하고, 운영 환경에서는 실제 결제 기능을 제공하는 스프링 빈을 등록한다고 가정!
 
 - `@Profile` 에 따른 빈 등록 예시 :
     
@@ -3300,12 +3350,15 @@ my:
 - `전투에서 실패한 지휘관은 용서할 수 있지만 경계에서 실패하는 지휘관은 용서할 수 없다`
     - 서비스를 운영하는 개발자에게 맞추어 보면 장애는 언제든지 발생할 수 있다. 하지만 `모니터링`(경계)은 잘 대응하는 것이 중요하다.
 
+<br>
 - 프로덕션을 운영에 배포할 때, 준비해야 하는 `비 기능적 요소`들을 뜻한다.
     - `지표(metric)`, `추적(trace)`, `감사(auditing)`
     - `모니터링`
 
+<br>
 - `애플리케이션`이 현재 살아있는지, `로그 정보`는 정상 설정 되었는지, `커넥션 풀`은 얼마나 사용되고 있는지 등을 확인할 수 있어야 한다!
 
+<br>
 - 스프링 부트가 제공하는 `액추에이터`는 `프로덕션 준비 기능`을 매우 편리하게 사용할 수 있는 다양한 편의 기능들을 제공한다.
     - `마이크로미터`, `프로메테우스`, `그라파나` 같은 최근 유행하는 `모니터링 시스템`과 매우 쉽게 연동할 수 있는 기능도 제공한다.
     - `액츄에이터` : 시스템을 `움직`이거나 `제어`하는 데 쓰이는 기계 장치라는 뜻
@@ -3335,6 +3388,7 @@ management:
        include: "*"
 ```
 
+<br>
 - `모든 엔드포인트`를 웹에 노출
     - `"*" 옵션`은 모든 엔드포인트를 웹에 노출하는 것이다. 참고로 `shutdown 엔드포인트`는 기본으로 활성화 되지 않기 때문에 노출도 되지 않는다.
     - `엔드포인트 활성화 + 엔드포인트 노출`이 둘다 적용되어야 사용할 수 있다.
@@ -3425,7 +3479,9 @@ management:
          }
         }
         ```
-        
+
+
+<br><br>        
 
 ```yaml
 management:
@@ -3438,9 +3494,12 @@ management:
        include: "*"
 ```
 
+<br>
 - `shutdown 엔드포인트` 활성화
     - 특정 엔드포인트를 활성화 하려면 `management.endpoint.{엔드포인트명}.enabled=true` 를 적용하면 된다.
 
+        
+<br>
 - 액츄에이터 관련 전체 application.yml :
     
     ```yaml
@@ -3504,6 +3563,8 @@ management:
 
 
     
+---
+        
 <br><br>
 
 
@@ -3561,7 +3622,7 @@ management:
     }
     ```
     
-
+<br>
 - 헬스 이상 상태
     - 헬스 컴포넌트 중에 하나라도 문제가 있으면 전체 상태는 DOWN 이 된다
         
@@ -3582,12 +3643,13 @@ management:
         }
         ```
         
-
+<br>
 - 공식문서 참고** : [헬스 기능 직접 구현하기](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.health.writing-custom-health-indicators)
 
     
+---
+        
 <br><br>
-
 
 ### c. 애플리케이션 정보
 
@@ -3598,6 +3660,7 @@ management:
     - `build` : 빌드 정보, META-INF/build-info.properties 파일이 필요하다.
     - `git` : git 정보, git.properties 파일이 필요하다.
 
+<br>
 - `애플리케이션 정보` 설정 방법
     
     ```yaml
@@ -3670,8 +3733,9 @@ management:
           }
         }
         ```
-        
-    - git 정보 추가 : `build.gradle` 에 다음 내용 추가
+
+<br>        
+- git 정보 추가 : `build.gradle` 에 다음 내용 추가
         
         ```groovy
         plugins {
@@ -3716,13 +3780,15 @@ management:
               mode: "full"
         ```
 
-    
+---
+        
 <br><br>
 
 ### d. 로거
 
 - `loggers` 엔드포인트를 사용하면 로깅과 관련된 정보를 확인하고, 또 실시간으로 변경할 수도 있다
 
+<br>
 - `loggers` 실습 예제 :
     
     ```java
@@ -3871,17 +3937,28 @@ management:
 }
 ```
 
+---
+        
 <br><br>
 
 
 ### e. HTTP 요청 응답 기록
 
 - HTTP 요청과 응답의 과거 기록을 확인하고 싶다면 `httpexchanges` 엔드포인트를 사용하면 된다.
+
+<br>
 - `HttpExchangeRepository` 인터페이스의 구현체를 빈으로 등록하면 `httpexchanges` 엔드포인트를 사용할 수 있다. (주의! 해당 빈을 등록하지 않으면 `httpexchanges` 엔드포인트가 활성화 되지 않는다)
+
+<br>
 - 스프링 부트는 기본으로 `InMemoryHttpExchangeRepository` 구현체를 제공한다.
+
+<br>
 - 해당 `구현체`는 `최대` `100개`의 `HTTP 요청`을 제공한다. `최대 요청`이 넘어가면 `과거 요청을 삭제`한다. `setCapacity()`로 최대 요청수를 `변경`할 수 있다.
+
+<br>
 - 중요** : 이 기능은 매우 `단순`하고 기능에 `제한이 많기` 때문에 개발 단계에서만 사용하고, 실제 `운영 서비스`에서는 `모니터링 툴`이나 `핀포인트`, `Zipkin` 같은 다른 기술을 사용하는 것이 좋다!
 
+<br><br>
 - HTTP 요청 응답 기록 예시 코드 :
     
     ```java
@@ -4285,7 +4362,10 @@ management:
     }
     
     ```
-    
+
+---
+        
+<br><br>
 
 ### f. 액츄에이터와 보안
 
@@ -4298,6 +4378,7 @@ management:
 management.server.port=9292
 ```
 
+<br><br>
 - 엔드포인트 경로 변경
 
 ```yaml
@@ -4317,7 +4398,7 @@ management:
 
 # 13. 마이크로미터, 프로메테우스, 그라파나
 
-## 1) 마이크로미터
+### 1) 마이크로미터
 
 - 이런 모니터링 툴이 작동하려면 시스템의 다양한 지표들을 각각의 모니터링 툴에 맞도록 만들어서 보내주어야 한다. (실제로는 라이브러리등을 통해서 자동화 되는 경우가 많다.)
 
@@ -4327,7 +4408,9 @@ management:
 - 기존에 측정했던 코드를 모두 변경한 툴에 맞도록 다시 변경해야 한다. 개발자 입장에서는 단순히 툴 하나를 변경했을 뿐인데, 측정하는 코드까지 모두 변경해야 하는 문제가 발생한다.
 - 이런 문제를 해결하는 것이 바로 `마이크로미터(Micrometer)`라는 `라이브러리`이다.
 
-- 마이크로미터 `추상화`
+<br><br>
+
+#### a. 마이크로미터 `추상화`
 
 ![Untitled](/assets/images/springbootstudy/Untitled19.png)
 
@@ -4340,31 +4423,33 @@ management:
 <br><br>
 
 
-- `마이크로미터`가 지원하는 `모니터링 툴`
-	- AppOptics
-	- Atlas
-	- CloudWatch
-	- Datadog
-	- Dynatrace
-	- Elastic
-	- Ganglia
-	- Graphite
-	- Humio
-	- Influx
-	- Instana
-	- JMX
-	- KairosDB
-	- New Relic
-	- Prometheus
-	- SignalFx
-	- Stackdriver
-	- StatsD
-	- Wavefront
+#### b. `마이크로미터`가 지원하는 `모니터링 툴`
+
+- AppOptics
+- Atlas
+- CloudWatch
+- Datadog
+- Dynatrace
+- Elastic
+- Ganglia
+- Graphite
+- Humio
+- Influx
+- Instana
+- JMX
+- KairosDB
+- New Relic
+- Prometheus
+- SignalFx
+- Stackdriver
+- StatsD
+- Wavefront
 
 <br><br>
 
-- 메트릭 확인하기
-    - `metrics 엔드포인트(`[http://localhost:8080/actuator/metrics](http://localhost:8080/actuator/metrics/jvm.memory.used)`)`
+#### c. 메트릭 확인하기
+
+- `metrics 엔드포인트(`[http://localhost:8080/actuator/metrics](http://localhost:8080/actuator/metrics/jvm.memory.used)`)`
         
         ```yaml
         {
@@ -4607,7 +4692,7 @@ management:
 <br><br>
 
 
-## 2) 프로메테우스
+### 2) 프로메테우스
 
 - 애플리케이션에서 발생한 메트릭을 그 순간만 확인하는 것이 아니라 과거 이력까지 함께 확인하려면 메트릭을 보관하는 DB가 필요하다. 이렇게 하려면 어디선가 메트릭을 지속해서 수집하고 `DB에 저장`해야 한다. 프로메테우스가 바로 이런 역할을 담당한다.
 
@@ -4621,6 +4706,7 @@ management:
     - 프로메테우스 폴더 내부의 `prometheus` 파일 실행
         - (MacOS에서는 시스템 환경설정 보안 및 개인 정보 보호로 이동해서 권한 해결하기)
 
+<br>
 - `프로메테우스 실행` ([http://localhost:8080/actuator/prometheus](http://localhost:8080/actuator/prometheus))
     
     ```yaml
@@ -5051,10 +5137,11 @@ management:
 
 - `연산자 쿼리와 함수`
 
+<br>
 - 다음과 같은 연산자를 지원한다.
-    - (덧셈)
-    - (빼기)
-    - (곱셈)
+    - +(덧셈)
+    - -(빼기)
+    - *(곱셈)
     - / (분할)
     - % (모듈로)
     - ^ (승수/지수)
@@ -5118,7 +5205,7 @@ management:
 <br><br>
 
 
-## 3) 그라파나
+### 3) 그라파나
 
 - 프로메테우스가 DB라고 하면, 이 DB에 있는 데이터를 불러서 사용자가 보기 편하게 보여주는 `대시보드`가 필요하다. 그라파나는 매우 유연하고, 데이터를 그래프로 보여주는 툴이다. 수 많은 그래프를 제공하고, 프로메테우스를 포함한 다양한 데이터소스를 지원한다.
 
@@ -5168,7 +5255,7 @@ management:
         - 앞서 만든 `hello dashboard` 선택
 
 <br><br>
-- `패널 만들기`
+- `패널 만들기 :`
     - `대시보드에 패널 만들기`
     - 대시보드가 큰 틀이라면 패널은 그 안에 `모듈`처럼 들어가는 `실제 그래프`를 보여주는 `컴포넌트`이다.
         - 중앙의 `Add visualization` 버튼 선택
@@ -5219,3 +5306,8 @@ management:
     3. New 버튼 선택 Import 선택
     4. 불러올 대시보드 숫자( 11378 )를 입력하고 Load 버튼 선택
     5. Prometheus 데이터소스를 선택하고 Import 버튼 선택
+    
+    
+    
+    
+    
