@@ -1,12 +1,10 @@
-	---
+---
 key: /2024/07/14/SpringBootStudy.html
 title: SpringBoot - SpringBoot Study
-tags: springboot
+tags: springboot dispatcher servlet container tomcat AutoConfiguration ImportSelector Profile Environment Value ConfigurationProperties Prometheus Grafana
 --- 
 
-# SpringBoot : Study
-
-# 1. 스프링부트 공부해야하는 이유
+# 1. 스프링부트 공부하는 이유
 
 - 내 생각 : 스프링 개념은 처음 공부하거나 학원에서 많이 자세히 배우는데 스프링부트 관련 개념은 단순히 개발 환경만 편히 제공한다는 것만 배우고 제대로 배우지 않는다고 생각해서 이전에 해당 강의를 구매함.
 
@@ -24,7 +22,7 @@ tags: springboot
 <br><br>
 
 
-# **2. 스프링 부트 - 핵심 기능 5가지**
+# **2. 스프링 부트 - 기능 5가지**
 
 - 1) WAS**
     - Tomcat 같은 웹 서버를 내장해서 별도의 웹 서버를 설치하지 않아도 됨
@@ -778,7 +776,7 @@ public abstract class AotDetector {
 
 // 실제 소스코드
 	@Override
-	public **WebServer** getWebServer(ServletContextInitializer... initializers) {
+	public WebServer getWebServer(ServletContextInitializer... initializers) {
 		if (this.disableMBeanRegistry) {
 			Registry.disableRegistry();
 		}
@@ -787,7 +785,7 @@ public abstract class AotDetector {
 		Tomcat tomcat = new Tomcat();
 		File baseDir = (this.baseDirectory != null) ? this.baseDirectory : createTempDir("tomcat");
 		tomcat.setBaseDir(baseDir.getAbsolutePath());
-		for (**LifecycleListener** listener : this.**serverLifecycleListeners**) {
+		for (LifecycleListener listener : this.serverLifecycleListeners**) {
 			tomcat.getServer().addLifecycleListener(listener);
 		}
 		
@@ -795,7 +793,7 @@ public abstract class AotDetector {
 		Connector connector = new Connector(this.protocol);
 		connector.setThrowOnFailure(true);
 		tomcat.getService().addConnector(connector);
-		**customizeConnector**(connector);
+		customizeConnector(connector);
 		tomcat.setConnector(connector);
 		tomcat.getHost().setAutoDeploy(false);
 		configureEngine(tomcat.getEngine());
@@ -935,45 +933,46 @@ public class MyApplication {
 
 ```
 
-<br>
+<br><br>
+
 - `Gemini`에게 추가 질문 : `customizeConnector 메서드를 이용해서 스프링부트 프로젝트가 On되는 부팅 시간이나 서버 연결 상태를 개선할 수 있을까?`
 
-<br>
+<br><br>
+
 - **답변 : `customizeConnector` 메서드를 이용한 부팅 시간 및 서버 연결 상태 개선 가능성 분석**
     - `customizeConnector` 메서드는 Tomcat 서버 커넥터를 사용자 정의하는 데 활용되는 강력한 도구이지만, **직접적으로 부팅 시간이나 서버 연결 상태를 개선하는 데 사용하기에는 한계가 있습니다.**
+	- 1. 부팅 시간 개선:
+		- **`제한적인 영향`:** `customizeConnector` 메서드는 Tomcat 서버 커넥터 설정에만 영향을 미치므로, **스프링 프레임워크 초기화, IoC 컨테이너 구성, 애플리케이션 로딩 등 다른 부팅 과정에 직접적인 영향을 미치지 못합니다.**
+		- **`잠재적인 이점`:** 커넥터 설정을 최적화하여 네트워킹 지연 시간을 줄이고 연결 수립 속도를 향상시킬 수는 있지만, **부팅 시간 전체에서 차지하는 비중은 상대적으로 작습니다.**
+		- **`주의 사항`:** 잘못된 설정은 오히려 부팅 시간을 증가시킬 수 있으므로 주의가 필요합니다.    
+	- 2. 서버 연결 상태 개선: 
+		- **효과적인 활용:** `customizeConnector` 메서드를 통해 다음과 같은 설정을 변경하여 서버 연결 상태를 개선할 수 있습니다.
+		- **`최대 연결 수`:** 예상 트래픽량에 맞게 최적화하여 연결 부족으로 인한 오류를 방지합니다.
+		- **`연결 시간 제한`:** 비활성 연결을 신속하게 종료하여 리소스 낭비를 줄입니다.
+		- **`KeepAlive 설정`:** 연결 유지 시간을 조정하여 불필요한 연결 종료를 방지합니다.
+		- **`SSL 설정`:** 강력한 암호화 알고리즘 및 인증서를 사용하여 보안을 강화합니다.
+		- **데이터 기반 최적화:** 서버 로그 분석, 성능 모니터링 도구 활용을 통해 실제 트래픽 패턴을 파악하고 설정을 최적화하는 것이 중요합니다.
+		- **주의 사항:** 설정 변경 시에는 서버 성능에 미치는 영향을 면밀히 검토해야 합니다.
+
+<br><br>
+
+- **결론: **
+	- `customizeConnector` 메서드는 Tomcat 서버 커넥터 설정을 최적화하여 **부팅 시간을 다소 단축하고 서버 연결 상태를 개선하는 데 도움이 될 수 있습니다.** 하지만, **직접적인 효과는 제한적이며, 설정 변경 시 주의가 필요합니다.**
     
-    **1. 부팅 시간 개선:**
+	- 부팅 시간 및 서버 연결 상태 개선을 위해서는 `customizeConnector` 메서드 외에도 다양한 최적화 전략을 종합적으로 고려해야 합니다.
+
+<br>        
+- 1. **추가적으로 고려할 사항:**
+	- **스프링 프레임워크 설정 최적화:** 스프링 설정 파일 (application.properties, application.yml) 에서 비활성화 가능한 기능들을 비활성화하고, 메모리 할당, 스레드 풀 설정 등을 최적화합니다.
+	- **데이터베이스 최적화:** 데이터베이스 쿼리 최적화, 인덱스 활용, 연결 풀 설정 등을 통해 데이터베이스 성능을 향상시킵니다.
+	- **캐싱 활용:** 자주 사용되는 데이터를 캐싱하여 데이터베이스 쿼리 부하를 줄입니다.
+	- **하드웨어 업그레이드:** 필요에 따라 CPU, 메모리, 스토리지 등 하드웨어를 업그레이드하여 시스템 성능을 향상시킵니다.
     
-    - **`제한적인 영향`:** `customizeConnector` 메서드는 Tomcat 서버 커넥터 설정에만 영향을 미치므로, **스프링 프레임워크 초기화, IoC 컨테이너 구성, 애플리케이션 로딩 등 다른 부팅 과정에 직접적인 영향을 미치지 못합니다.**
-    - **`잠재적인 이점`:** 커넥터 설정을 최적화하여 네트워킹 지연 시간을 줄이고 연결 수립 속도를 향상시킬 수는 있지만, **부팅 시간 전체에서 차지하는 비중은 상대적으로 작습니다.**
-    - **`주의 사항`:** 잘못된 설정은 오히려 부팅 시간을 증가시킬 수 있으므로 주의가 필요합니다.
-    
-    **2. 서버 연결 상태 개선:**
-    
-    - **효과적인 활용:** `customizeConnector` 메서드를 통해 다음과 같은 설정을 변경하여 서버 연결 상태를 개선할 수 있습니다.
-        - **`최대 연결 수`:** 예상 트래픽량에 맞게 최적화하여 연결 부족으로 인한 오류를 방지합니다.
-        - **`연결 시간 제한`:** 비활성 연결을 신속하게 종료하여 리소스 낭비를 줄입니다.
-        - **`KeepAlive 설정`:** 연결 유지 시간을 조정하여 불필요한 연결 종료를 방지합니다.
-        - **`SSL 설정`:** 강력한 암호화 알고리즘 및 인증서를 사용하여 보안을 강화합니다.
-    - **데이터 기반 최적화:** 서버 로그 분석, 성능 모니터링 도구 활용을 통해 실제 트래픽 패턴을 파악하고 설정을 최적화하는 것이 중요합니다.
-    - **주의 사항:** 설정 변경 시에는 서버 성능에 미치는 영향을 면밀히 검토해야 합니다.
-    
-    1. **결론:**
-    
-    `customizeConnector` 메서드는 Tomcat 서버 커넥터 설정을 최적화하여 **부팅 시간을 다소 단축하고 서버 연결 상태를 개선하는 데 도움이 될 수 있습니다.** 하지만, **직접적인 효과는 제한적이며, 설정 변경 시 주의가 필요합니다.**
-    
-    부팅 시간 및 서버 연결 상태 개선을 위해서는 `customizeConnector` 메서드 외에도 다양한 최적화 전략을 종합적으로 고려해야 합니다.
-    
-    1. **추가적으로 고려할 사항:**
-    - **스프링 프레임워크 설정 최적화:** 스프링 설정 파일 (application.properties, application.yml) 에서 비활성화 가능한 기능들을 비활성화하고, 메모리 할당, 스레드 풀 설정 등을 최적화합니다.
-    - **데이터베이스 최적화:** 데이터베이스 쿼리 최적화, 인덱스 활용, 연결 풀 설정 등을 통해 데이터베이스 성능을 향상시킵니다.
-    - **캐싱 활용:** 자주 사용되는 데이터를 캐싱하여 데이터베이스 쿼리 부하를 줄입니다.
-    - **하드웨어 업그레이드:** 필요에 따라 CPU, 메모리, 스토리지 등 하드웨어를 업그레이드하여 시스템 성능을 향상시킵니다.
-    
-    1. **참고 자료:**
-    - Spring Boot 공식 문서: [https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/](https://docs.spring.io/spring-boot/docs/current/reference/htm%3C/0%3Elsingle/)
-    - Tomcat 공식 문서: [https://tomcat.apache.org/tomcat-9.0-doc/index.html](https://tomcat.apache.org/tomcat-9.0-doc/index.html)
-    - Spring Boot 성능 최적화 가이드: [https://medium.com/@oril_/maximizing-performance-in-spring-boot-essential-strategies-for-developers-ae9841dc6a67?responsesOpen=true&sortBy=REVERSE_CHRON](https://medium.com/@oril_/maximizing-performance-in-spring-boot-essential-strategies-for-developers-ae9841dc6a67?responsesOpen=true&sortBy=REVERSE_CHRON)
+<br>    
+- 2. **참고 자료:**
+	- Spring Boot 공식 문서: [https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/](https://docs.spring.io/spring-boot/docs/current/reference/htm%3C/0%3Elsingle/)
+	- Tomcat 공식 문서: [https://tomcat.apache.org/tomcat-9.0-doc/index.html](https://tomcat.apache.org/tomcat-9.0-doc/index.html)
+	- Spring Boot 성능 최적화 가이드: [https://medium.com/@oril_/maximizing-performance-in-spring-boot-essential-strategies-for-developers-ae9841dc6a67?responsesOpen=true&sortBy=REVERSE_CHRON](https://medium.com/@oril_/maximizing-performance-in-spring-boot-essential-strategies-for-developers-ae9841dc6a67?responsesOpen=true&sortBy=REVERSE_CHRON)
 
 
 ---
@@ -981,7 +980,7 @@ public class MyApplication {
 <br><br>
 
 
-# 9. 자동구성(`Auto Configuration`)
+# 9. Auto Configuration
 
 ### 1) 스프링 부트의 자동 구성
 
@@ -1835,7 +1834,7 @@ public @interface AutoConfiguration {
 
 # 10. 외부설정과 프로필 1
 
-### 1) `외부 설정` 개념 :
+### 1) `외부 설정` 개념
 
 - `하나의 애플리케이션`을 `여러 다른 환경에서 사용`해야 할 때, 해당 개념이 사용된다.
 - 예를 들어, 애플리케이션이 개발DB에 접근하려면 [`dev.db.com`](http://dev.db.com/) 이라는 url 정보가 필요한데, 운영DB에 접근하려면 [`prod.db.com`](http://prod.db.com/) 이라는 서로 다른 url을 사용해야 한다.
@@ -1845,7 +1844,7 @@ public @interface AutoConfiguration {
 <br><br>
 
 
-### 2) 외부 설정 시 `문제점` :
+### 2) 외부 설정 시 `문제점`
 
 - 환경에 따라 `변하는 설정값`을 애플리케이션 `내부에 포함`하는 경우 :
     - 환경에 따라서 `빌드를 여러번` 해야 한다!
@@ -1858,7 +1857,7 @@ public @interface AutoConfiguration {
 
     
 
-### 3) 외부 설정의 해당 문제점의 `해결 방법` :
+### 3) 외부 설정의 해당 문제점의 `해결 방법`
 
 - `실행 시점`에 `외부 설정값을 주입!`
     - 배포 환경과 `무관`하게 `하나의 빌드 결과물`을 만든다. 여기서는 `app.jar` 를 빌드한다. 이 `안에는 설정값을 두지 않는다.`
@@ -1900,30 +1899,34 @@ public @interface AutoConfiguration {
 
   
 #### a. 외부 설정 - `OS 환경 변수`
-    - 명령어 :
-        - 윈도우 OS: `set`
-        - MAC, 리눅스 OS: `printenv`
-        
-        ![Untitled](/assets/images/springbootstudy/Untitled12.png)
-        
-    - 참고 코드 :
-        
-        ```java
-        package hello.external;
-        
-        import lombok.extern.slf4j.Slf4j;
-        import java.util.Map;
-        
-        @Slf4j
-        public class OsEnv {
-        	public static void main(String[] args) {
-        		Map<String, String> envMap = System.getenv();
-        		for (String key : envMap.keySet()) {
-        			log.info("env {}={}", key, System.getenv(key));
-        		}
-        	}
-        }
-        ```
+
+- 명령어 :
+	- 윈도우 OS: `set`
+	- MAC, 리눅스 OS: `printenv`
+    
+![Untitled](/assets/images/springbootstudy/Untitled12.png)
+
+<br>
+    
+- 참고 코드 :
+    
+```java
+package hello.external;
+
+import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+
+@Slf4j
+public class OsEnv {
+	public static void main(String[] args) {
+		Map<String, String> envMap = System.getenv();
+		for (String key : envMap.keySet()) {
+			log.info("env {}={}", key, System.getenv(key));
+		}
+	}
+}
+```
+
 ---
 
 <br><br>
