@@ -1,3 +1,4 @@
+
 ---
 key: /2024/01/14/Project-Etirovaf.html
 title: Project - Etirovaf
@@ -127,6 +128,204 @@ ENTRYPOINT ["npm", "run", "dev"]
 
 <br>	
 - 일반적인 리눅스 내의 username(group name도 마찬가지)은 커널의 한 부분이 아니라 외부 툴에 의해서 관리되고 있기 때문이다(/etc/passwd, LDAP, Kerberos 등등). 그래서, 다른 컨테이너 내에서 같은 username을 가질 수는 있어도 같은 uid/gid에 대해서 다른 권한을 가질 수는 없다.
+
+
+---
+
+<br><br>
+
+### 3) Github Actions를 이용한 CI/CD 구축 에러 모음 
+
+#### a. SpringBoot 프로젝트 Github Actions으로 빌드 시, Gradlew 파일 없어서 에러 발생
+
+- 문제 상황 : gradle not found 에러 발생
+
+<br>
+- 해결 방법 : 로컬 프로젝트 root 경로에서 직접 `gradle` 설치 후 `grade Wrapper` 명령어로 gradle 파일 생성하기 
+	- 이후에 git commit 후 원격인 github에 gradlew 파일 push하고 Github Actions로 빌드 다시 진행!
+
+---
+
+<br><br>
+
+#### b. EC2에서 docker, docker-compose 설치 방법 :
+
+- EC2 내부에서 아래 명령어 진행!
+
+<br>
+- 1) sudo -s : 관리자 권한으로 실행!
+
+<br>
+- 2) sudo yum update -y : 시스템 패키지 목록을 최신 상태로 업데이트합니다.
+
+<br>
+- 3) sudo yum install docker -y : Docker CE(Community Edition)를 설치합니다.
+
+<br>
+- 4) sudo systemctl start docker,  sudo systemctl enable docker : Docker 서비스를 시작하고, 시스템 부팅 시 자동으로 시작하도록 설정합니다.
+
+<br>
+- 5) sudo usermod -aG docker ec2-user : sudo 없이 Docker 명령어를 사용하려면 현재 사용자를 docker 그룹에 추가합니다.((Docker 그룹에 사용자 추가 (선택 사항),  EC2 사용자 이름은 실제 환경에 맞게 수정해야 합니다.))
+
+<br>
+- 6) newgrp docker: 변경 사항을 적용하기 위해 로그아웃 후 다시 로그인하거나 다음 명령어를 실행합니다.
+
+<br>
+- 7) docker --version : docker 버전을 확인하여 설치가 정상적으로 완료되었는지 확인합니다.
+
+<br>
+- 8) sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose : Docker Compose 설치: 여러 컨테이너를 함께 관리하는 Docker Compose를 설치할 수 있습니다.
+
+<br>
+- 9) sudo chmod +x /usr/local/bin/docker-compose : Docker Compose 설치: 여러 컨테이너를 함께 관리하는 Docker Compose를 설치할 수 있습니다.
+
+<br>
+- 10) docker login : Docker 저장소 설정: Docker Hub 또는 다른 레지스트리에 로그인하여 이미지를 pull/push 할 수 있도록 설정합니다.
+
+---
+
+<br><br>
+
+#### c. EC2에서 libcrypt 에러 발생
+
+- EC2에서 아마존 리눅스 2023 인스턴스 사용 시, docker-compose.yml 실행에서 `[31847] Error loading Python lib '/tmp/_MEIMMZKnV/libpython3.7m.so.1.0': dlopen: libcrypt.so.1: cannot open shared object file: No such file or directory` 에러가 발생
+	- Amazon Linux 2023에서 libcrypt.so.1 관련 에러가 발생하는 경우, 라이브러리를 설치하여 해결할 수 있다. Amazon Linux 2023는 최신 버전을 사용하는데, 이는 이전 버전과 호환되지 않을 수 있다. 이러한 호환성 문제를 해결하기 위한 라이브러리이다. `libxcrypt-compatglibclibcrypt libxcrypt-compat`
+
+<br>
+- 해결 방법 1. : EC2 인스턴스에 SSH로 접속하여 다음 명령어를 실행 -> `sudo yum install libxcrypt-compat -y` 
+
+<br>
+- 해결 방법 2 : libxcrypt-compat설치 후 Docker Compose 명령어를 다시 실행하여 문제가 해결되었는지 확인합니다.
+
+
+---
+
+<br><br>
+
+#### d. Github Actions를 통해 EC2로 .env 파일 전송 시, 민감 정보인 Database URL 못 읽는 현상 발생!
+
+- 문제 과정 1 : appplication.yml에서 `SPRING_DATABASE_URL`이 EC2에 포함되지 않아서 .env 파일을 Github Actions에서 workflow에서 직접 생성하였다. 
+	- 하지만, Github Secrets key로 전송하려고 하는데 `=`나 `&` 등의 특수문자는 Github Secrets key에서 저장되지 않아서 base64로 인코딩 후 전송하려고 했다.
+
+<br>
+- 문제 과정 2 : 깃허브 시크릿 키 패턴 때문에 SPRING_DATABASE_URL을 아래와 같이 변경 해야함! 하지만, 이렇게 변경하여 EC2로 .env 파일을 전송하면, 이번엔 docker-compose에서 실행 시, SPRING_DATABASE_URL를 읽지 못해버린다. 
+	- ‘jdbc:oracle://test:3301/test2%3FuseSSL%3Dfalse%26allowPublicKeyRetrieval%3Dtrue'
+
+<br>
+- 최종 해결 방법 : Github에서 여러 개의 시크릿 키로 분리:
+	- 긴 문자열을 여러 개의 시크릿 키로 분리하여 저장하는 방법도 있습니다. 예를 들어, 다음과 같이 분리할 수 있다.
+	- `SPRING_DATASOURCE_PROTOCOL` : jdbc:oracle
+	- `SPRING_DATASOURCE_HOST` : test
+	- `SPRING_DATASOURCE_PORT`: 3301
+	- `SPRING_DATASOURCE_DATABASE` : test2
+	- `SPRING_DATASOURCE_OPTIONS` : useSSL=false&allowPublicKeyRetrieval=true
+
+
+---
+
+<br><br>
+
+#### d. EC2에서 docker-compose로 SpringBoot 프로젝트를 실행 시, yml 못 읽는 에러 발생!!
+
+- 문제 발생 : appplication.yml 를 못 읽어서 스프링에서 톰캣 서버가 켜지지 않는 문제가 발생했다. 
+
+<br>
+- 해결 방법 : github actions의 yml 설정 파일에 appplication.yml에 들어갈 값을 민감 정보이기에 base64로 인코딩 후  github의 secrets key로 설정!
+	- 이렇게 `appplication.yml`파일을 EC2에 직접 주입해야 된다.
+
+
+---
+
+<br><br>
+
+#### e. EC2에서 메모리 이슈 
+- 문제이슈 및 해결방법 : 컨테이너(서버)를 5개 돌리려니까 메모리를 많이 사용해야하므로 속도가 느려져서 Ec2가 빙글빙글 무한히 대기하는 이슈로 먹통되는 문제가 발생!!
+	- 이러한 메모리 이슈로 EC2 인스턴스 생성 시, 스펙 증가시키기!!
+
+
+---
+
+<br><br>
+
+#### e. Nginx 이슈
+
+- 이게 제일 어렵다.. 에러 해결 방법 찾는데 2주 넘게 걸림!!
+
+<br>
+- 문제점1 : default.conf를 읽지 못하는 현상 발생 
+    - 문제 상황 : Nginx 설정 파일이 경로가 겹쳐서 기존에는 nginx.conf를 Dockerfile에서 추가해주고 docker-compose.yml 컨테이너의 볼륨에서도 추가해줌 
+    - 해결 방법 :  docker-compose.yml 컨테이너의 볼륨에서 제거해버림!!
+        - A) nginx.conf라는 파일은 `/nginx/nginx.conf`라는 경로가 중요!! : /nginx/nginx.conf`가 nginx의 기본 설정 파일 경로이다. `COPY ./conf.d/nginx.conf /etc/nginx/nginx.conf`
+        - B) default.conf라는 파일은 `/nginx/conf.d/default.conf`가 nginx의 기본 설정 파일 경로이다.
+      
+
+
+<br><br>
+
+- a. GitHub Actions 및 EC2 배포 시 고려 사항
+	- Dockerfile 내에 복사: GitHub Actions에서 빌드할 때, nginx.conf 파일을 Docker 이미지 내부로 복사하는 방법을 사용하는 것이 가장 깔끔한 방법이다. 이 경우, 배포 시 로컬 경로에 의존하지 않게 된다. 예를 들어, Dockerfile에서 nginx.conf 파일을 복사하도록 설정할 수 있다:
+
+<br>
+- `Dockerfile` 실습 코드 : 
+
+```dockerfile
+FROM nginx
+
+# Nginx 설정 파일을 Docker 이미지 내부로 복사
+COPY ./nginx/conf.d/nginx.conf /etc/nginx/nginx.conf
+
+# 앱 파일 복사 및 기타 설정
+COPY --from=builder /app/dist /usr/share/nginx/html
+```
+
+
+- 이렇게 설정하면, GitHub Actions에서 Docker 이미지를 빌드할 때 nginx.conf 파일이 자동으로 포함되며, EC2 서버에서 실행할 때도 해당 파일이 자동으로 컨테이너에 포함됩니다.
+
+
+<br><br>
+
+- b. Docker Compose 설정 수정
+	- 만약 Docker Compose 파일에서 volumes를 사용하여 로컬 파일을 마운트하는 대신, Dockerfile 내에서 복사하는 방법을 선택한다면, volumes 항목을 제거하거나 다른 파일을 마운트하는 데 사용할 수 있다.
+
+<br>
+- `yml` 실습 코드 :
+
+```yml
+version: '3'
+services:
+  nginx:
+    image: your-nginx-image
+    ports:
+      - "80:80"
+    # 로컬 파일을 마운트하는 대신, Dockerfile에서 복사한 파일을 사용
+    # volumes:
+    #   - ./nginx/conf.d/nginx.conf:/etc/nginx/nginx.conf
+```
+
+<br><br>
+
+- c. 요약 : 
+
+<br>
+- 1. Dockerfile 내에서 파일 복사: nginx.conf 파일을 Dockerfile 내에서 복사하도록 설정하면, GitHub Actions를 통해 빌드할 때 이 파일이 자동으로 포함된다.
+
+<br>
+- 2. volumes 사용 최소화: 로컬 파일 시스템에 의존하는 volumes 사용을 최소화하는 것이 배포 환경에서 더 안정적이다.
+
+<br>
+- 3. 상대경로 사용: 만약 꼭 volumes를 사용해야 한다면, 가능한 한 상대경로를 사용하고, GitHub Actions와 EC2 환경에서 동일한 경로 구조를 유지하도록 한다.
+
+<br>
+- 이렇게 하면, GitHub Actions에서 빌드하고 EC2로 배포할 때 경로 문제로 인한 오류를 방지할 수 있다.
+
+
+
+
+
+- 문제점2 : server_name의 url이 너무 길어서
+    * `server_names_hash_bucket_size 128;` 추가해주기!!
+
+
 
 ---
 

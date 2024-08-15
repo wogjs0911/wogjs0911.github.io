@@ -2399,22 +2399,22 @@ public class MyService {
 
 ##### g) `Vault` 외에도 정보를 안전하게 저장하고 관리할 수 있는 다양한 서비스들 :
     
-- 1. `AWS` Secrets Manager
+- `AWS` Secrets Manager
 
 <br>
-- 2. `Azure` Key Vault
+- `Azure` Key Vault
 
 <br>
-- 3. `Google` Cloud Secret Manager
+- `Google` Cloud Secret Manager
 
 <br>
-- 4. `Hashicorp` Consul
+- `Hashicorp` Consul
 
 <br>
-- 5. CyberArk Conjur
+- CyberArk Conjur
 
 <br>
-- 6. Doppler
+- Doppler
     
 
 ---
