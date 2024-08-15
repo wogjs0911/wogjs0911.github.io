@@ -1,5 +1,3 @@
-
-
 ---
 key: /2024/01/14/Project-Etirovaf.html
 title: Project - Etirovaf
