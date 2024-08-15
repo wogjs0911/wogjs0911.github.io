@@ -278,13 +278,16 @@ nginx       | /docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-
 - 문제 상황 : Nginx 설정 파일이 경로가 겹쳐서 기존에는 nginx.conf를 Dockerfile에서 추가해주고 docker-compose.yml 컨테이너의 볼륨에서도 추가해줌 
 
 <br>
-- 해결 방법 :  docker-compose.yml 컨테이너의 볼륨에서 제거해버림!!
+- 해결 방법 요약 :  docker-compose.yml 컨테이너의 볼륨에서 제거해버림!!
     - A) nginx.conf라는 파일은 `/nginx/nginx.conf`라는 경로가 중요!! : /nginx/nginx.conf`가 nginx의 기본 설정 파일 경로이다. `COPY ./conf.d/nginx.conf /etc/nginx/nginx.conf`
     - B) default.conf라는 파일은 `/nginx/conf.d/default.conf`가 nginx의 기본 설정 파일 경로이다.	
       
 
 
 <br><br>
+##### 해결 방법에 관한 상세 과정:
+
+<br>
 
 - 1) GitHub Actions 및 EC2 배포 시 고려 사항
 	- Dockerfile 내에 복사: GitHub Actions에서 빌드할 때, nginx.conf 파일을 Docker 이미지 내부로 복사하는 방법을 사용하는 것이 가장 깔끔한 방법이다. 이 경우, 배포 시 로컬 경로에 의존하지 않게 된다. 예를 들어, Dockerfile에서 nginx.conf 파일을 복사하도록 설정할 수 있다:
@@ -706,7 +709,7 @@ export default defineConfig({
 
 ### 3) docker compose 사용 시, React 프로젝트에서 새로운 라이브러리 추가할 때, 에러 발생
 
-- docker compose up --build로 docker image를 다시 빌드해줘야 한다!! 볼륨에 빌드된 파일이 포함되지 않아서 다시 빌드해줘야 한다!!
+- `docker compose up --build`로 `docker image`를 다시 빌드해줘야 한다!! 볼륨에 빌드된 파일이 포함되지 않아서 다시 빌드해줘야 한다!!
 
 
 ---
@@ -717,21 +720,21 @@ export default defineConfig({
 
 <br>
 
-#### a. 새로운 프로젝트 시작 시,!!
+#### a. 새로운 React + Typescript 프로젝트 생성 시,
 
-- Vite + React 버전 : 5.2.7 버전으로 다운받기
+- Vite + React 버전 : `5.2.7` 버전으로 직접 버전 설정해서 다운받기
 
 <br>
 
 #### b. tsconfig.json에서 paths 설정을 위해 ‘@types’로 별칭을 두면 기본 ‘node_modules’ 폴더에 ‘@types/package/~~’ 를 찾기 때문에
 
-- ‘myTypes’로 별칭을 두어 paths를 설정하기!
+- `myTypes`로 별칭을 두어 paths를 설정하기!
 
 <br>
 
 #### c. TS + React에서 Map 사용시, iterator시, map의 초기 객체가 모든 속성에 대한 Type을 다 갖고 있어야 한다.
 
-- 그래서, css 같은 경우는 하위 컴포넌트에서 전부 정해져야 한다. 부모 쪽에는 Css 속성을 컨트롤하는 부분이 없어야 한다. 중요하다!
+- 그래서, css 같은 경우는 하위 컴포넌트에서 전부 정해져야 한다. 부모 쪽에는 css 속성을 컨트롤하는 부분이 없어야 한다. 중요하다!
 
 
 <br>
@@ -933,24 +936,29 @@ public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws
 
 #### 2) JWT 토큰 인증 시, 401 에러 발생 
 
-- 기존 시큐리티 로직에서 JWT 토큰을 시큐리티 인증 이전에 설정하게 했는데 회원가입 시에는 JWT 인증이 필요 없기 때문에 제외시켜야 했다.
+- 문제 발생 : 
+	- 기존 시큐리티 로직에서 JWT 토큰을 시큐리티 인증 이전에 설정하게 했는데 회원가입 시에는 JWT 인증이 필요 없기 때문에 제외시켜야 했다.
 	- 한 블로그에서는 체인방식의 시큐리티 설정은 순서가 중요하다고 했기 때문에 기존 메서드 방식에서 체인방식으로 변경하고 시큐리티 순서 전체를 변경하고자 추가 설정하고자 함
 
 <br>    
-- 해봤던 방법 : 시큐리티 설정 파일을 메서드방식에서 체이닝방식으로 변경해봤지만 실패함!!
+- 문제 해결을 위해 해봤던 방법 : 
+	- 시큐리티 설정 파일을 메서드방식에서 체이닝방식으로 변경해봤지만 실패함!!
 
 <br>
-- 직접적으로 JWT 인증에서는 해당 설정 순서가 먹히지 않는 모습을 확인되어서 기존 회원가입 로직에서도 토큰 인증이 동작함!!
+- 여전히 같은 문제 발생 : 
+	- 직접적으로 JWT 인증에서는 해당 설정 순서가 먹히지 않는 모습을 확인되어서 기존 회원가입 로직에서도 토큰 인증이 동작함!!
 
 <br>
-- 다른 방법이 있는지 찾아봄 해당 순서 말고도 JWTTokenFilter 클래스에서 shouldNotFilter 메서드를 Override해서 이용함!!
-    - 해당 방식을 통해 HTTP 응답에서 200 OK 응답으로 해당 문제가 해결되었다! 완벽하지 않는 방식일 수 있지만 일단 해결되어 회원가입에 성공했다!
+- 해결 방법* : 
+	- 다른 방법이 있는지 찾아봄 해당 순서 말고도 JWTTokenFilter 클래스에서 shouldNotFilter 메서드를 Override해서 이용함!!
+	- 해당 방식을 통해 HTTP 응답에서 200 OK 응답으로 해당 문제가 해결되었다! 완벽하지 않는 방식일 수 있지만 일단 해결되어 회원가입에 성공했다!
 
 <br>
-- 하지만, allowCredentials과 allowedOrigins가 동시에 쓸 수 없다는 에러가 발생했다. 
+- 또 다른 문제 발생 : 
+	- 하지만, allowCredentials과 allowedOrigins가 동시에 쓸 수 없다는 에러가 발생했다. 
 
 <br>
-- 초기 수정 로직 : 실패함 
+- 초기 수정 로직 : 실패함!!
 	- requestMatchers.permitAll()는 addFilterBefore에 제대로 필터링되어 동작하지 않음!!
 
 ```java
@@ -1074,25 +1082,28 @@ public class WebConfig implements WebMvcConfigurer {
 #### 4) Redis 접근 불가 : 
 
 - 기존 로직이 저장 후 레디스에도 토큰 저장을 캐싱하는데 레디스에 접근 불가되어버린다.
-	- 로컬에서는 localhost로 적어도 되지만 배포되는 환경이거나 docker-compose 환경에서는 applicaiton.yml에서 컨테이너 이름이나 이미지 이름으로 설정해줘야한다.
-	- 해결법(docker-compose.yml): ‘localhost’ -> ‘redis’
+	- 로컬에서는 localhost로 적어도 되지만 배포되는 환경이거나 docker-compose 환경에서는 applicaiton.yml에서 컨테이너 이름이나 이미지 이름으로 설정해줘야 한다.
+	- 해결법(docker-compose.yml): `localhost` -> `redis`
 
 
-```application.yml
-Spring: 
+```yml
+spring: 
   data:
     redis:
       host: redis # 로컬에서 테스트 할 때는 localhost로 사용(redis)
       port: 6379
-
 ```
 
 ---
 
 <br><br>
 
-#### 5) 회원가입, 로그인 시, 인가 / 인증 방식!!(FE vs BE)
+#### 5) 회원가입, 로그인 시, 인가 / 인증 방식 정리
 
+- Backend, Frontend 입장에서 정리!!
+
+
+<br>
 - a. Backend :
 	- a) 회원가입과 로그인에서는 Access 토큰을 필터 처리하는 부분 제거함!
 	    - 로그인 이후에 해당 토큰을 가지고 서비스에 관한 API 요청 시, 접근 권한 체크하면 된다!
