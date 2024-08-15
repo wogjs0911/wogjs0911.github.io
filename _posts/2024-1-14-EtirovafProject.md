@@ -378,6 +378,36 @@ services:
 
 <br><br>
 
+#### i. Reference
+
+<br>
+- 참고 1 : [docker-compose + github actions를 이용한 CICD : 참고 1-1](https://velog.io/@jskim2x/Docker-Spring-Boot-Nginx-React-EC2-%EB%B0%B0%ED%8F%AC-feat.SSLLets-encrypt-13f53vg6)
+	- [docker-compose + github actions를 이용한 CICD 참고 사이트 1-2](https://velog.io/@jskim2x/Docker-Spring-Boot-Nginx-React-EC2-%EB%B0%B0%ED%8F%AC-feat.SSLLets-encrypt-3)
+
+<br>
+- 참고 2: [docker-compose + github actions를 이용한 CICD : 참고 2](https://velog.io/@kmw10693/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-SpringBoot-React-%EC%9B%B9-%EC%84%9C%EB%B9%84%EC%8A%A4-DockerNginx-SSLReverse-Proxy-Redis%EB%A1%9C-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
+
+
+<br>
+- 참고 3 : [docker-compose + github actions를 이용한 CICD : 참고 3](https://stackoverflow.com/questions/71357957/unable-to-map-docker-port-from-vite-app-to-local)
+
+
+<br>
+- 참고 4 : [docker-compose + github actions를 이용한 CICD : 참고 4](https://velog.io/@bjo6300/Springboot-docker-compose-github-actions%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%B4-EC2%EC%97%90-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
+
+
+<br>
+- 참고 5 : [github actions workflow 파일 리팩토링 : 참고](https://velog.io/@joon6093/%EA%B9%83%EC%95%A1%EC%85%98-CI-%EA%B5%AC%EC%B6%95)
+
+
+<br>
+- 참고 6 : [nginx 개념 정리 참고](https://hyeo-noo.tistory.com/205)
+
+
+---
+
+<br><br>
+
 ### 4) nginx 설정 파일 로컬용과 EC2용 비교
 
 #### a. local
