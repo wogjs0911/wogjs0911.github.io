@@ -1,10 +1,10 @@
 ---
 key: /2026/07/28/Enterprise-Graph-RAG-Architecture-Guide.html
-title: GraphRAG 및 지식 그래프 실무 구축 엔터프라이즈 아키텍처 가이드
+title: GraphRAG 및 지식 그래프 실무 엔터프라이즈 아키텍처 설계
 tags: GraphRAG Neo4j Enterprise Architecture LangChain Python AWS
 ---
 
-# GraphRAG 및 지식 그래프 실무 구축 엔터프라이즈 아키텍처 가이드
+# GraphRAG 및 지식 그래프 실무 엔터프라이즈 아키텍처 설계
 
 ## 목차
 1. [LLM 지식 그래프 추출 및 관계 생성 원리](#1-llm-지식-그래프-추출-및-관계-생성-원리)

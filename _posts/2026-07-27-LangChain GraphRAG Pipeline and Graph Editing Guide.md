@@ -1,10 +1,10 @@
 ---
 key: /2026/07/27/LangChain-GraphRAG-Pipeline-and-Graph-Editing-Guide.html
-title: LangChain GraphRAG 파이프라인 구축 및 지식 그래프 편집
+title: LangChain GraphRAG 파이프라인 구축 및 지식 그래프 관리
 tags: LangChain Neo4j GraphRAG Pydantic-AI Python Cypher KnowledgeGraph Groq OpenAI
 ---
 
-# LangChain GraphRAG 파이프라인 구축 및 지식 그래프 편집
+# LangChain GraphRAG 파이프라인 구축 및 지식 그래프 관리
 
 ## 목차
 1. [LangChain 기반 GraphRAG 전체 엔드투엔드 파이프라인](#1-langchain-기반-graphrag-전체-엔드투엔드-파이프라인)
