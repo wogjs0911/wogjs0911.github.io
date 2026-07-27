@@ -8,9 +8,9 @@ tags: LangChain Neo4j GraphRAG Pydantic-AI Python Cypher KnowledgeGraph Groq Ope
 
 ## 목차
 1. [LangChain 기반 GraphRAG 전체 엔드투엔드 파이프라인](#1-langchain-기반-graphrag-전체-엔드투엔드-파이프라인)
-2. [LangChain Neo4j 연동 및 파라미터 쿼리 실행 (`2_langchainXneo4j.py`)](#2-langchain-neo4j-연동-및-파라미터-쿼리-실행-2_langchainxneo4jpy)
-3. [Pydantic & Graph Pruning 기반 자동 지식 그래프 구축 (`3_build_graph.py`)](#3-pydantic--graph-pruning-기반-자동-지식-그래프-구축-3_build_graphpy)
-4. [GraphCypherQAChain을 통한 자연어 질의 응답 파이프라인 (`4_ask_graph.py`)](#4-graphcypherqachain을-통한-자연어-질의-응답-파이프라인-4_ask_graphpy)
+2. [LangChain Neo4j 연동 및 파라미터 쿼리 실행](#2-langchain-neo4j-연동-및-파라미터-쿼리-실행)
+3. [Pydantic & Graph Pruning 기반 자동 지식 그래프 구축](#3-pydantic--graph-pruning-기반-자동-지식-그래프-구축)
+4. [GraphCypherQAChain을 통한 자연어 질의 응답 파이프라인](#4-graphcypherqachain을-통한-자연어-질의-응답-파이프라인)
 5. [AI 추출 오류 교정: Cypher 데이터 수정 & 삭제 실습 Guide](#5-ai-추출-오류-교정-cypher-데이터-수정--삭제-실습-guide)
 6. [정리](#6-정리)
 
@@ -43,7 +43,7 @@ KG Writer (지식 그래프 쓰기) ──► Neo4j Database 저장 (UNWIND + ME
 
 ---
 
-## 2. LangChain Neo4j 연동 및 파라미터 쿼리 실행 (`2_langchainXneo4j.py`)
+## 2. LangChain Neo4j 연동 및 파라미터 쿼리 실행
 
 `langchain_neo4j` 패키지의 `Neo4jGraph` 클래스를 이용하면 파이썬 코드에서 데이터베이스 커넥션을 수립하고 Cypher 질의를 날릴 수 있습니다. 이때 하드코딩 방식과 **파라미터 바인딩 매핑 방식**의 차이를 이해하는 것이 중요합니다.
 
@@ -119,7 +119,7 @@ graph.query(
 
 ---
 
-## 3. Pydantic & Graph Pruning 기반 자동 지식 그래프 구축 (`3_build_graph.py`)
+## 3. Pydantic & Graph Pruning 기반 자동 지식 그래프 구축
 
 LLM의 **Structured Output (구조화된 출력)** 기능을 이용하여 비정형 한국어 문장에서 노드와 관계를 Pydantic 스키마 기반으로 추출하고, **Graph Pruning(그래프 정제)** 파이프라인을 거쳐 Neo4j에 저장하는 전체 소스 코드입니다.
 
@@ -408,7 +408,7 @@ print("Pydantic AI 그래프 DB 구축 완료!")
 
 ---
 
-## 4. GraphCypherQAChain을 통한 자연어 질의 응답 파이프라인 (`4_ask_graph.py`)
+## 4. GraphCypherQAChain을 통한 자연어 질의 응답 파이프라인
 
 지식 그래프가 구축되면 `GraphCypherQAChain`을 활용하여 자연어 질문을 실시간 Cypher 쿼리로 전환하고 결과를 조회하여 답변을 구성합니다.
 

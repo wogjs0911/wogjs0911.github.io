@@ -10,9 +10,9 @@ tags: Neo4j Cypher GraphDB GraphRAG LangChain Pydantic-AI Python Groq
 1. [Vector RAG vs Graph RAG 비교](#1-vector-rag-vs-graph-rag-비교)
 2. [Neo4j 및 Cypher 기본 개념](#2-neo4j-및-cypher-기본-개념)
 3. [Cypher 핵심 문법과 CRUD 실습](#3-cypher-핵심-문법과-crud-실습)
-4. [Python 기반 Neo4j 드라이버 연결 (`1_test_connection.py`)](#4-python-기반-neo4j-드라이버-연결-1_test_connectionpy)
-5. [LangChain과 Groq를 활용한 지식 그래프 자동 구축 (`2_build_graph.py`)](#5-langchain과-groq를-활용한-지식-그래프-자동-구축-2_build_graphpy)
-6. [GraphCypherQAChain을 활용한 Graph RAG 질의 응답 (`3_ask_graph.py`)](#6-graphcypherqachain을-활용한-graph-rag-질의-응답-3_ask_graphpy)
+4. [Python 기반 Neo4j 드라이버 연결](#4-python-기반-neo4j-드라이버-연결)
+5. [LangChain과 Groq를 활용한 지식 그래프 자동 구축](#5-langchain과-groq를-활용한-지식-그래프-자동-구축)
+6. [GraphCypherQAChain을 활용한 Graph RAG 질의 응답](#6-graphcypherqachain을-활용한-graph-rag-질의-응답)
 7. [Graph RAG 성능 최적화 및 운영 고려사항](#7-graph-rag-성능-최적화-및-운영-고려사항)
 8. [정리](#8-정리)
 
@@ -239,7 +239,7 @@ DETACH DELETE n;
 
 ---
 
-## 4. Python 기반 Neo4j 드라이버 연결 (`1_test_connection.py`)
+## 4. Python 기반 Neo4j 드라이버 연결
 
 Neo4j 데이터베이스와 파이썬 애플리케이션을 연결하는 가장 기본적인 방법은 공식 `neo4j` 파이썬 드라이버 라이브러리를 이용하는 것입니다.
 
@@ -269,7 +269,7 @@ finally:
 
 ---
 
-## 5. LangChain과 Groq를 활용한 지식 그래프 자동 구축 (`2_build_graph.py`)
+## 5. LangChain과 Groq를 활용한 지식 그래프 자동 구축
 
 비정형 자연어 텍스트로부터 지식 그래프(Knowledge Graph)를 구축하기 위해, Pydantic으로 추출할 그래프 스키마(노드와 관계)를 정적 타입으로 정의하고, Groq LLM(`llama-3.3-70b-versatile`)의 Structured Output 기능 및 LangChain Neo4j 연동 파이프라인을 사용합니다.
 
@@ -524,7 +524,7 @@ print("Pydantic AI 그래프 DB 구축 완료!")
 
 ---
 
-## 6. GraphCypherQAChain을 활용한 Graph RAG 질의 응답 (`3_ask_graph.py`)
+## 6. GraphCypherQAChain을 활용한 Graph RAG 질의 응답
 
 지식 그래프 데이터베이스 구축이 완료되면, 자연어 질문을 입력받아 **Cypher 쿼리로 자동 변환**한 뒤 Neo4j 조회를 거쳐 LLM이 최종 답변을 생성하는 Graph RAG 파이프라인(`GraphCypherQAChain`)을 구성합니다.
 
