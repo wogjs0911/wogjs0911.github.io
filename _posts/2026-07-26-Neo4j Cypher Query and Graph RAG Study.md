@@ -425,7 +425,7 @@ for kind in [
 print("그래프 생성 완료!")
 ```
 
-### 🚀 Pydantic AI 기반 지식 그래프 추출 풀 코드 리팩토링
+### Pydantic AI 기반 지식 그래프 추출 풀 코드 리팩토링
 
 최신 LLM 에이전트 프레임워크인 **Pydantic AI**를 활용하면 LangChain의 `ChatGroq` ➡️ `with_structured_output` ➡️ `invoke` 체인 구조를 단 한 줄의 `Agent('groq:...', result_type=KGGraph)` 선언으로 간결하고 안전하게 대체할 수 있습니다.
 
@@ -591,7 +591,7 @@ for question in questions:
 3. **Graph DB 실행 결과 (Raw Data)**: Neo4j에 위 Cypher 쿼리를 실행하여 얻은 결과 데이터 반환
 4. **최종 자연어 응답 생성**: Raw DB 데이터를 전달받은 LLM이 사용자 질문에 대답하는 자연어 최종 문장 작성
 
-### 🚀 Pydantic AI Agent + Custom Tool 질의 응답 리팩토링
+### Pydantic AI Agent + Custom Tool 질의 응답 리팩토링
 
 LangChain의 `GraphCypherQAChain` 대신 Pydantic AI의 `@agent.tool`을 활용하면, 에이전트가 직접 DB 스키마를 조회하고 인젝션 검증이 완료된 Cypher 쿼리를 안전하게 수행하는 **투명하고 강력한 커스텀 에이전트 파이프라인**을 작성할 수 있습니다.
 
