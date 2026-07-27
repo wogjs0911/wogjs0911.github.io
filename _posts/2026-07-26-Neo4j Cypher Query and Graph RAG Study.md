@@ -275,12 +275,14 @@ finally:
 
 ### 구축되는 그래프 구조 네트워크 다이어그램
 
-```mermaid
-graph LR
-    Kim["Person: 김민수"] -- RESPONSIBLE_FOR --> Refactor["Project: 결제 시스템 리팩터링"]
-    Refactor -- AIMS_TO_REDUCE --> Metric["Metric/Project: 장애율 개선 프로젝트"]
-    Security["Team: 보안팀"] -- COLLABORATED_ON --> Metric
-    Platform["Team: 플랫폼팀"] -- COLLABORATED_ON --> Metric
+```text
+[Person: 김민수] ──(RESPONSIBLE_FOR)──> [Project: 결제 시스템 리팩터링]
+                                                │
+                                         (AIMS_TO_REDUCE)
+                                                │
+                                                ▼
+  [Team: 보안팀]   ──(COLLABORATED_ON)──> [Metric: 장애율 개선 프로젝트]
+  [Team: 플랫폼팀] ──(COLLABORATED_ON)───┘
 ```
 
 ### 지식 그래프 구축 코드

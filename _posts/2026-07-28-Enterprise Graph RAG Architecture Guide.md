@@ -72,22 +72,12 @@ class KGRelationship(BaseModel):
 
 기업용 환경에서 가장 권장하는 **보안성 100% 보장 정석 패턴**입니다. LLM에게 Cypher 문장 전체 작성을 맡기지 않고, **의도(Intent) 분류 및 매개변수(Parameter) 추출**만 수행하게 한 후, 백엔드에서 사전 검증된 파라미터화 템플릿 쿼리를 안전하게 실행합니다.
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as 사용자
-    participant Gateway as Backend Gateway
-    participant LLM as LLM (Structured)
-    participant DB as Neo4j Graph DB
-
-    User->>Gateway: 자연어 질문 ("김민수 팀장의 담당 프로젝트 지표 알려줘")
-    Gateway->>LLM: Intent & Parameter 추출 요청
-    LLM-->>Gateway: JSON (Intent: GET_PERSON_METRICS, person: 김민수)
-    Gateway->>Gateway: Row-Level Security 세션 권한 검증
-    Gateway->>DB: 파라미터화 Cypher 쿼리 실행 ($person_name: '김민수')
-    DB-->>Gateway: DB Raw 조회 결과 반환
-    Gateway->>LLM: Context 주입 및 자연어 답변 생성 요청
-    LLM-->>User: 최종 자연어 답변 전달
+```text
+[사용자] ───(1. 자연어 질문)───> [Backend Gateway] ───(2. Intent/Parameter 추출)───> [LLM]
+                                      │                                             │
+                                      │ (3. Row-Level Security 권한 검증)           │
+                                      ▼                                             ▼
+[사용자] <───(6. 자연어 답변)──── [Backend Gateway] <───(5. Raw 데이터)─── [Neo4j DB] <──(4. Cypher)
 ```
 
 ### 파이프라인 구현 예시
@@ -331,10 +321,14 @@ Person Table ──(JOIN)──> Rel_Table ──(JOIN)──> Project Table ─
 
 ### 하이브리드 3단계 전환 로드맵
 
-```mermaid
-graph TD
-    Step1["1단계: 현행 RDB + Function Calling 유지 (단순 CRUD)"] --> Step2["2단계: Graph DB를 보완용 연관 엔진(Sidecar)으로 추가"]
-    Step2 --> Step3["3단계: Function Calling 목록에 'search_graph_context' 툴 1개 추가"]
+```text
+[1단계: 현행 RDB + Function Calling 유지 (단순 CRUD)]
+                         │
+                         ▼
+[2단계: Graph DB를 보완용 연관 검색 엔진(Sidecar)으로 추가]
+                         │
+                         ▼
+[3단계: Function Calling 목록에 'search_graph_context' 툴 1개 추가]
 ```
 
 #### 1단계: 기존 RDB + Function Calling 유지 (현행 유지)
