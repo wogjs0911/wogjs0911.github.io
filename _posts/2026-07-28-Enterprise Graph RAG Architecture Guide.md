@@ -337,6 +337,15 @@ graph TD
     Step2 --> Step3["3단계: Function Calling 목록에 'search_graph_context' 툴 1개 추가"]
 ```
 
+#### 1단계: 기존 RDB + Function Calling 유지 (현행 유지)
+- 단순 CRUD 및 파라미터 기반 단편 조회의 경우 현재 구축한 RDB 기반 Function Calling 구조를 그대로 활용합니다.
+
+#### 2단계: Graph DB를 보완용 연관 검색 엔진(Sidecar)으로 추가
+- 기존 RDB 데이터를 나포(CDC)하거나 백배치로 Neo4j에 노드/Edge로 동기화하여 연관 탐색전용 백엔드를 준비합니다.
+
+#### 3단계: Function Calling 목록에 `search_graph_context` 툴 1개 추가
+- 기존 툴 목록에 Graph 조회 전용 툴을 추가하여, LLM이 복잡한 맥락/관계 질문에만 선택적으로 Graph DB를 조회하도록 라우팅합니다.
+
 ---
 
 ## 10. 대규모 Intent 분류를 위한 시맨틱 라우터(Semantic Router) 고도화 아키텍처
