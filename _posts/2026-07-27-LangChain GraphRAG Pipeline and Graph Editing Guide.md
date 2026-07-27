@@ -286,7 +286,7 @@ graph.refresh_schema()
 print("그래프 구축 완료!")
 ```
 
-### 🔥 Pydantic AI (pydantic-ai) 기반 지식 그래프 추출 풀 코드 리팩토링
+### 🚀 Pydantic AI 기반 지식 그래프 추출 풀 코드 리팩토링
 
 LangChain의 `ChatGroq` ➡️ `with_structured_output` ➡️ `invoke` 4단계 구조 대신, 최신 **Pydantic AI**를 사용하면 `Agent('groq:...', result_type=KGGraph)` 단 한 줄 선언만으로 타입 안전성이 완벽하게 보장되는 경량화된 지식 그래프 추출 파이프라인을 구축할 수 있습니다.
 
@@ -456,7 +456,7 @@ for question in questions:
     print("답변:", result["result"])
 ```
 
-### 🔥 Pydantic AI Agent + Tooling 기반 Graph RAG 리팩토링
+### 🚀 Pydantic AI Agent + Tooling 기반 Graph RAG 리팩토링
 
 Pydantic AI를 이용하면 에이전트가 직접 스키마 툴과 안전한 READ전용 Cypher 실행 툴을 선택해 수행하도록 구성할 수 있습니다.
 
