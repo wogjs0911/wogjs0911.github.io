@@ -24,6 +24,7 @@ titles:
   fr-LU   : *FR
   # @end locale config
 key: page-about
+show_title: false
 ---
 
 ## 김재헌 · Server Developer / AI Platform
