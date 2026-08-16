@@ -14,21 +14,52 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
   }
 
   /// search
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function makeSnippet(content, query, radius) {
+    var lower = content.toLowerCase(), q = query.toLowerCase();
+    var idx = lower.indexOf(q);
+    if (idx < 0) { return ''; }
+    var start = Math.max(0, idx - radius);
+    var end = Math.min(content.length, idx + q.length + radius);
+    var snippet = content.substring(start, end).trim();
+    if (start > 0) { snippet = '…' + snippet; }
+    if (end < content.length) { snippet = snippet + '…'; }
+    return snippet;
+  }
+
   function searchByQuery(query) {
-    var i, j, key, keys, cur, _title, _content, result = {};
+    var i, j, key, keys, cur, _title, _content, _titleMatch, _contentMatch, matches, result = {};
+    var _query = query.toLowerCase();
     keys = Object.keys(searchData);
     for (i = 0; i < keys.length; i++) {
       key = keys[i];
+      matches = [];
       for (j = 0; j < searchData[key].length; j++) {
-        cur = searchData[key][j], _title = cur.title, _content = cur.content || '';
-        if ((result[key] === undefined || result[key] && result[key].length < 12 )
-          && (_title.toLowerCase().indexOf(query.toLowerCase()) >= 0
-            || _content.toLowerCase().indexOf(query.toLowerCase()) >= 0)) {
-          if (result[key] === undefined) {
-            result[key] = [];
-          }
-          result[key].push(cur);
+        cur = searchData[key][j];
+        _title = cur.title || '';
+        _content = cur.content || '';
+        _titleMatch = _title.toLowerCase().indexOf(_query) >= 0;
+        _contentMatch = !_titleMatch && _content.toLowerCase().indexOf(_query) >= 0;
+        if (_titleMatch || _contentMatch) {
+          matches.push({
+            title: _title,
+            url: cur.url,
+            titleMatch: _titleMatch,
+            snippet: _contentMatch ? makeSnippet(_content, query, 40) : ''
+          });
         }
+      }
+      // title matches ranked above content-only matches; sort is stable so
+      // original relative order is preserved within each group.
+      matches.sort(function(a, b) { return (b.titleMatch ? 1 : 0) - (a.titleMatch ? 1 : 0); });
+      if (matches.length > 0) {
+        result[key] = matches.slice(0, 12);
       }
     }
     return result;
@@ -38,8 +69,15 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
     return $('<p class="search-result__header">' + header + '</p>');
   });
 
-  var renderItem = function(index, title, url) {
-    return $('<li class="search-result__item" data-index="' + index + '"><a class="button" href="' + url + '">' + title + '</a></li>');
+  var renderItem = function(index, item) {
+    var _snippet = item.snippet
+      ? '<span class="search-result__snippet">' + escapeHtml(item.snippet) + '</span>'
+      : '';
+    return $('<li class="search-result__item" data-index="' + index + '">'
+      + '<a class="button" href="' + item.url + '">'
+      + '<span class="search-result__title">' + escapeHtml(item.title) + '</span>'
+      + _snippet
+      + '</a></li>');
   };
 
   function render(data) {
@@ -51,7 +89,7 @@ window.Lazyload.js([SOURCES.jquery, PAHTS.search_js], function() {
       $root.append(renderHeader(key));
       for (j = 0; j < data[key].length; j++) {
         cur = data[key][j];
-        $root.append(renderItem(itemIndex++, cur.title, cur.url));
+        $root.append(renderItem(itemIndex++, cur));
       }
     }
     return $root;
