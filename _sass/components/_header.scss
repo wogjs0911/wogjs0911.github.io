@@ -82,6 +82,10 @@
   }
 }
 
+.search-button svg {
+  flex-shrink: 0;
+}
+
 .navigation {
   @include overflow(auto, "x");
   & > ul {
