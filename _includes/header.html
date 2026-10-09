@@ -16,7 +16,7 @@
           {%- endif -%}
         </div>
         {%- if site.search.provider -%}
-          <button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button>
+          <button type="button" class="button button--secondary button--circle search-button js-search-toggle" aria-label="검색" title="검색">{%- include svg/search.svg -%}</button>
         {%- endif -%}
       </div>
       
@@ -51,7 +51,7 @@
             {%- endif -%}
           {%- endfor -%}
           {%- if site.search.provider -%}
-            <li><button class="button button--secondary button--circle search-button js-search-toggle"><i class="fas fa-search"></i></button></li>
+            <li><button type="button" class="button button--secondary button--circle search-button js-search-toggle" aria-label="검색" title="검색">{%- include svg/search.svg -%}</button></li>
           {%- endif -%}
         </ul>
       </nav>
